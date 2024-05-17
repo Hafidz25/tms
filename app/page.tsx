@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
-
+import Image from "next/image";
+import { MoreHorizontal, ArrowUpRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,8 +20,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Navbar from "@/components/custom/Navbar";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import CardDashboard from "@/components/custom/CardDashboard";
+import Navbar from "@/components/custom/Navbar";
 
 export default function Home() {
   return (
@@ -49,119 +58,226 @@ export default function Home() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Customer</TableHead>
-                    <TableHead className="hidden xl:table-column">
-                      Type
+                    <TableHead>Name</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      Price
                     </TableHead>
-                    <TableHead className="hidden xl:table-column">
-                      Status
+                    <TableHead className="hidden md:table-cell">
+                      Total Sales
                     </TableHead>
-                    <TableHead className="hidden xl:table-column">
-                      Date
+                    <TableHead className="hidden md:table-cell">
+                      Created at
                     </TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead>
+                      <span className="sr-only">Actions</span>
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   <TableRow>
+                    <TableCell className="font-medium">
+                      Laser Lemonade Machine
+                    </TableCell>
                     <TableCell>
-                      <div className="font-medium">Liam Johnson</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        liam@example.com
-                      </div>
+                      <Badge variant="outline">Draft</Badge>
                     </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Sale
+                    <TableCell className="hidden md:table-cell">
+                      $499.99
                     </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Approved
-                      </Badge>
+                    <TableCell className="hidden md:table-cell">25</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      2023-07-12 10:42 AM
                     </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-23
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            aria-haspopup="true"
+                            size="icon"
+                            variant="ghost"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem>Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
-                    <TableCell className="text-right">$250.00</TableCell>
                   </TableRow>
                   <TableRow>
+                    <TableCell className="font-medium">
+                      Hypernova Headphones
+                    </TableCell>
                     <TableCell>
-                      <div className="font-medium">Olivia Smith</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        olivia@example.com
-                      </div>
+                      <Badge variant="outline">Active</Badge>
                     </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Refund
+                    <TableCell className="hidden md:table-cell">
+                      $129.99
                     </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Declined
-                      </Badge>
+                    <TableCell className="hidden md:table-cell">100</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      2023-10-18 03:21 PM
                     </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-24
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            aria-haspopup="true"
+                            size="icon"
+                            variant="ghost"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem>Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
-                    <TableCell className="text-right">$150.00</TableCell>
                   </TableRow>
                   <TableRow>
+                    <TableCell className="font-medium">
+                      AeroGlow Desk Lamp
+                    </TableCell>
                     <TableCell>
-                      <div className="font-medium">Noah Williams</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        noah@example.com
-                      </div>
+                      <Badge variant="outline">Active</Badge>
                     </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Subscription
+                    <TableCell className="hidden md:table-cell">
+                      $39.99
                     </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Approved
-                      </Badge>
+                    <TableCell className="hidden md:table-cell">50</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      2023-11-29 08:15 AM
                     </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-25
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            aria-haspopup="true"
+                            size="icon"
+                            variant="ghost"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem>Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
-                    <TableCell className="text-right">$350.00</TableCell>
                   </TableRow>
                   <TableRow>
+                    <TableCell className="font-medium">
+                      TechTonic Energy Drink
+                    </TableCell>
                     <TableCell>
-                      <div className="font-medium">Emma Brown</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        emma@example.com
-                      </div>
+                      <Badge variant="secondary">Draft</Badge>
                     </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Sale
+                    <TableCell className="hidden md:table-cell">
+                      $2.99
                     </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Approved
-                      </Badge>
+                    <TableCell className="hidden md:table-cell">0</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      2023-12-25 11:59 PM
                     </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-26
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            aria-haspopup="true"
+                            size="icon"
+                            variant="ghost"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem>Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
-                    <TableCell className="text-right">$450.00</TableCell>
                   </TableRow>
                   <TableRow>
+                    <TableCell className="font-medium">
+                      Gamer Gear Pro Controller
+                    </TableCell>
                     <TableCell>
-                      <div className="font-medium">Liam Johnson</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        liam@example.com
-                      </div>
+                      <Badge variant="outline">Active</Badge>
                     </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Sale
+                    <TableCell className="hidden md:table-cell">
+                      $59.99
                     </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Approved
-                      </Badge>
+                    <TableCell className="hidden md:table-cell">75</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      2024-01-01 12:00 AM
                     </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-27
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            aria-haspopup="true"
+                            size="icon"
+                            variant="ghost"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem>Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
-                    <TableCell className="text-right">$550.00</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">
+                      Luminous VR Headset
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">Active</Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      $199.99
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">30</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      2024-02-14 02:14 PM
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            aria-haspopup="true"
+                            size="icon"
+                            variant="ghost"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem>Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
