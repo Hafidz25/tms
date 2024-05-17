@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/custom/Navbar";
-import { briefList } from "@/app/constants/briefList";
 import { userList } from "@/app/constants/userList";
 
 const Page = () => {
@@ -44,18 +43,18 @@ const Page = () => {
           <div className="flex items-center">
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="assigned">Assigned</TabsTrigger>
-              <TabsTrigger value="in_progress">In Progress</TabsTrigger>
-              <TabsTrigger value="done" className="hidden sm:flex">
-                Done
+              <TabsTrigger value="admin">Admin</TabsTrigger>
+              <TabsTrigger value="cs">Customer Service</TabsTrigger>
+              <TabsTrigger value="tm" className="hidden sm:flex">
+                Team Member
               </TabsTrigger>
             </TabsList>
             <div className="ml-auto flex items-center gap-2">
-              <Link href="/brief/create">
+              <Link href="/user/create">
                 <Button size="sm" className="h-8 gap-1">
                   <PlusCircle className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Add Brief
+                    Add User
                   </span>
                 </Button>
               </Link>
@@ -64,7 +63,7 @@ const Page = () => {
           <TabsContent value="all">
             <Card x-chunk="dashboard-06-chunk-0">
               <CardHeader>
-                <CardTitle>Briefs</CardTitle>
+                <CardTitle>Users</CardTitle>
                 <CardDescription>
                   Manage your products and view their sales performance.
                 </CardDescription>
@@ -73,13 +72,10 @@ const Page = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
                       <TableHead className="hidden md:table-cell">
-                        Assign
-                      </TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        Created at
+                        Role
                       </TableHead>
                       <TableHead className="hidden md:table-cell">
                         Action
@@ -90,21 +86,16 @@ const Page = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {briefList.map((data) => (
+                    {userList.map((data) => (
                       <TableRow>
                         <TableCell className="font-medium">
-                          {data.title}
+                          {data.name}
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {data.email}
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">{data.status}</Badge>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {userList
-                            .filter((user) => user.id === data.assign)
-                            .map((filtered) => filtered.name)}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {data.created_at}
+                          <Badge variant="outline">{data.role}</Badge>
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>
@@ -137,10 +128,10 @@ const Page = () => {
               </CardFooter>
             </Card>
           </TabsContent>
-          <TabsContent value="assigned">
+          <TabsContent value="admin">
             <Card x-chunk="dashboard-06-chunk-0">
               <CardHeader>
-                <CardTitle>Briefs</CardTitle>
+                <CardTitle>Users</CardTitle>
                 <CardDescription>
                   Manage your products and view their sales performance.
                 </CardDescription>
@@ -149,13 +140,10 @@ const Page = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
                       <TableHead className="hidden md:table-cell">
-                        Assign
-                      </TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        Created at
+                        Role
                       </TableHead>
                       <TableHead className="hidden md:table-cell">
                         Action
@@ -166,23 +154,18 @@ const Page = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {briefList
-                      .filter((data) => data.status === "assigned")
+                    {userList
+                      .filter((data) => data.role === "Admin")
                       .map((data) => (
                         <TableRow>
                           <TableCell className="font-medium">
-                            {data.title}
+                            {data.name}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.email}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{data.status}</Badge>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {userList
-                              .filter((user) => user.id === data.assign)
-                              .map((filtered) => filtered.name)}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {data.created_at}
+                            <Badge variant="outline">{data.role}</Badge>
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>
@@ -215,10 +198,10 @@ const Page = () => {
               </CardFooter>
             </Card>
           </TabsContent>
-          <TabsContent value="in_progress">
+          <TabsContent value="cs">
             <Card x-chunk="dashboard-06-chunk-0">
               <CardHeader>
-                <CardTitle>Briefs</CardTitle>
+                <CardTitle>Users</CardTitle>
                 <CardDescription>
                   Manage your products and view their sales performance.
                 </CardDescription>
@@ -227,13 +210,10 @@ const Page = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
                       <TableHead className="hidden md:table-cell">
-                        Assign
-                      </TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        Created at
+                        Role
                       </TableHead>
                       <TableHead className="hidden md:table-cell">
                         Action
@@ -244,23 +224,18 @@ const Page = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {briefList
-                      .filter((data) => data.status === "in progress")
+                    {userList
+                      .filter((data) => data.role === "Customer Service")
                       .map((data) => (
                         <TableRow>
                           <TableCell className="font-medium">
-                            {data.title}
+                            {data.name}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.email}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{data.status}</Badge>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {userList
-                              .filter((user) => user.id === data.assign)
-                              .map((filtered) => filtered.name)}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {data.created_at}
+                            <Badge variant="outline">{data.role}</Badge>
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>
@@ -293,10 +268,10 @@ const Page = () => {
               </CardFooter>
             </Card>
           </TabsContent>
-          <TabsContent value="done">
+          <TabsContent value="tm">
             <Card x-chunk="dashboard-06-chunk-0">
               <CardHeader>
-                <CardTitle>Briefs</CardTitle>
+                <CardTitle>Users</CardTitle>
                 <CardDescription>
                   Manage your products and view their sales performance.
                 </CardDescription>
@@ -305,13 +280,10 @@ const Page = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
                       <TableHead className="hidden md:table-cell">
-                        Assign
-                      </TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        Created at
+                        Role
                       </TableHead>
                       <TableHead className="hidden md:table-cell">
                         Action
@@ -322,23 +294,18 @@ const Page = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {briefList
-                      .filter((data) => data.status === "done")
+                    {userList
+                      .filter((data) => data.role === "Team Member")
                       .map((data) => (
                         <TableRow>
                           <TableCell className="font-medium">
-                            {data.title}
+                            {data.name}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.email}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{data.status}</Badge>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {userList
-                              .filter((user) => user.id === data.assign)
-                              .map((filtered) => filtered.name)}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {data.created_at}
+                            <Badge variant="outline">{data.role}</Badge>
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>

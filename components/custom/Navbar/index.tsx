@@ -31,16 +31,10 @@ const Navbar = () => {
           Dashboard
         </Link>
         <Link
-          href="/customerService"
+          href="/user"
           className="text-muted-foreground transition-colors hover:text-foreground"
         >
-          CS
-        </Link>
-        <Link
-          href="/teamMember"
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Teams
+          Users
         </Link>
         <Link
           href="/brief"
@@ -69,16 +63,10 @@ const Navbar = () => {
               Dashboard
             </Link>
             <Link
-              href="/customerService"
+              href="/user"
               className="text-muted-foreground hover:text-foreground"
             >
-              Customer Service
-            </Link>
-            <Link
-              href="/teamMember"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Teams
+              Users
             </Link>
             <Link
               href="/brief"
