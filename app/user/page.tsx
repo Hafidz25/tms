@@ -30,8 +30,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/custom/Navbar";
+import ShareDialog from "@/components/custom/ShareDialog";
 import { userList } from "@/app/constants/userList";
 
 const Page = () => {
@@ -73,16 +82,11 @@ const Page = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
                       <TableHead className="hidden md:table-cell">
-                        Role
+                        Email
                       </TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        Action
-                      </TableHead>
-                      {/* <TableHead>
-                        <span className="sr-only">Actions</span>
-                      </TableHead> */}
+                      <TableHead>Role</TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -95,7 +99,26 @@ const Page = () => {
                           {data.email}
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">{data.role}</Badge>
+                          <div className="w-[100%] lg:w-[60%] xl:w-[35%]">
+                            <Select defaultValue={data.role}>
+                              <SelectTrigger
+                                id="status"
+                                aria-label="Select status"
+                              >
+                                <SelectValue placeholder="Select role" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Default">Default</SelectItem>
+                                <SelectItem value="Admin">Admin</SelectItem>
+                                <SelectItem value="Customer Service">
+                                  Customer Service
+                                </SelectItem>
+                                <SelectItem value="Team Member">
+                                  Team Member
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>
@@ -111,8 +134,17 @@ const Page = () => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>Edit</DropdownMenuItem>
                               <DropdownMenuItem>Delete</DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Link href="" className="w-full">
+                                      Share
+                                    </Link>
+                                  </DialogTrigger>
+                                  <ShareDialog />
+                                </Dialog>
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -123,7 +155,7 @@ const Page = () => {
               </CardContent>
               <CardFooter>
                 <div className="text-xs text-muted-foreground">
-                  Showing <strong>1-10</strong> of <strong>32</strong> products
+                  Showing <strong>1-10</strong> of <strong>32</strong> users
                 </div>
               </CardFooter>
             </Card>
@@ -141,16 +173,11 @@ const Page = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
                       <TableHead className="hidden md:table-cell">
-                        Role
+                        Email
                       </TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        Action
-                      </TableHead>
-                      {/* <TableHead>
-                        <span className="sr-only">Actions</span>
-                      </TableHead> */}
+                      <TableHead>Role</TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -165,7 +192,28 @@ const Page = () => {
                             {data.email}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{data.role}</Badge>
+                            <div className="w-[100%] lg:w-[60%] xl:w-[35%]">
+                              <Select defaultValue={data.role}>
+                                <SelectTrigger
+                                  id="status"
+                                  aria-label="Select status"
+                                >
+                                  <SelectValue placeholder="Select role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Default">
+                                    Default
+                                  </SelectItem>
+                                  <SelectItem value="Admin">Admin</SelectItem>
+                                  <SelectItem value="Customer Service">
+                                    Customer Service
+                                  </SelectItem>
+                                  <SelectItem value="Team Member">
+                                    Team Member
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>
@@ -181,8 +229,17 @@ const Page = () => {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem>Edit</DropdownMenuItem>
                                 <DropdownMenuItem>Delete</DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Link href="" className="w-full">
+                                        Share
+                                      </Link>
+                                    </DialogTrigger>
+                                    <ShareDialog />
+                                  </Dialog>
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
@@ -193,7 +250,7 @@ const Page = () => {
               </CardContent>
               <CardFooter>
                 <div className="text-xs text-muted-foreground">
-                  Showing <strong>1-10</strong> of <strong>32</strong> products
+                  Showing <strong>1-10</strong> of <strong>32</strong> users
                 </div>
               </CardFooter>
             </Card>
@@ -211,16 +268,11 @@ const Page = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
                       <TableHead className="hidden md:table-cell">
-                        Role
+                        Email
                       </TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        Action
-                      </TableHead>
-                      {/* <TableHead>
-                        <span className="sr-only">Actions</span>
-                      </TableHead> */}
+                      <TableHead>Role</TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -235,7 +287,28 @@ const Page = () => {
                             {data.email}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{data.role}</Badge>
+                            <div className="w-[100%] lg:w-[60%] xl:w-[35%]">
+                              <Select defaultValue={data.role}>
+                                <SelectTrigger
+                                  id="status"
+                                  aria-label="Select status"
+                                >
+                                  <SelectValue placeholder="Select role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Default">
+                                    Default
+                                  </SelectItem>
+                                  <SelectItem value="Admin">Admin</SelectItem>
+                                  <SelectItem value="Customer Service">
+                                    Customer Service
+                                  </SelectItem>
+                                  <SelectItem value="Team Member">
+                                    Team Member
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>
@@ -251,8 +324,17 @@ const Page = () => {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem>Edit</DropdownMenuItem>
                                 <DropdownMenuItem>Delete</DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Link href="" className="w-full">
+                                        Share
+                                      </Link>
+                                    </DialogTrigger>
+                                    <ShareDialog />
+                                  </Dialog>
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
@@ -263,7 +345,7 @@ const Page = () => {
               </CardContent>
               <CardFooter>
                 <div className="text-xs text-muted-foreground">
-                  Showing <strong>1-10</strong> of <strong>32</strong> products
+                  Showing <strong>1-10</strong> of <strong>32</strong> users
                 </div>
               </CardFooter>
             </Card>
@@ -281,16 +363,11 @@ const Page = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
                       <TableHead className="hidden md:table-cell">
-                        Role
+                        Email
                       </TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        Action
-                      </TableHead>
-                      {/* <TableHead>
-                        <span className="sr-only">Actions</span>
-                      </TableHead> */}
+                      <TableHead>Role</TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -305,7 +382,28 @@ const Page = () => {
                             {data.email}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{data.role}</Badge>
+                            <div className="w-[100%] lg:w-[60%] xl:w-[35%]">
+                              <Select defaultValue={data.role}>
+                                <SelectTrigger
+                                  id="status"
+                                  aria-label="Select status"
+                                >
+                                  <SelectValue placeholder="Select role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Default">
+                                    Default
+                                  </SelectItem>
+                                  <SelectItem value="Admin">Admin</SelectItem>
+                                  <SelectItem value="Customer Service">
+                                    Customer Service
+                                  </SelectItem>
+                                  <SelectItem value="Team Member">
+                                    Team Member
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>
@@ -321,8 +419,17 @@ const Page = () => {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem>Edit</DropdownMenuItem>
                                 <DropdownMenuItem>Delete</DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Link href="" className="w-full">
+                                        Share
+                                      </Link>
+                                    </DialogTrigger>
+                                    <ShareDialog />
+                                  </Dialog>
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
@@ -333,7 +440,7 @@ const Page = () => {
               </CardContent>
               <CardFooter>
                 <div className="text-xs text-muted-foreground">
-                  Showing <strong>1-10</strong> of <strong>32</strong> products
+                  Showing <strong>1-10</strong> of <strong>32</strong> users
                 </div>
               </CardFooter>
             </Card>

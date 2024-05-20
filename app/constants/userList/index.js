@@ -17,4 +17,10 @@ export const userList = [
         email: 'tm@tm.com',
         role: 'Team Member'
     },
+    {
+        id: 4,
+        name: 'Test 3',
+        email: 'tm@tm.com',
+        role: 'Team Member'
+    },
 ]

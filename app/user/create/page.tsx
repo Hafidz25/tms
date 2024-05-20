@@ -1,6 +1,7 @@
+"use client";
 import React from "react";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,11 +18,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import Navbar from "@/components/custom/Navbar";
+import generator from "generate-password";
+import ShareDialog from "@/components/custom/ShareDialog";
 
 const Page = () => {
+  const [password, setPassword] = React.useState("");
+  function generatePass() {
+    const password = generator.generate({
+      length: 10,
+      numbers: true,
+    });
+    setPassword(password);
+  }
   return (
     <div className="flex min-h-screen w-full flex-col">
       <Navbar />
@@ -64,6 +76,21 @@ const Page = () => {
                         placeholder="Input Email"
                       />
                     </div>
+                    <div className="grid gap-3">
+                      <Label htmlFor="password">Password</Label>
+                      <div className="flex gap-3">
+                        <Input
+                          id="password"
+                          type="text"
+                          className="w-full"
+                          placeholder="Input Password"
+                          value={password}
+                        />
+                        <Button size="sm" onClick={generatePass}>
+                          Generate
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -77,16 +104,19 @@ const Page = () => {
                   <div className="grid gap-6">
                     <div className="grid gap-3">
                       <Label htmlFor="status">Role</Label>
-                      <Select>
+                      <Select defaultValue="Default">
                         <SelectTrigger id="status" aria-label="Select status">
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder="Select role" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="draft">Admin</SelectItem>
-                          <SelectItem value="published">
+                          <SelectItem value="Default">Default</SelectItem>
+                          <SelectItem value="Admin">Admin</SelectItem>
+                          <SelectItem value="Customer Service">
                             Customer Service
                           </SelectItem>
-                          <SelectItem value="archived">Team Member</SelectItem>
+                          <SelectItem value="Team Member">
+                            Team Member
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -97,6 +127,14 @@ const Page = () => {
           </div>
           <div className="flex items-center justify-start gap-2">
             <Button size="sm">Add User</Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  Share
+                </Button>
+              </DialogTrigger>
+              <ShareDialog />
+            </Dialog>
           </div>
         </div>
       </main>

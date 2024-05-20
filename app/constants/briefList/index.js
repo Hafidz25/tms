@@ -5,6 +5,7 @@ export const briefList = [
         desc: "test desc",
         status: "assigned",
         assign: 2,
+        deadline: "2023-07-12",
         created_at: "2023-07-12 10:42 AM",
     },
     {
@@ -13,6 +14,7 @@ export const briefList = [
         desc: "test desc",
         status: "reviewed",
         assign: 2,
+        deadline: "2023-07-12",
         created_at: "2023-07-12 10:42 AM",
     },
     {
@@ -21,6 +23,7 @@ export const briefList = [
         desc: "test desc",
         status: "in progress",
         assign: 3,
+        deadline: "2023-07-12",
         created_at: "2023-07-12 10:42 AM",
     },
     {
@@ -29,6 +32,7 @@ export const briefList = [
         desc: "test desc",
         status: "assigned",
         assign: 3,
+        deadline: "2023-07-12",
         created_at: "2023-07-12 10:42 AM",
     },
     {
@@ -37,6 +41,7 @@ export const briefList = [
         desc: "test desc",
         status: "done",
         assign: 2,
+        deadline: "2023-07-12",
         created_at: "2023-07-12 10:42 AM",
     },
 ];

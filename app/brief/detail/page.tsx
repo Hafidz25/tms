@@ -54,13 +54,13 @@ const Page = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
   });
 
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [value, setValue] = React.useState("Test 2");
 
   return (
     <div className="flex min-h-screen w-full flex-col">
       <Navbar />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="mx-auto grid max-w-[59rem] lg:min-w-[59rem] flex-1 auto-rows-max gap-4">
+        <div className="mx-auto grid max-w-[59rem] lg:min-w-[59rem] flex-1 auto-rows-max gap-4 lg:gap-8">
           <div className="flex items-center gap-4">
             <Link href="/brief">
               <Button variant="outline" size="icon" className="h-7 w-7">
@@ -87,11 +87,18 @@ const Page = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
                         type="text"
                         className="w-full"
                         placeholder="Input Name"
+                        value="Lipsum dolor sit amet"
+                        readOnly
                       />
                     </div>
                     <div className="grid gap-3">
                       <Label htmlFor="email">Description</Label>
-                      <Textarea id="description" className="min-h-32" />
+                      <Textarea
+                        id="description"
+                        className="min-h-32"
+                        value="Lipsum dolor sit amet, consectetur adipiscing elit"
+                        readOnly
+                      />
                     </div>
                   </div>
                 </CardContent>
@@ -113,6 +120,7 @@ const Page = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
                             role="combobox"
                             aria-expanded={open}
                             className="w-full justify-between"
+                            disabled
                           >
                             {value
                               ? userList.find((user) => user.name === value)
@@ -171,6 +179,7 @@ const Page = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
                                 "w-full justify-start text-left font-normal",
                                 !date && "text-muted-foreground"
                               )}
+                              disabled
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />
                               {date?.from ? (
@@ -200,9 +209,9 @@ const Page = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
                         </Popover>
                       </div>
                     </div>
-                    {/* <div className="grid gap-3">
+                    <div className="grid gap-3">
                       <Label htmlFor="status">Status</Label>
-                      <Select>
+                      <Select defaultValue="assigned">
                         <SelectTrigger id="status" aria-label="Select status">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
@@ -214,15 +223,42 @@ const Page = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
                           <SelectItem value="done">Done</SelectItem>
                         </SelectContent>
                       </Select>
-                    </div> */}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
           </div>
-          <div className="flex items-center justify-start gap-2 ">
-            <Button size="sm">Add Brief</Button>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Feedback</CardTitle>
+              <CardDescription>
+                Lipsum dolor sit amet, consectetur adipiscing elit
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid w-full gap-2">
+                <Textarea placeholder="Type your message here." />
+                <div className="flex justify-start">
+                  <Button>Send message</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardDescription>
+                <div className="font-semibold text-lg">Test 3</div>
+                Team Member
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+              enim ad minim veniam, quis nostrud exercitation ullamco laboris
+              nisi ut aliquip ex ea commodo consequat.
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>

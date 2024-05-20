@@ -79,14 +79,11 @@ const Page = () => {
                         Assign
                       </TableHead>
                       <TableHead className="hidden md:table-cell">
-                        Created at
+                        Deadline
                       </TableHead>
                       <TableHead className="hidden md:table-cell">
                         Action
                       </TableHead>
-                      {/* <TableHead>
-                        <span className="sr-only">Actions</span>
-                      </TableHead> */}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -104,7 +101,7 @@ const Page = () => {
                             .map((filtered) => filtered.name)}
                         </TableCell>
                         <TableCell className="hidden md:table-cell">
-                          {data.created_at}
+                          {data.deadline}
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>
@@ -120,6 +117,7 @@ const Page = () => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem>Detail</DropdownMenuItem>
                               <DropdownMenuItem>Edit</DropdownMenuItem>
                               <DropdownMenuItem>Delete</DropdownMenuItem>
                             </DropdownMenuContent>
@@ -132,7 +130,7 @@ const Page = () => {
               </CardContent>
               <CardFooter>
                 <div className="text-xs text-muted-foreground">
-                  Showing <strong>1-10</strong> of <strong>32</strong> products
+                  Showing <strong>1-10</strong> of <strong>32</strong> briefs
                 </div>
               </CardFooter>
             </Card>
@@ -160,9 +158,6 @@ const Page = () => {
                       <TableHead className="hidden md:table-cell">
                         Action
                       </TableHead>
-                      {/* <TableHead>
-                        <span className="sr-only">Actions</span>
-                      </TableHead> */}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -182,7 +177,7 @@ const Page = () => {
                               .map((filtered) => filtered.name)}
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
-                            {data.created_at}
+                            {data.deadline}
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>
@@ -198,6 +193,7 @@ const Page = () => {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem>Detail</DropdownMenuItem>
                                 <DropdownMenuItem>Edit</DropdownMenuItem>
                                 <DropdownMenuItem>Delete</DropdownMenuItem>
                               </DropdownMenuContent>
@@ -210,7 +206,7 @@ const Page = () => {
               </CardContent>
               <CardFooter>
                 <div className="text-xs text-muted-foreground">
-                  Showing <strong>1-10</strong> of <strong>32</strong> products
+                  Showing <strong>1-10</strong> of <strong>32</strong> briefs
                 </div>
               </CardFooter>
             </Card>
@@ -238,9 +234,6 @@ const Page = () => {
                       <TableHead className="hidden md:table-cell">
                         Action
                       </TableHead>
-                      {/* <TableHead>
-                        <span className="sr-only">Actions</span>
-                      </TableHead> */}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -260,7 +253,7 @@ const Page = () => {
                               .map((filtered) => filtered.name)}
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
-                            {data.created_at}
+                            {data.deadline}
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>
@@ -276,6 +269,7 @@ const Page = () => {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem>Detail</DropdownMenuItem>
                                 <DropdownMenuItem>Edit</DropdownMenuItem>
                                 <DropdownMenuItem>Delete</DropdownMenuItem>
                               </DropdownMenuContent>
@@ -288,7 +282,7 @@ const Page = () => {
               </CardContent>
               <CardFooter>
                 <div className="text-xs text-muted-foreground">
-                  Showing <strong>1-10</strong> of <strong>32</strong> products
+                  Showing <strong>1-10</strong> of <strong>32</strong> briefs
                 </div>
               </CardFooter>
             </Card>
@@ -316,9 +310,6 @@ const Page = () => {
                       <TableHead className="hidden md:table-cell">
                         Action
                       </TableHead>
-                      {/* <TableHead>
-                        <span className="sr-only">Actions</span>
-                      </TableHead> */}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -338,7 +329,7 @@ const Page = () => {
                               .map((filtered) => filtered.name)}
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
-                            {data.created_at}
+                            {data.deadline}
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>
@@ -354,6 +345,7 @@ const Page = () => {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem>Detail</DropdownMenuItem>
                                 <DropdownMenuItem>Edit</DropdownMenuItem>
                                 <DropdownMenuItem>Delete</DropdownMenuItem>
                               </DropdownMenuContent>
@@ -366,7 +358,7 @@ const Page = () => {
               </CardContent>
               <CardFooter>
                 <div className="text-xs text-muted-foreground">
-                  Showing <strong>1-10</strong> of <strong>32</strong> products
+                  Showing <strong>1-10</strong> of <strong>32</strong> briefs
                 </div>
               </CardFooter>
             </Card>
