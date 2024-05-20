@@ -34,9 +34,6 @@ const Page = () => {
                 <span className="sr-only">Back</span>
               </Button>
             </Link>
-            <div className="hidden items-center gap-2 md:ml-auto md:flex">
-              <Button size="sm">Add User</Button>
-            </div>
           </div>
           <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
             <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
@@ -98,7 +95,7 @@ const Page = () => {
               </Card>
             </div>
           </div>
-          <div className="flex items-center justify-end gap-2 md:hidden">
+          <div className="flex items-center justify-start gap-2">
             <Button size="sm">Add User</Button>
           </div>
         </div>
