@@ -82,6 +82,9 @@ const Page = () => {
                         Deadline
                       </TableHead>
                       <TableHead className="hidden md:table-cell">
+                        Deadline
+                      </TableHead>
+                      <TableHead className="hidden md:table-cell">
                         Action
                       </TableHead>
                     </TableRow>
@@ -99,6 +102,9 @@ const Page = () => {
                           {userList
                             .filter((user) => user.id === data.assign)
                             .map((filtered) => filtered.name)}
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {data.deadline}
                         </TableCell>
                         <TableCell className="hidden md:table-cell">
                           {data.deadline}

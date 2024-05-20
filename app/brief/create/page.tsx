@@ -200,21 +200,9 @@ const Page = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
                         </Popover>
                       </div>
                     </div>
-                    {/* <div className="grid gap-3">
-                      <Label htmlFor="status">Status</Label>
-                      <Select>
-                        <SelectTrigger id="status" aria-label="Select status">
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="assigned">Assigned</SelectItem>
-                          <SelectItem value="in_progress">
-                            In Progress
-                          </SelectItem>
-                          <SelectItem value="done">Done</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div> */}
+                    <div className="hidden">
+                      <input type="hidden" name="assigned" value={"assigned"} />
+                    </div>
                   </div>
                 </CardContent>
               </Card>

@@ -245,20 +245,6 @@ const Page = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader>
-              <CardDescription>
-                <div className="font-semibold text-lg">Test 3</div>
-                Team Member
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
-            </CardContent>
-          </Card>
         </div>
       </main>
     </div>
