@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { Navbar } from "@/components/layouts/navbar";
+import { Navbar } from "@/components/navbar";
 
 export default function DashboardLayout({children}: {children: React.ReactNode}) {
   return (
