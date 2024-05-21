@@ -44,8 +44,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/custom/Navbar";
 import { userList } from "@/app/constants/userList";
+import Feedback from "@/components/custom/Feedback";
 
 const Page = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
   const [date, setDate] = React.useState<DateRange | undefined>({
@@ -231,11 +233,38 @@ const Page = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
           </div>
           <Card>
             <CardHeader>
-              <CardTitle>Feedback</CardTitle>
-              <CardDescription>
-                Lipsum dolor sit amet, consectetur adipiscing elit
-              </CardDescription>
+              <CardTitle>Feedback (3)</CardTitle>
             </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-3">
+                <Feedback
+                  user={"Hafidz"}
+                  role={"Team Member"}
+                  message={
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, seddo eiusmod tempor incididunt ut labore et dolore magnaaliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+                  }
+                  time={"28 minutes"}
+                />
+                <Feedback
+                  user={"Alif"}
+                  role={"Customer Service"}
+                  tag={"Hafidz"}
+                  message={
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, seddo eiusmod tempor incididunt ut labore et dolore magnaaliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+                  }
+                  time={"28 minutes"}
+                />
+                <Feedback
+                  user={"Hafidz"}
+                  role={"Customer Service"}
+                  tag={"Alif"}
+                  message={
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, seddo eiusmod tempor incididunt ut labore et dolore magnaaliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+                  }
+                  time={"28 minutes"}
+                />
+              </div>
+            </CardContent>
             <CardContent>
               <div className="grid w-full gap-2">
                 <Textarea placeholder="Type your message here." />
