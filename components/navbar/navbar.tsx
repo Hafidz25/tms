@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import {
@@ -18,6 +20,7 @@ import { split, capitalize } from "lodash-es";
 import { nanoid } from "nanoid";
 
 import { LinkProps } from "next/link";
+import { usePathname } from "next/navigation";
 
 interface NavProp extends LinkProps {
   id?: string;
@@ -65,6 +68,8 @@ function NavbarBrand() {
 }
 
 function NavbarMenu() {
+  const pathname = usePathname();
+
   return (
     <Fragment>
       {NAVS.map((nav) => (
@@ -72,7 +77,9 @@ function NavbarMenu() {
           {...nav}
           key={nav.id}
           href={nav.href}
-          className="text-muted-foreground transition-colors hover:text-foreground"
+          className={`${
+            pathname === nav.href ? "text-slate-800" : "text-slate-400"
+          } transition-colors hover:text-slate-800`}
         >
           {nav.location}
         </Link>
@@ -81,6 +88,7 @@ function NavbarMenu() {
   );
 }
 
+// perlu refactor
 function Navbar() {
   return (
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-4 md:px-6">
