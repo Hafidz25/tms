@@ -46,6 +46,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/custom/Navbar";
 import { userList } from "@/app/constants/userList";
+import { Chips } from "@/components/ui/chips";
 
 const Page = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
   const [date, setDate] = React.useState<DateRange | undefined>({
@@ -106,58 +107,7 @@ const Page = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
                   <div className="grid gap-6">
                     <div className="grid gap-3">
                       <Label htmlFor="status">Assign</Label>
-                      <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={open}
-                            className="w-full justify-between"
-                          >
-                            {value
-                              ? userList.find((user) => user.name === value)
-                                  ?.name
-                              : "Select user..."}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-full p-0">
-                          <Command>
-                            <CommandInput placeholder="Search user..." />
-                            <CommandEmpty>No user found.</CommandEmpty>
-                            <CommandGroup>
-                              <CommandList>
-                                {userList
-                                  .filter((user) => user.role === "Team Member")
-                                  .map((option) => (
-                                    <CommandItem
-                                      key={option.name}
-                                      value={option.name}
-                                      onSelect={(currentValue) => {
-                                        setValue(
-                                          currentValue === value
-                                            ? ""
-                                            : currentValue
-                                        );
-                                        setOpen(false);
-                                      }}
-                                    >
-                                      <Check
-                                        className={cn(
-                                          "mr-2 h-4 w-4",
-                                          value === option.name
-                                            ? "opacity-100"
-                                            : "opacity-0"
-                                        )}
-                                      />
-                                      {option.name}
-                                    </CommandItem>
-                                  ))}
-                              </CommandList>
-                            </CommandGroup>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
+                      <Chips />
                     </div>
                     <div className="grid gap-3">
                       <Label htmlFor="status">Deadline</Label>
