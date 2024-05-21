@@ -31,13 +31,13 @@ const Navbar = () => {
           Dashboard
         </Link>
         <Link
-          href="/user"
+          href="/users"
           className="text-muted-foreground transition-colors hover:text-foreground"
         >
           Users
         </Link>
         <Link
-          href="/brief"
+          href="/briefs"
           className="text-muted-foreground transition-colors hover:text-foreground"
         >
           Briefs
@@ -63,13 +63,13 @@ const Navbar = () => {
               Dashboard
             </Link>
             <Link
-              href="/user"
+              href="/users"
               className="text-muted-foreground hover:text-foreground"
             >
               Users
             </Link>
             <Link
-              href="/brief"
+              href="/briefs"
               className="text-muted-foreground hover:text-foreground"
             >
               Briefs
