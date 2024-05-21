@@ -14,7 +14,7 @@ import {
 import { Command as CommandPrimitive } from "cmdk";
 import { userList } from "@/app/constants/userList";
 
-export function Chips() {
+export function Chips({ disable = false }) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
   const [selected, setSelected] = React.useState([
@@ -83,6 +83,7 @@ export function Chips() {
           })}
           {/* Avoid having the "Search" Icon */}
           <CommandPrimitive.Input
+            disabled={disable}
             ref={inputRef}
             value={inputValue}
             onValueChange={setInputValue}
