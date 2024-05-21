@@ -46,14 +46,16 @@ function nav({
 }
 
 const NAVS = [
-  nav({ href: "/user", location: "User" }),
-  nav({ href: "/briefs", location: "Briefs" }),
+  nav({ href: "/dashboard", location: "Home" }),
+  nav({ href: "/dashboard/users", location: "Users" }),
+  nav({ href: "/dashboard/briefs", location: "Briefs" }),
 ];
 
+// perlu refactor
 function NavbarBrand() {
   return (
     <Link
-      href="/"
+      href="/dashboard"
       className="min-w-max flex items-center gap-2 text-lg font-semibold md:text-base"
     >
       <Package2 className="h-6 w-6" />
