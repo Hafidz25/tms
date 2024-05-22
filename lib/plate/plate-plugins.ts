@@ -36,7 +36,6 @@ import {
   unwrapCodeBlock,
 } from '@udecode/plate-code-block';
 import { createComboboxPlugin } from '@udecode/plate-combobox';
-import { createCommentsPlugin, MARK_COMMENT } from '@udecode/plate-comments';
 import {
   createPlugins,
   isBlockAboveEmpty,
@@ -62,9 +61,6 @@ import {
   ELEMENT_H1,
   ELEMENT_H2,
   ELEMENT_H3,
-  ELEMENT_H4,
-  ELEMENT_H5,
-  ELEMENT_H6,
   KEYS_HEADING,
 } from '@udecode/plate-heading';
 import {
@@ -129,7 +125,6 @@ import { CodeBlockElement } from '@/components/plate-ui/code-block-element';
 import { CodeLeaf } from '@/components/plate-ui/code-leaf';
 import { CodeLineElement } from '@/components/plate-ui/code-line-element';
 import { CodeSyntaxLeaf } from '@/components/plate-ui/code-syntax-leaf';
-import { CommentLeaf } from '@/components/plate-ui/comment-leaf';
 import { EmojiCombobox } from '@/components/plate-ui/emoji-combobox';
 import { ExcalidrawElement } from '@/components/plate-ui/excalidraw-element';
 import { HeadingElement } from '@/components/plate-ui/heading-element';
@@ -144,7 +139,6 @@ import { MediaEmbedElement } from '@/components/plate-ui/media-embed-element';
 import { MentionElement } from '@/components/plate-ui/mention-element';
 import { MentionInputElement } from '@/components/plate-ui/mention-input-element';
 import { ParagraphElement } from '@/components/plate-ui/paragraph-element';
-import { withPlaceholders } from '@/components/plate-ui/placeholder';
 import {
   TableCellElement,
   TableCellHeaderElement,
@@ -268,14 +262,14 @@ export const plugins = createPlugins(
       options: {
         rules: [
           {
-            hotkey: 'mod+enter',
+            hotkey: "mod+enter",
           },
           {
-            hotkey: 'mod+shift+enter',
+            hotkey: "mod+shift+enter",
             before: true,
           },
           {
-            hotkey: 'enter',
+            hotkey: "enter",
             query: {
               start: true,
               end: true,
@@ -293,22 +287,22 @@ export const plugins = createPlugins(
         rules: [
           {
             ...resetBlockTypesCommonRule,
-            hotkey: 'Enter',
+            hotkey: "Enter",
             predicate: isBlockAboveEmpty,
           },
           {
             ...resetBlockTypesCommonRule,
-            hotkey: 'Backspace',
+            hotkey: "Backspace",
             predicate: isSelectionAtBlockStart,
           },
           {
             ...resetBlockTypesCodeBlockRule,
-            hotkey: 'Enter',
+            hotkey: "Enter",
             predicate: isCodeBlockEmpty,
           },
           {
             ...resetBlockTypesCodeBlockRule,
-            hotkey: 'Backspace',
+            hotkey: "Backspace",
             predicate: isSelectionAtCodeBlockStart,
           },
         ],
@@ -325,9 +319,9 @@ export const plugins = createPlugins(
     createSoftBreakPlugin({
       options: {
         rules: [
-          { hotkey: 'shift+enter' },
+          { hotkey: "shift+enter" },
           {
-            hotkey: 'enter',
+            hotkey: "enter",
             query: {
               allow: [ELEMENT_CODE_BLOCK, ELEMENT_BLOCKQUOTE, ELEMENT_TD],
             },
@@ -355,7 +349,7 @@ export const plugins = createPlugins(
       },
       plugins: [
         {
-          key: 'tabbable_element',
+          key: "tabbable_element",
           isElement: true,
           isVoid: true,
           component: TabbableElement,
@@ -367,54 +361,45 @@ export const plugins = createPlugins(
     }),
     dragOverCursorPlugin,
 
-    // Collaboration
-    createCommentsPlugin(),
-
     // Deserialization
     createDeserializeDocxPlugin(),
     createDeserializeMdPlugin(),
     createJuicePlugin(),
   ],
   {
-    components: withDraggables(
-      withPlaceholders({
-        [ELEMENT_BLOCKQUOTE]: BlockquoteElement,
-        [ELEMENT_CODE_BLOCK]: CodeBlockElement,
-        [ELEMENT_CODE_LINE]: CodeLineElement,
-        [ELEMENT_CODE_SYNTAX]: CodeSyntaxLeaf,
-        [ELEMENT_HR]: HrElement,
-        [ELEMENT_H1]: withProps(HeadingElement, { variant: 'h1' }),
-        [ELEMENT_H2]: withProps(HeadingElement, { variant: 'h2' }),
-        [ELEMENT_H3]: withProps(HeadingElement, { variant: 'h3' }),
-        [ELEMENT_H4]: withProps(HeadingElement, { variant: 'h4' }),
-        [ELEMENT_H5]: withProps(HeadingElement, { variant: 'h5' }),
-        [ELEMENT_H6]: withProps(HeadingElement, { variant: 'h6' }),
-        [ELEMENT_IMAGE]: ImageElement,
-        [ELEMENT_LI]: withProps(PlateElement, { as: 'li' }),
-        [ELEMENT_LINK]: LinkElement,
-        [ELEMENT_MEDIA_EMBED]: MediaEmbedElement,
-        [ELEMENT_MENTION]: MentionElement,
-        [ELEMENT_MENTION_INPUT]: MentionInputElement,
-        [ELEMENT_UL]: withProps(ListElement, { variant: 'ul' }),
-        [ELEMENT_OL]: withProps(ListElement, { variant: 'ol' }),
-        [ELEMENT_PARAGRAPH]: ParagraphElement,
-        [ELEMENT_TABLE]: TableElement,
-        [ELEMENT_TD]: TableCellElement,
-        [ELEMENT_TH]: TableCellHeaderElement,
-        [ELEMENT_TODO_LI]: TodoListElement,
-        [ELEMENT_TR]: TableRowElement,
-        [ELEMENT_EXCALIDRAW]: ExcalidrawElement,
-        [MARK_BOLD]: withProps(PlateLeaf, { as: 'strong' }),
-        [MARK_CODE]: CodeLeaf,
-        [MARK_HIGHLIGHT]: HighlightLeaf,
-        [MARK_ITALIC]: withProps(PlateLeaf, { as: 'em' }),
-        [MARK_KBD]: KbdLeaf,
-        [MARK_STRIKETHROUGH]: withProps(PlateLeaf, { as: 's' }),
-        [MARK_SUBSCRIPT]: withProps(PlateLeaf, { as: 'sub' }),
-        [MARK_SUPERSCRIPT]: withProps(PlateLeaf, { as: 'sup' }),
-        [MARK_UNDERLINE]: withProps(PlateLeaf, { as: 'u' }),
-        [MARK_COMMENT]: CommentLeaf,
-      })
-    ),
+    components: withDraggables({
+      [ELEMENT_BLOCKQUOTE]: BlockquoteElement,
+      [ELEMENT_CODE_BLOCK]: CodeBlockElement,
+      [ELEMENT_CODE_LINE]: CodeLineElement,
+      [ELEMENT_CODE_SYNTAX]: CodeSyntaxLeaf,
+      [ELEMENT_HR]: HrElement,
+      [ELEMENT_H1]: withProps(HeadingElement, { variant: "h2" }),
+      [ELEMENT_H2]: withProps(HeadingElement, { variant: "h3" }),
+      [ELEMENT_H3]: withProps(HeadingElement, { variant: "h4" }),
+      [ELEMENT_IMAGE]: ImageElement,
+      [ELEMENT_LI]: withProps(PlateElement, { as: "li" }),
+      [ELEMENT_LINK]: LinkElement,
+      [ELEMENT_MEDIA_EMBED]: MediaEmbedElement,
+      [ELEMENT_MENTION]: MentionElement,
+      [ELEMENT_MENTION_INPUT]: MentionInputElement,
+      [ELEMENT_UL]: withProps(ListElement, { variant: "ul" }),
+      [ELEMENT_OL]: withProps(ListElement, { variant: "ol" }),
+      [ELEMENT_PARAGRAPH]: ParagraphElement,
+      [ELEMENT_TABLE]: TableElement,
+      [ELEMENT_TD]: TableCellElement,
+      [ELEMENT_TH]: TableCellHeaderElement,
+      [ELEMENT_TODO_LI]: TodoListElement,
+      [ELEMENT_TR]: TableRowElement,
+      [ELEMENT_EXCALIDRAW]: ExcalidrawElement,
+      [MARK_BOLD]: withProps(PlateLeaf, { as: "strong" }),
+      [MARK_CODE]: CodeLeaf,
+      [MARK_HIGHLIGHT]: HighlightLeaf,
+      [MARK_ITALIC]: withProps(PlateLeaf, { as: "em" }),
+      [MARK_KBD]: KbdLeaf,
+      [MARK_STRIKETHROUGH]: withProps(PlateLeaf, { as: "s" }),
+      [MARK_SUBSCRIPT]: withProps(PlateLeaf, { as: "sub" }),
+      [MARK_SUPERSCRIPT]: withProps(PlateLeaf, { as: "sup" }),
+      [MARK_UNDERLINE]: withProps(PlateLeaf, { as: "u" }),
+    }),
   }
 );
