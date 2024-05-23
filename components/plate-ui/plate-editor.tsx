@@ -36,7 +36,7 @@ export default function PlateEditor() {
 
           <Editor
             placeholder="Masukan text..."
-            className="px-14 py-16"
+            className="px-8 py-8"
             autoFocus
             focusRing={false}
             variant="ghost"
