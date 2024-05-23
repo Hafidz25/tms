@@ -89,7 +89,7 @@ function NavbarMenu() {
 }
 
 // perlu refactor
-function Navbar() {
+function Navbar({ user }: any) {
   return (
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-4 md:px-6">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:w-full md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
@@ -127,8 +127,8 @@ function Navbar() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>
               <div className="flex flex-col gap-y-1">
-                <span className="pl-2 text-sm font-bold">Abaz</span>
-                <Badge variant={"secondary"}> Team Member </Badge>
+                <span className="pl-2 text-sm font-bold">{user.user.name}</span>
+                <Badge variant={"secondary"}> {user.user.role} </Badge>
               </div>
             </DropdownMenuLabel>
 
