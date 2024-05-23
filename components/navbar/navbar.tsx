@@ -74,7 +74,9 @@ function NavbarMenu() {
     <Fragment>
       {NAVS.map((nav) => (
         <Link
-          {...nav}
+          replace={nav.replace}
+          scroll={nav.scroll}
+          prefetch={nav.prefetch}
           key={nav.id}
           href={nav.href}
           className={`${
