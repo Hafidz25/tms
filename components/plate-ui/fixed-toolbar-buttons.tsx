@@ -1,4 +1,3 @@
-import React from "react";
 import {
   MARK_BOLD,
   MARK_CODE,
@@ -14,7 +13,6 @@ import { ELEMENT_IMAGE } from "@udecode/plate-media";
 import { Icons, iconVariants } from "@/components/plate-ui/icons";
 import { AlignDropdownMenu } from "@/components/plate-ui/align-dropdown-menu";
 import { ColorDropdownMenu } from "@/components/plate-ui/color-dropdown-menu";
-import { EmojiDropdownMenu } from "@/components/plate-ui/emoji-dropdown-menu";
 import { IndentListToolbarButton } from "@/components/plate-ui/indent-list-toolbar-button";
 import { IndentToolbarButton } from "@/components/plate-ui/indent-toolbar-button";
 import { LineHeightDropdownMenu } from "@/components/plate-ui/line-height-dropdown-menu";
@@ -99,13 +97,8 @@ export function FixedToolbarButtons() {
 
             <ToolbarGroup>
               <LinkToolbarButton />
-
               <MediaToolbarButton nodeType={ELEMENT_IMAGE} />
-
               <TableDropdownMenu />
-
-              <EmojiDropdownMenu />
-
               <MoreDropdownMenu />
             </ToolbarGroup>
           </>

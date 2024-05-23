@@ -46,7 +46,6 @@ import {
   someNode,
 } from '@udecode/plate-common';
 import { createDndPlugin } from '@udecode/plate-dnd';
-import { createEmojiPlugin } from '@udecode/plate-emoji';
 import {
   createExcalidrawPlugin,
   ELEMENT_EXCALIDRAW,
@@ -125,7 +124,6 @@ import { CodeBlockElement } from '@/components/plate-ui/code-block-element';
 import { CodeLeaf } from '@/components/plate-ui/code-leaf';
 import { CodeLineElement } from '@/components/plate-ui/code-line-element';
 import { CodeSyntaxLeaf } from '@/components/plate-ui/code-syntax-leaf';
-import { EmojiCombobox } from '@/components/plate-ui/emoji-combobox';
 import { ExcalidrawElement } from '@/components/plate-ui/excalidraw-element';
 import { HeadingElement } from '@/components/plate-ui/heading-element';
 import { HighlightLeaf } from '@/components/plate-ui/highlight-leaf';
@@ -254,9 +252,6 @@ export const plugins = createPlugins(
     createComboboxPlugin(),
     createDndPlugin({
       options: { enableScroller: true },
-    }),
-    createEmojiPlugin({
-      renderAfterEditable: EmojiCombobox as RenderAfterEditable,
     }),
     createExitBreakPlugin({
       options: {
