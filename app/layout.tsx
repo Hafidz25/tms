@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter as FontSans } from "next/font/google";
+import { cn } from '@udecode/cn';
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+import { TooltipProvider } from '@/components/plate-ui/tooltip';
+
+export const fontSans = FontSans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   title: "Task Management System",
@@ -16,7 +22,20 @@ export default function RootLayout({
 }>) {
   return (
     <html>
-      <body>{children}</body>
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          fontSans.variable
+        )}
+      >
+        <TooltipProvider
+          disableHoverableContent
+          delayDuration={500}
+          skipDelayDuration={0}
+        >
+          {children}
+        </TooltipProvider>
+      </body>
     </html>
   );
 }

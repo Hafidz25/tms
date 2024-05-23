@@ -9,7 +9,6 @@ import {
   CommandGroup,
   CommandItem,
   CommandList,
-  CommandEmpty,
 } from "@/components/ui/command";
 import { Command as CommandPrimitive } from "cmdk";
 import { userList } from "@/app/constants/userList";
@@ -94,9 +93,9 @@ export function Chips({ disable = false }) {
           />
         </div>
       </div>
-      <div className="relative mt-2">
+      <div className="relative">
         {open && selectables.length > 0 ? (
-          <div className="absolute w-full z-10 top-0 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
+          <div className="absolute w-full z-10 top-2 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
             <CommandGroup className="bg-white h-full overflow-auto">
               <CommandList>
                 {selectables
