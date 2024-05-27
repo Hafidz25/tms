@@ -109,6 +109,36 @@ const Page = () => {
     }
   };
 
+  const updateRole = async (
+    dataId: string,
+    role: string,
+    name: string,
+    email: string
+  ) => {
+    try {
+      const response = await fetch(`/api/users/${dataId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name, email: email, role: role }),
+      });
+      // console.log(response);
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: "User updated successfully.",
+        });
+        Router.refresh();
+      }
+      return response;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen w-full flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
       <Tabs defaultValue="all">
@@ -164,7 +194,17 @@ const Page = () => {
                         </TableCell>
                         <TableCell>
                           <div className="w-[100%] lg:w-[60%] xl:w-[35%]">
-                            <Select defaultValue={data.role}>
+                            <Select
+                              defaultValue={data.role}
+                              onValueChange={(value) =>
+                                updateRole(
+                                  data.id,
+                                  value,
+                                  data.name,
+                                  data.email
+                                )
+                              }
+                            >
                               <SelectTrigger
                                 id="status"
                                 aria-label="Select status"

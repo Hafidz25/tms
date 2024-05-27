@@ -28,3 +28,34 @@ export async function DELETE(
     }
   );
 }
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const body = await req.json();
+  const { name, email, password, role } = body;
+
+  // Hash password
+  //   const hashedPassword = await hash(password, 10);
+  const users = await db.user.update({
+    where: { id: params.id },
+    data: {
+      name: name,
+      email: email,
+      //   password: hashedPassword,
+      role: role,
+    },
+  });
+
+  return NextResponse.json(
+    {
+      success: true,
+      message: "User update successfully",
+      data: users,
+    },
+    {
+      status: 200,
+    }
+  );
+}
