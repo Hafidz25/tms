@@ -26,7 +26,8 @@ export default withAuth(
       return new NextResponse("You are not authorized!");
     } else if (
       req.nextUrl.pathname === "/dashboard/briefs/create" &&
-      req.nextauth.token?.role !== "Customer Service"
+      req.nextauth.token?.role !== "Customer Service" &&
+      req.nextauth.token?.role !== "Admin"
     ) {
       return new NextResponse("You are not authorized!");
     }

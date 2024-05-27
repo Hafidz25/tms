@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { File, MoreHorizontal, PlusCircle } from "lucide-react";
@@ -37,13 +38,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/custom/Navbar";
 import ShareDialog from "@/components/custom/ShareDialog";
 import { userList } from "@/app/constants/userList";
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+// const updateUserRole = async ({ userId, userRole }: any) => {
+//   const updateRole = await prisma.user.update({
+//     where: { id: userId },
+//     data: {
+//       role: userRole,
+//     },
+//   });
+// };
+
 const Page = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [load, setLoad] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/users")
+      .then((response) => response.json())
+      .then((data) => {
+        setUsers(data.data);
+        setLoad(true);
+      });
+  }, []);
+
+  const handleDelete = async (dataId: string) => {};
+
   return (
     <div className="min-h-screen w-full flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
       <Tabs defaultValue="all">
@@ -87,66 +126,99 @@ const Page = () => {
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {userList.map((data, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="font-medium">{data.name}</TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {data.email}
-                      </TableCell>
-                      <TableCell>
-                        <div className="w-[100%] lg:w-[60%] xl:w-[35%]">
-                          <Select defaultValue={data.role}>
-                            <SelectTrigger
-                              id="status"
-                              aria-label="Select status"
-                            >
-                              <SelectValue placeholder="Select role" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Default">Default</SelectItem>
-                              <SelectItem value="Admin">Admin</SelectItem>
-                              <SelectItem value="Customer Service">
-                                Customer Service
-                              </SelectItem>
-                              <SelectItem value="Team Member">
-                                Team Member
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              aria-haspopup="true"
-                              size="icon"
-                              variant="ghost"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Toggle menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Delete</DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Link href="" className="w-full">
-                                    Share
-                                  </Link>
-                                </DialogTrigger>
-                                <ShareDialog />
-                              </Dialog>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+                {load ? (
+                  <TableBody>
+                    {users.map((data, i) => (
+                      <TableRow key={data.id}>
+                        <TableCell className="font-medium">
+                          {data.name}
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {data.email}
+                        </TableCell>
+                        <TableCell>
+                          <div className="w-[100%] lg:w-[60%] xl:w-[35%]">
+                            <Select defaultValue={data.role}>
+                              <SelectTrigger
+                                id="status"
+                                aria-label="Select status"
+                              >
+                                <SelectValue placeholder="Select role" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Default">Default</SelectItem>
+                                <SelectItem value="Admin">Admin</SelectItem>
+                                <SelectItem value="Customer Service">
+                                  Customer Service
+                                </SelectItem>
+                                <SelectItem value="Team Member">
+                                  Team Member
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                aria-haspopup="true"
+                                size="icon"
+                                variant="ghost"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Toggle menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem>
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Link href="" className="w-full">
+                                      Delete
+                                    </Link>
+                                  </DialogTrigger>
+                                  <DialogContent className="sm:max-w-[425px]">
+                                    <DialogHeader>
+                                      <DialogTitle>Delete data</DialogTitle>
+                                      <DialogDescription>
+                                        Are you sure to delete data '{data.name}
+                                        '?
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter className="mt-4">
+                                      <Button type="reset" variant="outline">
+                                        Cancel
+                                      </Button>
+                                      <Button
+                                        type="submit"
+                                        onClick={() => handleDelete(data.id)}
+                                        variant="destructive"
+                                      >
+                                        Delete
+                                      </Button>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                </Dialog>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Link href="" className="w-full">
+                                      Share
+                                    </Link>
+                                  </DialogTrigger>
+                                  <ShareDialog />
+                                </Dialog>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                ) : null}
               </Table>
             </CardContent>
             <CardFooter>
@@ -176,70 +248,74 @@ const Page = () => {
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {userList
-                    .filter((data) => data.role === "Admin")
-                    .map((data, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-medium">
-                          {data.name}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {data.email}
-                        </TableCell>
-                        <TableCell>
-                          <div className="w-[100%] lg:w-[60%] xl:w-[35%]">
-                            <Select defaultValue={data.role}>
-                              <SelectTrigger
-                                id="status"
-                                aria-label="Select status"
-                              >
-                                <SelectValue placeholder="Select role" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Default">Default</SelectItem>
-                                <SelectItem value="Admin">Admin</SelectItem>
-                                <SelectItem value="Customer Service">
-                                  Customer Service
-                                </SelectItem>
-                                <SelectItem value="Team Member">
-                                  Team Member
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                aria-haspopup="true"
-                                size="icon"
-                                variant="ghost"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>Delete</DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Link href="" className="w-full">
-                                      Share
-                                    </Link>
-                                  </DialogTrigger>
-                                  <ShareDialog />
-                                </Dialog>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
+                {load ? (
+                  <TableBody>
+                    {users
+                      .filter((data) => data.role === "Admin")
+                      .map((data, i) => (
+                        <TableRow key={data.id}>
+                          <TableCell className="font-medium">
+                            {data.name}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.email}
+                          </TableCell>
+                          <TableCell>
+                            <div className="w-[100%] lg:w-[60%] xl:w-[35%]">
+                              <Select defaultValue={data.role}>
+                                <SelectTrigger
+                                  id="status"
+                                  aria-label="Select status"
+                                >
+                                  <SelectValue placeholder="Select role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Default">
+                                    Default
+                                  </SelectItem>
+                                  <SelectItem value="Admin">Admin</SelectItem>
+                                  <SelectItem value="Customer Service">
+                                    Customer Service
+                                  </SelectItem>
+                                  <SelectItem value="Team Member">
+                                    Team Member
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  aria-haspopup="true"
+                                  size="icon"
+                                  variant="ghost"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Toggle menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem>Delete</DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Link href="" className="w-full">
+                                        Share
+                                      </Link>
+                                    </DialogTrigger>
+                                    <ShareDialog />
+                                  </Dialog>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                ) : null}
               </Table>
             </CardContent>
             <CardFooter>
@@ -269,70 +345,74 @@ const Page = () => {
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {userList
-                    .filter((data) => data.role === "Customer Service")
-                    .map((data, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-medium">
-                          {data.name}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {data.email}
-                        </TableCell>
-                        <TableCell>
-                          <div className="w-[100%] lg:w-[60%] xl:w-[35%]">
-                            <Select defaultValue={data.role}>
-                              <SelectTrigger
-                                id="status"
-                                aria-label="Select status"
-                              >
-                                <SelectValue placeholder="Select role" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Default">Default</SelectItem>
-                                <SelectItem value="Admin">Admin</SelectItem>
-                                <SelectItem value="Customer Service">
-                                  Customer Service
-                                </SelectItem>
-                                <SelectItem value="Team Member">
-                                  Team Member
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                aria-haspopup="true"
-                                size="icon"
-                                variant="ghost"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>Delete</DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Link href="" className="w-full">
-                                      Share
-                                    </Link>
-                                  </DialogTrigger>
-                                  <ShareDialog />
-                                </Dialog>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
+                {load ? (
+                  <TableBody>
+                    {users
+                      .filter((data) => data.role === "Customer Service")
+                      .map((data, i) => (
+                        <TableRow key={data.id}>
+                          <TableCell className="font-medium">
+                            {data.name}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.email}
+                          </TableCell>
+                          <TableCell>
+                            <div className="w-[100%] lg:w-[60%] xl:w-[35%]">
+                              <Select defaultValue={data.role}>
+                                <SelectTrigger
+                                  id="status"
+                                  aria-label="Select status"
+                                >
+                                  <SelectValue placeholder="Select role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Default">
+                                    Default
+                                  </SelectItem>
+                                  <SelectItem value="Admin">Admin</SelectItem>
+                                  <SelectItem value="Customer Service">
+                                    Customer Service
+                                  </SelectItem>
+                                  <SelectItem value="Team Member">
+                                    Team Member
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  aria-haspopup="true"
+                                  size="icon"
+                                  variant="ghost"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Toggle menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem>Delete</DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Link href="" className="w-full">
+                                        Share
+                                      </Link>
+                                    </DialogTrigger>
+                                    <ShareDialog />
+                                  </Dialog>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                ) : null}
               </Table>
             </CardContent>
             <CardFooter>
@@ -362,70 +442,74 @@ const Page = () => {
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {userList
-                    .filter((data) => data.role === "Team Member")
-                    .map((data, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-medium">
-                          {data.name}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {data.email}
-                        </TableCell>
-                        <TableCell>
-                          <div className="w-[100%] lg:w-[60%] xl:w-[35%]">
-                            <Select defaultValue={data.role}>
-                              <SelectTrigger
-                                id="status"
-                                aria-label="Select status"
-                              >
-                                <SelectValue placeholder="Select role" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Default">Default</SelectItem>
-                                <SelectItem value="Admin">Admin</SelectItem>
-                                <SelectItem value="Customer Service">
-                                  Customer Service
-                                </SelectItem>
-                                <SelectItem value="Team Member">
-                                  Team Member
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                aria-haspopup="true"
-                                size="icon"
-                                variant="ghost"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>Delete</DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Link href="" className="w-full">
-                                      Share
-                                    </Link>
-                                  </DialogTrigger>
-                                  <ShareDialog />
-                                </Dialog>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
+                {load ? (
+                  <TableBody>
+                    {users
+                      .filter((data) => data.role === "Team Member")
+                      .map((data, i) => (
+                        <TableRow key={data.id}>
+                          <TableCell className="font-medium">
+                            {data.name}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.email}
+                          </TableCell>
+                          <TableCell>
+                            <div className="w-[100%] lg:w-[60%] xl:w-[35%]">
+                              <Select defaultValue={data.role}>
+                                <SelectTrigger
+                                  id="status"
+                                  aria-label="Select status"
+                                >
+                                  <SelectValue placeholder="Select role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Default">
+                                    Default
+                                  </SelectItem>
+                                  <SelectItem value="Admin">Admin</SelectItem>
+                                  <SelectItem value="Customer Service">
+                                    Customer Service
+                                  </SelectItem>
+                                  <SelectItem value="Team Member">
+                                    Team Member
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  aria-haspopup="true"
+                                  size="icon"
+                                  variant="ghost"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Toggle menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem>Delete</DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Link href="" className="w-full">
+                                        Share
+                                      </Link>
+                                    </DialogTrigger>
+                                    <ShareDialog />
+                                  </Dialog>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                ) : null}
               </Table>
             </CardContent>
             <CardFooter>

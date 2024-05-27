@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         name: name,
         email: email,
         password: hashedPassword,
-        role: "Default",
+        role: role,
       },
     });
 
@@ -83,3 +83,5 @@ export async function GET() {
     );
   }
 }
+
+export async function PUT(req: NextRequest) {}

@@ -15,11 +15,34 @@ datasource db {
 
 
 model User {
-  id              String    @id @default(cuid()) // primary key with CUID
-  name            String    @db.VarChar(255) // varchar
-  email           String    @unique @db.VarChar(255) // email must be unique
+  id              String    @id @default(cuid())
+  name            String    @db.VarChar(255)
+  email           String    @unique @db.VarChar(255)
   role            String    @default("Default")
   password        String    @db.VarChar(255)
+  briefs          Brief[]   // user have many brief
+  feedbacks       Feedback[]   // user have many feedback
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+}
+
+model Brief {
+  id              String    @id @default(cuid())
+  title           String
+  deadline        DateTime 
+  description     String
+  status          String
+  assign          User[]   // brief have many user
+  feedback        Feedback[]   // brief have many feedback
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Feedback {
+  id              String    @id @default(cuid())
+  content         String
+  user            User?     @relation(fields: [userId], references: [id]) // A feedback can have one brief
+  userId          String?
+  brief           Brief?    @relation(fields: [briefId], references: [id]) // A feedback can have one brief
+  briefId         String?
 }
