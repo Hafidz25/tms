@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -18,10 +18,27 @@ import { useToast } from "@/components/ui/use-toast";
 import { signIn } from "next-auth/react";
 
 const Page = () => {
+  const [auth, setAuth] = useState(null);
+  const [authLoad, setAuthLoad] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const Router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetch("/api")
+      .then((response) => response.json())
+      .then((data) => {
+        setAuth(data.authenticated);
+        setAuthLoad(true);
+      });
+  }, []);
+
+  if (authLoad) {
+    if (auth) {
+      Router.push("/dashboard");
+    }
+  }
 
   const submitData = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -33,10 +50,15 @@ const Page = () => {
     });
     if (signInData?.error) {
       toast({
-        title: "Uh oh! Something went wrong.",
-        description: signInData.error,
+        title: "Error",
+        description: "Uh oh! Something went wrong.",
+        variant: "destructive",
       });
     } else {
+      toast({
+        title: "Success",
+        description: "Sign in successfully.",
+      });
       Router.push("/dashboard");
     }
   };

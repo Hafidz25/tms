@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -17,11 +17,28 @@ import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 
 const Page = () => {
+  const [auth, setAuth] = useState(null);
+  const [authLoad, setAuthLoad] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const Router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetch("/api")
+      .then((response) => response.json())
+      .then((data) => {
+        setAuth(data.authenticated);
+        setAuthLoad(true);
+      });
+  }, []);
+
+  if (authLoad) {
+    if (auth) {
+      Router.push("/dashboard");
+    }
+  }
 
   const submitData = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -34,16 +51,25 @@ const Page = () => {
       });
       // console.log(response);
       if (response.status === 201) {
+        toast({
+          title: "Success",
+          description: "User created successfully.",
+        });
         Router.push("/signin");
       } else if (response.status === 409) {
-        return toast({
-          title: "Uh oh! Something went wrong.",
-          description: "There was a problem with your request.",
+        toast({
+          title: "Error",
+          description: "User with this email already exists.",
+          variant: "destructive",
         });
       }
       return response;
     } catch (error) {
-      console.error(error);
+      toast({
+        title: "Error",
+        description: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
     }
   };
 
