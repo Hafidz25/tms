@@ -51,6 +51,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/custom/Navbar";
 import ShareDialog from "@/components/custom/ShareDialog";
 import { userList } from "@/app/constants/userList";
+import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 
 interface User {
   id: string;
@@ -71,6 +73,8 @@ interface User {
 const Page = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [load, setLoad] = useState(false);
+  const { toast } = useToast();
+  const Router = useRouter();
 
   useEffect(() => {
     fetch("/api/users")
@@ -81,7 +85,29 @@ const Page = () => {
       });
   }, []);
 
-  const handleDelete = async (dataId: string) => {};
+  const handleDelete = async (dataId: string) => {
+    try {
+      const response = await fetch(`/api/users/${dataId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      // console.log(response);
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: "User deleted successfully.",
+        });
+        Router.refresh();
+      }
+      return response;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen w-full flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">

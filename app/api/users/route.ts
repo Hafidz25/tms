@@ -84,4 +84,22 @@ export async function GET() {
   }
 }
 
-export async function PUT(req: NextRequest) {}
+// export async function DELETE(
+//   req: NextRequest,
+//   { params }: { params: { id: string } }
+// ) {
+//   const users = await db.user.delete({
+//     where: { id: params.id },
+//   });
+
+//   return NextResponse.json(
+//     {
+//       success: true,
+//       message: "Delete user successfully",
+//       data: users,
+//     },
+//     {
+//       status: 200,
+//     }
+//   );
+// }

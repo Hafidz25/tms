@@ -47,7 +47,7 @@ const Page = () => {
     e.preventDefault();
     try {
       const body = { name, email, password, role };
-      console.log(body);
+      // console.log(body);
       const response = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
