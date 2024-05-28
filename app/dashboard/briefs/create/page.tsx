@@ -4,6 +4,7 @@ import { useState, Fragment } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { addDays } from "date-fns";
 import { DateRange } from "react-day-picker";
+import { userList } from "@/data/user";
 
 import { DevTool } from "@hookform/devtools";
 import Link from "next/link";
@@ -22,6 +23,16 @@ export default function CreateBrief() {
     from: new Date(Date.now()),
     to: addDays(new Date(Date.now()), 14),
   });
+
+  const userChipList = userList.
+    filter(user => user.role !== 'Admin' && user.role !== 'Customer Server').
+    map(user => {
+    const { id, name: text } = user;
+    return {
+      id,
+      text,
+    }
+  })
 
   const handleSubmitBrief = (data: any) => {
     console.log(data);
@@ -42,14 +53,15 @@ export default function CreateBrief() {
               <ChevronLeft className="h-4 w-4" />
             </Link>
 
-            <Button size="sm" type="submit">Add Brief</Button>
+            <Button size="sm" type="submit">
+              Add Brief
+            </Button>
           </div>
 
           <Divider className="my-10" />
 
           <div className="flex flex-col gap-y-6">
             <Input
-              id="name"
               type="text"
               className="w-full border-0 p-0 ring-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent placeholder:capitalize text-[40px] font-bold"
               placeholder="Judul Brief..."
@@ -57,8 +69,13 @@ export default function CreateBrief() {
               {...register("Judul")}
             />
 
-            <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 items-center sm:max-w-2xl">
-              <input type="hidden" name="assigned" value={"assigned"} />
+            <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 items-start sm:max-w-2xl">
+              <input
+                type="hidden"
+                {...register("status", {
+                  value: "assigned",
+                })}
+              />
 
               <Controller
                 control={control}
@@ -75,9 +92,17 @@ export default function CreateBrief() {
                 )}
               />
 
-              <div className="hidden sm:block sm:w-1 h-1 sm:h-8 sm:border-r sm:border-t-0 border-t border-slate-300"></div>
+              <div className="hidden sm:block sm:w-1 h-1 sm:h-10 sm:border-r sm:border-t-0 border-t border-slate-300"></div>
 
-              <Chips />
+              <Controller
+                control={control}
+                name="operator"
+                render={({ field }) => (
+                  <Chips chipItems={userChipList} onChange={(value) => {
+                    field.onChange(value.map(data => ({id: data.id})))
+                  }} />
+                )}
+              />
             </div>
           </div>
 
