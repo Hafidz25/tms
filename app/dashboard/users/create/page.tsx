@@ -84,7 +84,7 @@ const Page = () => {
         className="mx-auto grid max-w-[59rem] lg:min-w-[59rem] flex-1 auto-rows-max gap-4"
       >
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/users">
+          <Link href="" onClick={() => Router.back()}>
             <Button variant="outline" size="icon" className="h-7 w-7">
               <ChevronLeft className="h-4 w-4" />
               <span className="sr-only">Back</span>
@@ -187,7 +187,7 @@ const Page = () => {
                 Share
               </Button>
             </DialogTrigger>
-            <ShareDialog name={name} password={password} />
+            <ShareDialog email={email} password={password} />
           </Dialog>
         </div>
       </form>

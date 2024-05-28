@@ -7,6 +7,7 @@ import { DateRange } from "react-day-picker";
 
 import { DevTool } from "@hookform/devtools";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { ChevronLeft } from "lucide-react";
 import { PlateEditor } from "@/components/plate-ui/plate-editor";
@@ -22,6 +23,7 @@ export default function CreateBrief() {
     from: new Date(Date.now()),
     to: addDays(new Date(Date.now()), 14),
   });
+  const Router = useRouter();
 
   const handleSubmitBrief = (data: any) => {
     console.log(data);
@@ -36,13 +38,16 @@ export default function CreateBrief() {
         >
           <div className="flex items-center justify-between gap-4">
             <Link
-              href="/dashboard/briefs"
+              href=""
+              onClick={() => Router.back()}
               className="w-8 h-8 rounded-lg border border-slate-300 grid place-items-center"
             >
               <ChevronLeft className="h-4 w-4" />
             </Link>
 
-            <Button size="sm" type="submit">Add Brief</Button>
+            <Button size="sm" type="submit">
+              Add Brief
+            </Button>
           </div>
 
           <Divider className="my-10" />

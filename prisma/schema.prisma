@@ -29,10 +29,10 @@ model User {
 model Brief {
   id              String    @id @default(cuid())
   title           String
-  deadline        DateTime 
-  description     String
+  deadline        Json   // {to: DateTime, from: DateTime} - Butuh konfigurasi typed json
+  content         String
   status          String
-  assign          User[]   // brief have many user
+  assign          User[]
   feedback        Feedback[]   // brief have many feedback
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

@@ -1,3 +1,6 @@
+"use client";
+import React, { useEffect, useState } from "react";
+
 import Link from "next/link";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 
@@ -26,11 +29,82 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
 import { briefList } from "@/app/constants/briefList";
 import { userList } from "@/app/constants/userList";
 
+interface Brief {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  deadline: {
+    from: string;
+    to: string;
+  };
+  assign: [
+    {
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+    }
+  ];
+  feedback: [];
+  createdAt: string;
+}
+
 const Page = () => {
+  const [briefs, setBriefs] = useState<Brief[]>([]);
+  const [load, setLoad] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetch("/api/briefs")
+      .then((response) => response.json())
+      .then((data) => {
+        setBriefs(data.data);
+        setLoad(true);
+      });
+  }, []);
+
+  const handleDelete = async (dataId: string) => {
+    try {
+      const response = await fetch(`/api/briefs/${dataId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      })
+        .then((response) => response.json)
+        .then((data) => {
+          location.reload();
+          // Router.refresh()
+          toast({
+            title: "Success",
+            description: "Brief deleted successfully.",
+          });
+        });
+      // console.log(response);
+
+      return response;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex flex-1 flex-col min-h-screen w-full gap-4 p-4 md:gap-8 md:p-8">
       <Tabs defaultValue="all">
@@ -75,56 +149,86 @@ const Page = () => {
                       Deadline
                     </TableHead>
                     <TableHead className="hidden md:table-cell">
-                      Deadline
+                      Created at
                     </TableHead>
                     <TableHead className="hidden md:table-cell">
                       Action
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {briefList.map((data, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="font-medium">
-                        {data.title}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{data.status}</Badge>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {userList
-                          .filter((user) => user.id === data.assign)
-                          .map((filtered) => filtered.name)}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {data.deadline}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {data.deadline}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              aria-haspopup="true"
-                              size="icon"
-                              variant="ghost"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Toggle menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Detail</DropdownMenuItem>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Delete</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+                {load ? (
+                  <TableBody>
+                    {briefs.map((data, i) => (
+                      <TableRow key={data.id}>
+                        <TableCell className="font-medium">
+                          {data.title}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{data.status}</Badge>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {data.assign.map((user) => user.name).join(", ")}
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {data.deadline.to}
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {data.createdAt}
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                aria-haspopup="true"
+                                size="icon"
+                                variant="ghost"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Toggle menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem>Detail</DropdownMenuItem>
+                              <DropdownMenuItem>Edit</DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Link href="" className="w-full">
+                                      Delete
+                                    </Link>
+                                  </DialogTrigger>
+                                  <DialogContent className="sm:max-w-[425px]">
+                                    <DialogHeader>
+                                      <DialogTitle>Delete data</DialogTitle>
+                                      <DialogDescription>
+                                        Are you sure to delete data '
+                                        {data.title}
+                                        '?
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter className="mt-4">
+                                      <Button type="reset" variant="outline">
+                                        Cancel
+                                      </Button>
+                                      <Button
+                                        type="submit"
+                                        onClick={() => handleDelete(data.id)}
+                                        variant="destructive"
+                                      >
+                                        Delete
+                                      </Button>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                </Dialog>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                ) : null}
               </Table>
             </CardContent>
             <CardFooter>
@@ -152,6 +256,9 @@ const Page = () => {
                       Assign
                     </TableHead>
                     <TableHead className="hidden md:table-cell">
+                      Deadline
+                    </TableHead>
+                    <TableHead className="hidden md:table-cell">
                       Created at
                     </TableHead>
                     <TableHead className="hidden md:table-cell">
@@ -159,48 +266,51 @@ const Page = () => {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {briefList
-                    .filter((data) => data.status === "assigned")
-                    .map((data, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-medium">
-                          {data.title}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{data.status}</Badge>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {userList
-                            .filter((user) => user.id === data.assign)
-                            .map((filtered) => filtered.name)}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {data.deadline}
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                aria-haspopup="true"
-                                size="icon"
-                                variant="ghost"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>Detail</DropdownMenuItem>
-                              <DropdownMenuItem>Edit</DropdownMenuItem>
-                              <DropdownMenuItem>Delete</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
+                {load ? (
+                  <TableBody>
+                    {briefs
+                      .filter((data) => data.status === "Assigned")
+                      .map((data, i) => (
+                        <TableRow key={i}>
+                          <TableCell className="font-medium">
+                            {data.title}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{data.status}</Badge>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.assign.map((user) => user.name).join(", ")}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.deadline.to}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.createdAt}
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  aria-haspopup="true"
+                                  size="icon"
+                                  variant="ghost"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Toggle menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem>Detail</DropdownMenuItem>
+                                <DropdownMenuItem>Edit</DropdownMenuItem>
+                                <DropdownMenuItem>Delete</DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                ) : null}
               </Table>
             </CardContent>
             <CardFooter>
@@ -228,6 +338,9 @@ const Page = () => {
                       Assign
                     </TableHead>
                     <TableHead className="hidden md:table-cell">
+                      Deadline
+                    </TableHead>
+                    <TableHead className="hidden md:table-cell">
                       Created at
                     </TableHead>
                     <TableHead className="hidden md:table-cell">
@@ -235,48 +348,51 @@ const Page = () => {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {briefList
-                    .filter((data) => data.status === "in progress")
-                    .map((data, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-medium">
-                          {data.title}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{data.status}</Badge>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {userList
-                            .filter((user) => user.id === data.assign)
-                            .map((filtered) => filtered.name)}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {data.deadline}
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                aria-haspopup="true"
-                                size="icon"
-                                variant="ghost"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>Detail</DropdownMenuItem>
-                              <DropdownMenuItem>Edit</DropdownMenuItem>
-                              <DropdownMenuItem>Delete</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
+                {load ? (
+                  <TableBody>
+                    {briefs
+                      .filter((data) => data.status === "In Progress")
+                      .map((data, i) => (
+                        <TableRow key={i}>
+                          <TableCell className="font-medium">
+                            {data.title}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{data.status}</Badge>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.assign.map((user) => user.name).join(", ")}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.deadline.to}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.createdAt}
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  aria-haspopup="true"
+                                  size="icon"
+                                  variant="ghost"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Toggle menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem>Detail</DropdownMenuItem>
+                                <DropdownMenuItem>Edit</DropdownMenuItem>
+                                <DropdownMenuItem>Delete</DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                ) : null}
               </Table>
             </CardContent>
             <CardFooter>
@@ -304,6 +420,9 @@ const Page = () => {
                       Assign
                     </TableHead>
                     <TableHead className="hidden md:table-cell">
+                      Deadline
+                    </TableHead>
+                    <TableHead className="hidden md:table-cell">
                       Created at
                     </TableHead>
                     <TableHead className="hidden md:table-cell">
@@ -311,48 +430,51 @@ const Page = () => {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {briefList
-                    .filter((data) => data.status === "done")
-                    .map((data, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-medium">
-                          {data.title}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{data.status}</Badge>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {userList
-                            .filter((user) => user.id === data.assign)
-                            .map((filtered) => filtered.name)}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {data.deadline}
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                aria-haspopup="true"
-                                size="icon"
-                                variant="ghost"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>Detail</DropdownMenuItem>
-                              <DropdownMenuItem>Edit</DropdownMenuItem>
-                              <DropdownMenuItem>Delete</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
+                {load ? (
+                  <TableBody>
+                    {briefs
+                      .filter((data) => data.status === "Done")
+                      .map((data, i) => (
+                        <TableRow key={i}>
+                          <TableCell className="font-medium">
+                            {data.title}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{data.status}</Badge>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.assign.map((user) => user.name).join(", ")}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.deadline.to}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.createdAt}
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  aria-haspopup="true"
+                                  size="icon"
+                                  variant="ghost"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Toggle menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem>Detail</DropdownMenuItem>
+                                <DropdownMenuItem>Edit</DropdownMenuItem>
+                                <DropdownMenuItem>Delete</DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                ) : null}
               </Table>
             </CardContent>
             <CardFooter>

@@ -61,15 +61,6 @@ interface User {
   role: string;
 }
 
-// const updateUserRole = async ({ userId, userRole }: any) => {
-//   const updateRole = await prisma.user.update({
-//     where: { id: userId },
-//     data: {
-//       role: userRole,
-//     },
-//   });
-// };
-
 const Page = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [load, setLoad] = useState(false);
@@ -90,15 +81,18 @@ const Page = () => {
       const response = await fetch(`/api/users/${dataId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-      });
-      // console.log(response);
-      if (response.status === 200) {
-        toast({
-          title: "Success",
-          description: "User deleted successfully.",
+      })
+        .then((response) => response.json)
+        .then((data) => {
+          location.reload();
+          // Router.refresh()
+          toast({
+            title: "Success",
+            description: "User deleted successfully.",
+          });
         });
-        Router.refresh();
-      }
+      // console.log(response);
+
       return response;
     } catch (error) {
       toast({
@@ -275,7 +269,10 @@ const Page = () => {
                                       Share
                                     </Link>
                                   </DialogTrigger>
-                                  <ShareDialog />
+                                  <ShareDialog
+                                    email={data.email}
+                                    password={"data.password"}
+                                  />
                                 </Dialog>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -364,7 +361,37 @@ const Page = () => {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem>Delete</DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Link href="" className="w-full">
+                                        Delete
+                                      </Link>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-[425px]">
+                                      <DialogHeader>
+                                        <DialogTitle>Delete data</DialogTitle>
+                                        <DialogDescription>
+                                          Are you sure to delete data '
+                                          {data.name}
+                                          '?
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      <DialogFooter className="mt-4">
+                                        <Button type="reset" variant="outline">
+                                          Cancel
+                                        </Button>
+                                        <Button
+                                          type="submit"
+                                          onClick={() => handleDelete(data.id)}
+                                          variant="destructive"
+                                        >
+                                          Delete
+                                        </Button>
+                                      </DialogFooter>
+                                    </DialogContent>
+                                  </Dialog>
+                                </DropdownMenuItem>
                                 <DropdownMenuItem>
                                   <Dialog>
                                     <DialogTrigger asChild>
@@ -372,7 +399,10 @@ const Page = () => {
                                         Share
                                       </Link>
                                     </DialogTrigger>
-                                    <ShareDialog />
+                                    <ShareDialog
+                                      email={data.email}
+                                      password={"data.password"}
+                                    />
                                   </Dialog>
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -461,7 +491,37 @@ const Page = () => {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem>Delete</DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Link href="" className="w-full">
+                                        Delete
+                                      </Link>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-[425px]">
+                                      <DialogHeader>
+                                        <DialogTitle>Delete data</DialogTitle>
+                                        <DialogDescription>
+                                          Are you sure to delete data '
+                                          {data.name}
+                                          '?
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      <DialogFooter className="mt-4">
+                                        <Button type="reset" variant="outline">
+                                          Cancel
+                                        </Button>
+                                        <Button
+                                          type="submit"
+                                          onClick={() => handleDelete(data.id)}
+                                          variant="destructive"
+                                        >
+                                          Delete
+                                        </Button>
+                                      </DialogFooter>
+                                    </DialogContent>
+                                  </Dialog>
+                                </DropdownMenuItem>
                                 <DropdownMenuItem>
                                   <Dialog>
                                     <DialogTrigger asChild>
@@ -469,7 +529,10 @@ const Page = () => {
                                         Share
                                       </Link>
                                     </DialogTrigger>
-                                    <ShareDialog />
+                                    <ShareDialog
+                                      email={data.email}
+                                      password={"data.password"}
+                                    />
                                   </Dialog>
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -558,7 +621,37 @@ const Page = () => {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem>Delete</DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Link href="" className="w-full">
+                                        Delete
+                                      </Link>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-[425px]">
+                                      <DialogHeader>
+                                        <DialogTitle>Delete data</DialogTitle>
+                                        <DialogDescription>
+                                          Are you sure to delete data '
+                                          {data.name}
+                                          '?
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      <DialogFooter className="mt-4">
+                                        <Button type="reset" variant="outline">
+                                          Cancel
+                                        </Button>
+                                        <Button
+                                          type="submit"
+                                          onClick={() => handleDelete(data.id)}
+                                          variant="destructive"
+                                        >
+                                          Delete
+                                        </Button>
+                                      </DialogFooter>
+                                    </DialogContent>
+                                  </Dialog>
+                                </DropdownMenuItem>
                                 <DropdownMenuItem>
                                   <Dialog>
                                     <DialogTrigger asChild>
@@ -566,7 +659,10 @@ const Page = () => {
                                         Share
                                       </Link>
                                     </DialogTrigger>
-                                    <ShareDialog />
+                                    <ShareDialog
+                                      email={data.email}
+                                      password={"data.password"}
+                                    />
                                   </Dialog>
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
