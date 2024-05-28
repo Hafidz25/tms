@@ -42,6 +42,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { briefList } from "@/app/constants/briefList";
 import { userList } from "@/app/constants/userList";
+import { useRouter } from "next/navigation";
 
 interface Brief {
   id: string;
@@ -68,6 +69,7 @@ const Page = () => {
   const [briefs, setBriefs] = useState<Brief[]>([]);
   const [load, setLoad] = useState(false);
   const { toast } = useToast();
+  const Router = useRouter();
 
   useEffect(() => {
     fetch("/api/briefs")
@@ -83,18 +85,22 @@ const Page = () => {
       const response = await fetch(`/api/briefs/${dataId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-      })
-        .then((response) => response.json)
-        .then((data) => {
-          location.reload();
-          // Router.refresh()
-          toast({
-            title: "Success",
-            description: "Brief deleted successfully.",
-          });
-        });
-      // console.log(response);
+      });
 
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: "Brief deleted successfully.",
+        });
+        Router.refresh();
+        // location.reload();
+      } else if (response.status === 403) {
+        toast({
+          title: "Error",
+          description: "You dont have access.",
+          variant: "destructive",
+        });
+      }
       return response;
     } catch (error) {
       toast({

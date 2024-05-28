@@ -16,27 +16,26 @@ export async function POST(req: NextRequest) {
 
   if (
     session?.user.role === "Admin" ||
-    session?.user.role === "Customer Service"
+    session?.user.role === "Customer Service" ||
+    session?.user.role === "Team Member"
   ) {
     try {
       const body = await req.json();
-      const { title, deadline, content, status, assign } = body;
+      const { content, briefId, userId } = body;
 
       // Create data
-      const newBrief = await db.brief.create({
+      const newFeedback = await db.feedback.create({
         data: {
-          title: title,
-          deadline: deadline,
           content: content,
-          status: "Assigned",
-          assign: { connect: assign },
+          briefId: briefId,
+          userId: userId,
         },
       });
 
       return NextResponse.json(
         {
-          brief: newBrief,
-          message: "Brief created successfully",
+          brief: newFeedback,
+          message: "Feedback created successfully",
         },
         { status: 201 }
       );
@@ -64,30 +63,19 @@ export async function GET() {
 
   if (
     session?.user.role === "Admin" ||
-    session?.user.role === "Customer Service"
+    session?.user.role === "Customer Service" ||
+    session?.user.role === "Team Member"
   ) {
     try {
       //get all posts
-      const briefs = await db.brief.findMany({
-        select: {
-          id: true,
-          title: true,
-          deadline: true,
-          content: true,
-          status: true,
-          assign: true,
-          feedback: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
+      const feedbacks = await db.feedback.findMany();
 
       //return response JSON
       return NextResponse.json(
         {
           success: true,
-          message: "List Data Briefs",
-          data: briefs,
+          message: "List Data Feedbacks",
+          data: feedbacks,
         },
         {
           status: 200,

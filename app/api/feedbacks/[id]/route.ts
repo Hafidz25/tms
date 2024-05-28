@@ -19,17 +19,18 @@ export async function DELETE(
 
   if (
     session?.user.role === "Admin" ||
-    session?.user.role === "Customer Service"
+    session?.user.role === "Customer Service" ||
+    session?.user.role === "Team Member"
   ) {
-    const briefs = await db.brief.delete({
+    const feedbacks = await db.feedback.delete({
       where: { id: params.id },
     });
 
     return NextResponse.json(
       {
         success: true,
-        message: "Delete brief successfully",
-        data: briefs,
+        message: "Delete feedback successfully",
+        data: feedbacks,
       },
       {
         status: 200,
@@ -57,24 +58,22 @@ export async function PATCH(
     session?.user.role === "Team Member"
   ) {
     const body = await req.json();
-    const { title, deadline, content, status, assign } = body;
+    const { content, briefId, userId } = body;
 
-    const briefs = await db.brief.update({
+    const feedbacks = await db.feedback.update({
       where: { id: params.id },
       data: {
-        title: title,
-        deadline: deadline,
         content: content,
-        status: status,
-        assign: { set: assign },
+        briefId: briefId,
+        userId: userId,
       },
     });
 
     return NextResponse.json(
       {
         success: true,
-        message: "Brief update successfully",
-        data: briefs,
+        message: "Feedback update successfully",
+        data: feedbacks,
       },
       {
         status: 200,
