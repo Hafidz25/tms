@@ -8,7 +8,7 @@ interface CreateUserProps {
   role?: Roles | undefined;
 }
 
-const userRole: Roles[] = ["Admin", "Customer Server", "Team Member"];
+const userRole: Roles[] = ["Admin", "Customer Service", "Team Member"];
 
 function createUser({ amount = 1, role }: CreateUserProps): User[] {
   const result: User[] = [];
