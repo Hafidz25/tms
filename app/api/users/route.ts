@@ -77,7 +77,19 @@ export async function GET() {
   if (session?.user.role === "Admin") {
     try {
       //get all posts
-      const users = await db.user.findMany();
+      const users = await db.user.findMany({
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          briefs: true,
+          feedbacks: true,
+          briefNotification: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
 
       //return response JSON
       return NextResponse.json(
