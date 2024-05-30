@@ -40,8 +40,6 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { briefList } from "@/app/constants/briefList";
-import { userList } from "@/app/constants/userList";
 import { useRouter } from "next/navigation";
 
 interface Brief {

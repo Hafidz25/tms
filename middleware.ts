@@ -18,7 +18,7 @@ import { redirect } from "next/navigation";
 export default withAuth(
   // `withAuth` augments your `Request` with the user's token.
   function middleware(req) {
-    console.log(req.nextauth);
+    // console.log(req.nextauth);
     if (
       req.nextUrl.pathname === "/dashboard/users" &&
       req.nextauth.token?.role !== "Admin"

@@ -50,7 +50,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/custom/Navbar";
 import ShareDialog from "@/components/custom/ShareDialog";
-import { userList } from "@/app/constants/userList";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 
