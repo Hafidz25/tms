@@ -1,6 +1,6 @@
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
 import { format } from "date-fns";
-import { DateRange, DayPicker, SelectRangeEventHandler } from "react-day-picker";
+import { DateRange, DayPickerRangeProps } from "react-day-picker";
 import { Calendar as CalendarIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -13,12 +13,17 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-type DateRangePickerProps = {
-  date: DateRange | undefined,
-  onChange: SelectRangeEventHandler
-} & React.ComponentProps<typeof DayPicker>;
+interface DateRangePickerProps extends DayPickerRangeProps {
+  onChange?: ((range?: DateRange) => void) | undefined;
+  placeholder?: string;
+};
 
-const DateRangePicker = forwardRef(({ date, ...props }: DateRangePickerProps, ref) => {
+const DateRangePicker = forwardRef(({ onChange, placeholder = 'Pick a date', ...props }: DateRangePickerProps, ref) => {
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: undefined,
+    to: undefined,
+  });
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -41,18 +46,22 @@ const DateRangePicker = forwardRef(({ date, ...props }: DateRangePickerProps, re
               format(date.from, "LLL dd, y")
             )
           ) : (
-            <span>Pick a date</span>
+            <span className="text-muted-foreground">{placeholder}</span>
           )}
         </Button>
       </PopoverTrigger>
+
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
+          {...props}
           initialFocus
-          mode="range"
           defaultMonth={date?.from}
           selected={date}
-          onSelect={props.onChange}
-          numberOfMonths={2}
+          mode="range"
+          onSelect={(range) => {
+            setDate(range);
+            if (onChange) onChange(range);
+          }}
         />
       </PopoverContent>
     </Popover>
