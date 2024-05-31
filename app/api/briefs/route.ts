@@ -14,49 +14,60 @@ export const config = {
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOption);
 
-  if (
-    session?.user.role === "Admin" ||
-    session?.user.role === "Customer Service"
-  ) {
-    try {
-      const body = await req.json();
-      const { title, deadline, content, status, assign } = body;
+  try {
+    const body = await req.json();
+    const { title, deadline, content, status, assign } = body;
 
-      // Create data
-      const newBrief = await db.brief.create({
-        data: {
-          title: title,
-          deadline: deadline,
-          content: content,
-          status: "Assigned",
-          assign: { connect: assign },
-        },
-      });
+    // Create data
+    const newBrief = await db.brief.create({
+      data: {
+        title: title,
+        deadline: deadline,
+        content: content,
+        status: "Assigned",
+        assign: { connect: assign },
+      },
+    });
 
-      return NextResponse.json(
-        {
-          brief: newBrief,
-          message: "Brief created successfully",
-        },
-        { status: 201 }
-      );
-    } catch (error) {
-      console.log(error);
-      return NextResponse.json(
-        { error: "Internal Server Error" },
-        {
-          status: 500,
-        }
-      );
-    }
-  } else {
+    const newBriefNotif = await db.briefNotification.create({
+      data: {
+        message: `New brief ${newBrief.title} just added`,
+        briefId: newBrief.id,
+        assign: { connect: assign },
+      },
+    });
+
     return NextResponse.json(
-      { error: "You dont have access" },
       {
-        status: 403,
+        brief: newBrief,
+        notification: newBriefNotif,
+        message: "Brief created successfully",
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      {
+        status: 500,
       }
     );
   }
+
+  // if (
+  //   session?.user.role === "Admin" ||
+  //   session?.user.role === "Customer Service"
+  // ) {
+
+  // } else {
+  //   return NextResponse.json(
+  //     { error: "You dont have access" },
+  //     {
+  //       status: 403,
+  //     }
+  //   );
+  // }
 }
 
 export async function GET() {

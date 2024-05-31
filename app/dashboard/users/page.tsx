@@ -1,3 +1,6 @@
+"use client";
+import React, { useEffect, useState } from "react";
+
 import Link from "next/link";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { userList } from "@/data/user";
@@ -82,7 +85,26 @@ function DropdownMenuActions(props: React.ComponentProps<typeof DropdownMenu>) {
   );
 }
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
 function UsersPage() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [load, setLoad] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/users")
+      .then((response) => response.json())
+      .then((data) => {
+        setUsers(data.data);
+        setLoad(true);
+      });
+  }, []);
+
   return (
     <DashboardPanel>
       <Tabs defaultValue={TAB_LIST[0]}>
@@ -122,24 +144,26 @@ function UsersPage() {
                     </TableRow>
                   </TableHeader>
 
-                  <TableBody>
-                    {userList.map((data, ui) => (
-                      <TableRow key={ui}>
-                        <TableCell className="font-medium">
-                          {data.name}
-                        </TableCell>
-                        <TableCell>{data.email}</TableCell>
+                  {load ? (
+                    <TableBody>
+                      {users.map((data, ui) => (
+                        <TableRow key={ui}>
+                          <TableCell className="font-medium">
+                            {data.name}
+                          </TableCell>
+                          <TableCell>{data.email}</TableCell>
 
-                        <TableCell>
-                          <SelectRole value={data.role} />
-                        </TableCell>
+                          <TableCell>
+                            <SelectRole value={data.role} />
+                          </TableCell>
 
-                        <TableCell>
-                          <DropdownMenuActions />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
+                          <TableCell>
+                            <DropdownMenuActions />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  ) : null}
                 </Table>
               </CardContent>
             </Card>

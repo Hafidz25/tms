@@ -16,14 +16,14 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { message, briefId, userId } = body;
+    const { message, briefId, assign } = body;
 
     // Create data
     const newBriefNotif = await db.briefNotification.create({
       data: {
         message: message,
         briefId: briefId,
-        userId: userId,
+        assign: { connect: assign },
       },
     });
 
@@ -65,7 +65,16 @@ export async function GET() {
 
   try {
     //get all posts
-    const briefNotif = await db.briefNotification.findMany();
+    const briefNotif = await db.briefNotification.findMany({
+      select: {
+        id: true,
+        message: true,
+        briefId: true,
+        assign: true,
+        read: true,
+        createdAt: true,
+      },
+    });
 
     //return response JSON
     return NextResponse.json(

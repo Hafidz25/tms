@@ -14,61 +14,63 @@ export const config = {
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOption);
 
-  if (session?.user.role === "Admin") {
-    try {
-      const body = await req.json();
-      const { name, email, password, role } = body;
+  try {
+    const body = await req.json();
+    const { name, email, password, role } = body;
 
-      // Check email
-      const existingUserByEmail = await db.user.findUnique({
-        where: { email: email },
-      });
-      if (existingUserByEmail) {
-        return NextResponse.json(
-          { user: null, message: "User with this email already exists" },
-          { status: 409 }
-        );
-      }
-
-      // Hash password
-      const hashedPassword = await hash(password, 10);
-
-      // Create data
-      const newUser = await db.user.create({
-        data: {
-          name: name,
-          email: email,
-          password: hashedPassword,
-          role: role,
-        },
-      });
-
-      const { password: newUserPassword, ...rest } = newUser;
-
+    // Check email
+    const existingUserByEmail = await db.user.findUnique({
+      where: { email: email },
+    });
+    if (existingUserByEmail) {
       return NextResponse.json(
-        {
-          user: rest,
-          message: "User created successfully",
-        },
-        { status: 201 }
-      );
-    } catch (error) {
-      console.log(error);
-      return NextResponse.json(
-        { error: "Internal Server Error" },
-        {
-          status: 500,
-        }
+        { user: null, message: "User with this email already exists" },
+        { status: 409 }
       );
     }
-  } else {
+
+    // Hash password
+    const hashedPassword = await hash(password, 10);
+
+    // Create data
+    const newUser = await db.user.create({
+      data: {
+        name: name,
+        email: email,
+        password: hashedPassword,
+        role: role,
+      },
+    });
+
+    const { password: newUserPassword, ...rest } = newUser;
+
     return NextResponse.json(
-      { error: "You dont have access" },
       {
-        status: 403,
+        user: rest,
+        message: "User created successfully",
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      {
+        status: 500,
       }
     );
   }
+
+  // if (session?.user.role === "Admin") {
+
+  // } else {
+  //   return NextResponse.json(
+  //     { error: "You dont have access" },
+  //     {
+  //       status: 403,
+  //     }
+  //   );
+  // }
 }
 
 export async function GET() {
@@ -83,6 +85,7 @@ export async function GET() {
           name: true,
           email: true,
           role: true,
+          password: true,
           briefs: true,
           feedbacks: true,
           briefNotification: true,

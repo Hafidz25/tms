@@ -90,8 +90,8 @@ const Page = () => {
           title: "Success",
           description: "Brief deleted successfully.",
         });
-        Router.refresh();
-        // location.reload();
+        // Router.refresh();
+        location.reload();
       } else if (response.status === 403) {
         toast({
           title: "Error",
