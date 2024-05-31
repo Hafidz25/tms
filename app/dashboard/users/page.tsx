@@ -32,6 +32,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 
 const TAB_LIST = ["All", "Admin", "Customer Service", "Team Member"];
 const TABLE_CONTENT = ["Name", "Email", "Role", "Action"];
@@ -40,9 +42,47 @@ const TABLE_CONTENT_ROLE = [...TAB_LIST].map((role) => {
   return role;
 });
 
-function SelectRole(props: React.ComponentProps<typeof Select>) {
+function SelectRole({ data }: any) {
+  const { toast } = useToast();
+  const Router = useRouter();
+
+  const updateRole = async (
+    dataId: string,
+    role: string,
+    name: string,
+    email: string
+  ) => {
+    try {
+      const response = await fetch(`/api/users/${dataId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name, email: email, role: role }),
+      });
+      // console.log(response);
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: "User updated successfully.",
+        });
+        Router.refresh();
+      }
+      return response;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <Select {...props}>
+    <Select
+      defaultValue={data.role}
+      onValueChange={(value) =>
+        updateRole(data.id, value, data.name, data.email)
+      }
+    >
       <SelectTrigger id="status" aria-label="Select status">
         <SelectValue placeholder="Select role" />
       </SelectTrigger>
@@ -154,7 +194,7 @@ function UsersPage() {
                           <TableCell>{data.email}</TableCell>
 
                           <TableCell>
-                            <SelectRole value={data.role} />
+                            <SelectRole data={data} />
                           </TableCell>
 
                           <TableCell>
