@@ -1,8 +1,9 @@
+"use client";
 import React, { useEffect, useState } from "react";
 
 import Link from "next/link";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
-import { createUser, SUPER_ACCOUNT } from "@/data/user";
+import { userList } from "@/data/user";
 
 import { DashboardPanel } from "@/components/layouts/dashboard-panel";
 import { Button } from "@/components/ui/button";
@@ -39,8 +40,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "@/components/ui/use-toast";
-import { redirect } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 
 const TAB_LIST = ["All", "Admin", "Customer Service", "Team Member"];
 const TABLE_CONTENT = ["Name", "Email", "Role", "Action"];
@@ -49,46 +50,46 @@ const TABLE_CONTENT_ROLE = [...TAB_LIST].map((role) => {
   return role;
 });
 
-async function updateRole(
-  dataId: string,
-  role: string,
-  name: string,
-  email: string
-) {
-  "use server";
-
-  try {
-    const response = await fetch(`/api/users/${dataId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name, email: email, role: role }),
-    });
-    // console.log(response);
-    if (response.status === 200) {
-      toast({
-        title: "Success",
-        description: "User updated successfully.",
-      });
-      redirect("/dashboard/users");
-    }
-    return response;
-  } catch (error) {
-    toast({
-      title: "Error",
-      description: "Uh oh! Something went wrong.",
-      variant: "destructive",
-    });
-  }
-}
-
-// Butuh implementasi server action
 function SelectRole({ data }: any) {
+  const { toast } = useToast();
+  const Router = useRouter();
+
+  const updateRole = async (
+    dataId: string,
+    role: string,
+    name: string,
+    email: string
+  ) => {
+    try {
+      const response = await fetch(`/api/users/${dataId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name, email: email, role: role }),
+      });
+      // console.log(response);
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: "User updated successfully.",
+        });
+        Router.refresh();
+      }
+      return response;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Select
       defaultValue={data.role}
-      // onValueChange={(value) =>
-      //   updateRole(data.id, value, data.name, data.email)
-      // }
+      onValueChange={(value) =>
+        updateRole(data.id, value, data.name, data.email)
+      }
     >
       <SelectTrigger id="status" aria-label="Select status">
         <SelectValue placeholder="Select role" />
@@ -106,7 +107,8 @@ function SelectRole({ data }: any) {
 }
 
 function DropdownMenuActions({ data }: any) {
-  // const { toast } = useToast();
+  const { toast } = useToast();
+  const Router = useRouter();
 
   const handleDelete = async (dataId: string) => {
     try {
@@ -180,7 +182,7 @@ function DropdownMenuActions({ data }: any) {
                 Share
               </Link>
             </DialogTrigger>
-            <ShareDialog />
+            <ShareDialog email={data.email} />
           </Dialog>
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -195,20 +197,21 @@ interface User {
   role: string;
 }
 
-// butuh implementasi revalidation
-async function fetchPagesData() {
-  const result = await fetch("http://localhost:3000/api/users");
-  // console.log(result.json());
-  return result.json();
-}
+function UsersPage() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [load, setLoad] = useState(false);
 
-async function UsersPage() {
-  const USERS = await fetchPagesData();
-  console.log(USERS.data);
+  useEffect(() => {
+    fetch("/api/users")
+      .then((response) => response.json())
+      .then((data) => {
+        setUsers(data.data);
+        setLoad(true);
+      });
+  }, []);
 
   return (
     <DashboardPanel>
-      {/* Perlu refactor */}
       <Tabs defaultValue={TAB_LIST[0]}>
         <div className="flex gap-2 items-center sm:justify-between justify-start flex-wrap">
           <TabsList>
@@ -246,25 +249,26 @@ async function UsersPage() {
                     </TableRow>
                   </TableHeader>
 
-                  <TableBody>
-                    {USERS.data.map((data, ui) => (
-                      <TableRow key={ui}>
-                        <TableCell className="font-medium">
-                          {data.name}
-                        </TableCell>
+                  {load ? (
+                    <TableBody>
+                      {users.map((data, ui) => (
+                        <TableRow key={data.id}>
+                          <TableCell className="font-medium">
+                            {data.name}
+                          </TableCell>
+                          <TableCell>{data.email}</TableCell>
 
-                        <TableCell>{data.email}</TableCell>
+                          <TableCell>
+                            <SelectRole data={data} />
+                          </TableCell>
 
-                        <TableCell>
-                          <SelectRole data={data} />
-                        </TableCell>
-
-                        <TableCell>
-                          <DropdownMenuActions data={data} />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
+                          <TableCell>
+                            <DropdownMenuActions data={data} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  ) : null}
                 </Table>
               </CardContent>
             </Card>
