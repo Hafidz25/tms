@@ -1,23 +1,18 @@
 import Link from "next/link";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
-import { userList } from "@/data/user";
+import { createUser, SUPER_ACCOUNT } from "@/data/user";
 
 import { DashboardPanel } from "@/components/layouts/dashboard-panel";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShareDialog from "@/components/custom/ShareDialog";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
   Table,
@@ -35,10 +30,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const TAB_LIST = ['All', 'Admin', 'Customer Service', 'Team Member'];
-const TABLE_CONTENT = ['Name', 'Email', 'Role', 'Action'];
-const TABLE_CONTENT_ROLE = [...TAB_LIST].map(role => {
-  if (role === 'All') return 'Default';
+const TAB_LIST = ["All", "Admin", "Customer Service", "Team Member"];
+const TABLE_CONTENT = ["Name", "Email", "Role", "Action"];
+const TABLE_CONTENT_ROLE = [...TAB_LIST].map((role) => {
+  if (role === "All") return "Default";
   return role;
 });
 
@@ -50,8 +45,10 @@ function SelectRole(props: React.ComponentProps<typeof Select>) {
       </SelectTrigger>
 
       <SelectContent>
-        {TABLE_CONTENT_ROLE.map((role,i) => (
-          <SelectItem key={role.trim() + i} value={role}>{role}</SelectItem>
+        {TABLE_CONTENT_ROLE.map((role, i) => (
+          <SelectItem key={role.trim() + i} value={role}>
+            {role}
+          </SelectItem>
         ))}
       </SelectContent>
     </Select>
@@ -85,7 +82,14 @@ function DropdownMenuActions(props: React.ComponentProps<typeof DropdownMenu>) {
   );
 }
 
-function UsersPage() {
+async function fetchPagesData() {
+  const AMOUNT_DATA = 4;
+  return [...createUser({ amount: AMOUNT_DATA }), { ...SUPER_ACCOUNT }];
+}
+
+async function UsersPage() {
+  const USERS = await fetchPagesData();
+
   return (
     <DashboardPanel>
       <Tabs defaultValue={TAB_LIST[0]}>
@@ -126,7 +130,7 @@ function UsersPage() {
                   </TableHeader>
 
                   <TableBody>
-                    {userList.map((data, ui) => (
+                    {USERS.map((data, ui) => (
                       <TableRow key={ui}>
                         <TableCell className="font-medium">
                           {data.name}
@@ -151,6 +155,6 @@ function UsersPage() {
       </Tabs>
     </DashboardPanel>
   );
-};
+}
 
 export default UsersPage;
