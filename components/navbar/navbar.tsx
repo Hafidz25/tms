@@ -1,17 +1,31 @@
 "use client";
-
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Fragment } from "react";
-import { CircleUser, Menu, Package2 } from "lucide-react";
+import {
+  CircleUser,
+  Menu,
+  Package2,
+  Bell,
+  LogOut,
+  Settings,
+  User,
+} from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +39,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { split, capitalize } from "lodash-es";
 import { nanoid } from "nanoid";
@@ -33,6 +57,8 @@ import { LinkProps } from "next/link";
 import { usePathname } from "next/navigation";
 
 import { signOut } from "next-auth/react";
+
+import { formatDistanceToNow } from "date-fns";
 
 interface NavProp extends LinkProps {
   id?: string;
@@ -102,9 +128,62 @@ function NavbarMenu() {
   );
 }
 
+interface BriefNotification {
+  id: string;
+  message: string;
+  assign: [
+    {
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+    }
+  ];
+  read: boolean;
+  createdAt: string;
+}
+
 // perlu refactor
 function Navbar({ user }: any) {
+  const [briefNotif, setBriefNotif] = useState<BriefNotification[]>([]);
+  const [load, setLoad] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetch("/api/brief-notifications")
+      .then((response) => response.json())
+      .then((data) => {
+        setBriefNotif(data.data);
+        setLoad(true);
+      });
+  }, []);
+
+  const updateNotif = async (dataId: string) => {
+    try {
+      const response = await fetch(`/api/brief-notifications/${dataId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ read: true }),
+      });
+      // console.log(response);
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: "Notification read successfully.",
+        });
+        // Router.refresh();
+        location.reload();
+      }
+      return response;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-8">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:w-full md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
@@ -131,30 +210,183 @@ function Navbar({ user }: any) {
         </SheetContent>
       </Sheet>
 
-      <div className="md:ml-auto md:block md:w-auto flex w-full justify-end">
+      <div className="md:ml-auto flex gap-2 md:w-auto w-full justify-end">
+        {load ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full focus-visible:ring-0 focus-visible:ring-offset-0 relative"
+              >
+                <Bell className="h-5 w-5" />
+                {briefNotif.filter((data) => data.read === false).length > 0 ? (
+                  <div className="w-2 h-2 rounded-full bg-red-600 absolute right-3 top-2"></div>
+                ) : null}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-80 ms-4 md:w-96" align="end">
+              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>
+                <Tabs defaultValue="all" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="unread">
+                      Unread
+                      {briefNotif.filter((data) => data.read === false).length >
+                      0 ? (
+                        <Badge className="ms-2">
+                          {
+                            briefNotif.filter((data) => data.read === false)
+                              .length
+                          }
+                        </Badge>
+                      ) : null}
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="all">
+                    <ScrollArea className="h-96 rounded-md">
+                      <div className="flex flex-col gap-2">
+                        {briefNotif.map((data) => (
+                          <Card
+                            className={
+                              data.read === false
+                                ? "bg-slate-50 cursor-pointer"
+                                : "bg-white cursor-pointer"
+                            }
+                            key={data.id}
+                            onClick={() => updateNotif(data.id)}
+                          >
+                            <CardHeader className="p-4">
+                              <CardDescription>
+                                <div className="flex gap-4 items-start w-full">
+                                  <div className="bg-slate-100 p-4 rounded-md">
+                                    <Package2 className="h-6 w-6" />
+                                  </div>
+                                  <div className="w-full">
+                                    <div className="text-black text-md">
+                                      {data.message} to{" "}
+                                      {data.assign
+                                        .map((user) => user.name)
+                                        .join(", ")}
+                                    </div>
+                                    <span className="text-xs font-normal">
+                                      {formatDistanceToNow(data.createdAt)}
+                                    </span>
+                                  </div>
+                                  {data.read === false ? (
+                                    <div className="flex justify-end">
+                                      <Badge>New</Badge>
+                                    </div>
+                                  ) : null}
+                                </div>
+                              </CardDescription>
+                            </CardHeader>
+                          </Card>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </TabsContent>
+                  <TabsContent value="unread">
+                    <ScrollArea className="h-96 rounded-md">
+                      <div className="flex flex-col gap-2">
+                        {briefNotif
+                          .filter((data) => data.read === false)
+                          .map((data) => (
+                            <Card
+                              className={
+                                data.read === false
+                                  ? "bg-slate-50 cursor-pointer"
+                                  : "bg-white cursor-pointer"
+                              }
+                              key={data.id}
+                              onClick={() => updateNotif(data.id)}
+                            >
+                              <CardHeader className="p-4">
+                                <CardDescription>
+                                  <div className="flex gap-4 items-start w-full">
+                                    <div className="bg-slate-100 p-4 rounded-md">
+                                      <Package2 className="h-6 w-6" />
+                                    </div>
+                                    <div className="w-full">
+                                      <div className="text-black text-md">
+                                        {data.message} to{" "}
+                                        {data.assign
+                                          .map((user) => user.name)
+                                          .join(", ")}
+                                      </div>
+                                      <span className="text-xs font-normal">
+                                        {formatDistanceToNow(data.createdAt)}
+                                      </span>
+                                    </div>
+                                    {data.read === false ? (
+                                      <div className="flex justify-end">
+                                        <Badge>New</Badge>
+                                      </div>
+                                    ) : null}
+                                  </div>
+                                </CardDescription>
+                              </CardHeader>
+                            </Card>
+                          ))}
+                      </div>
+                    </ScrollArea>
+                  </TabsContent>
+                </Tabs>
+              </DropdownMenuLabel>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full focus-visible:ring-0 focus-visible:ring-offset-0"
+          >
+            <Bell className="h-5 w-5" />
+          </Button>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="secondary" size="icon" className="rounded-full">
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full focus-visible:ring-0 focus-visible:ring-offset-0"
+            >
               <CircleUser className="h-5 w-5" />
               <span className="sr-only">Toggle user menu</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuLabel>
               <div className="flex flex-col gap-y-1">
                 <span className="pl-2 text-sm font-bold">
                   {user?.user.name}
                 </span>
-                <Badge variant={"secondary"}> {user?.user.role} </Badge>
+                <Badge className="w-fit" variant={"secondary"}>
+                  {" "}
+                  {user?.user.role}{" "}
+                </Badge>
               </div>
             </DropdownMenuLabel>
-
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem>
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Link href="" className="w-full">
-                    Sign out
+                  <Link href="" className="flex w-full items-center">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Sign out</span>
                   </Link>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
@@ -184,22 +416,6 @@ function Navbar({ user }: any) {
                 </DialogContent>
               </Dialog>
             </DropdownMenuItem>
-
-            {/* {user ? (
-              <DropdownMenuItem>
-                <Link
-                  href=""
-                  onClick={() =>
-                    signOut({
-                      redirect: true,
-                      callbackUrl: `${window.location.origin}/signin`,
-                    })
-                  }
-                >
-                  Sign Out
-                </Link>
-              </DropdownMenuItem>
-            ) : null} */}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -7,7 +7,15 @@ import { userList } from "@/data/user";
 
 import { DashboardPanel } from "@/components/layouts/dashboard-panel";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShareDialog from "@/components/custom/ShareDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,9 +106,37 @@ function SelectRole({ data }: any) {
   );
 }
 
-function DropdownMenuActions(props: React.ComponentProps<typeof DropdownMenu>) {
+function DropdownMenuActions({ data }: any) {
+  const { toast } = useToast();
+  const Router = useRouter();
+
+  const handleDelete = async (dataId: string) => {
+    try {
+      const response = await fetch(`/api/users/${dataId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      // console.log(response);
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: "User deleted successfully.",
+        });
+        // Router.refresh();
+        location.reload();
+      }
+      return response;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <DropdownMenu {...props}>
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button aria-haspopup="true" size="icon" variant="ghost">
           <MoreHorizontal className="h-4 w-4" />
@@ -109,7 +145,36 @@ function DropdownMenuActions(props: React.ComponentProps<typeof DropdownMenu>) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end">
-        <DropdownMenuItem>Delete</DropdownMenuItem>
+        <DropdownMenuItem>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Link href="" className="w-full">
+                Delete
+              </Link>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Delete data</DialogTitle>
+                <DialogDescription>
+                  Are you sure to delete data '{data.name}
+                  '?
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="mt-4">
+                <Button type="reset" variant="outline">
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  onClick={() => handleDelete(data.id)}
+                  variant="destructive"
+                >
+                  Delete
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </DropdownMenuItem>
         <DropdownMenuItem>
           <Dialog>
             <DialogTrigger asChild>
@@ -187,7 +252,7 @@ function UsersPage() {
                   {load ? (
                     <TableBody>
                       {users.map((data, ui) => (
-                        <TableRow key={ui}>
+                        <TableRow key={data.id}>
                           <TableCell className="font-medium">
                             {data.name}
                           </TableCell>
@@ -198,7 +263,7 @@ function UsersPage() {
                           </TableCell>
 
                           <TableCell>
-                            <DropdownMenuActions />
+                            <DropdownMenuActions data={data} />
                           </TableCell>
                         </TableRow>
                       ))}

@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     const newBriefNotif = await db.briefNotification.create({
       data: {
-        message: `New brief ${newBrief.title} just added`,
+        message: `New brief "${newBrief.title}" just added`,
         briefId: newBrief.id,
         assign: { connect: assign },
       },

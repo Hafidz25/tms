@@ -74,6 +74,9 @@ export async function GET() {
         read: true,
         createdAt: true,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
     //return response JSON
