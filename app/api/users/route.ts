@@ -76,49 +76,51 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   const session = await getServerSession(authOption);
 
-  if (session?.user.role === "Admin") {
-    try {
-      //get all posts
-      const users = await db.user.findMany({
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          password: true,
-          briefs: true,
-          feedbacks: true,
-          briefNotification: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
+  try {
+    //get all posts
+    const users = await db.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        password: true,
+        briefs: true,
+        feedbacks: true,
+        briefNotification: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
 
-      //return response JSON
-      return NextResponse.json(
-        {
-          success: true,
-          message: "List Data Users",
-          data: users,
-        },
-        {
-          status: 200,
-        }
-      );
-    } catch (error) {
-      return NextResponse.json(
-        { error: "Internal Server Error" },
-        {
-          status: 500,
-        }
-      );
-    }
-  } else {
+    //return response JSON
     return NextResponse.json(
-      { error: "You dont have access" },
       {
-        status: 403,
+        success: true,
+        message: "List Data Users",
+        data: users,
+      },
+      {
+        status: 200,
+      }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      {
+        status: 500,
       }
     );
   }
+
+  // if (session?.user.role === "Admin") {
+
+  // } else {
+  //   return NextResponse.json(
+  //     { error: "You dont have access" },
+  //     {
+  //       status: 403,
+  //     }
+  //   );
+  // }
 }

@@ -9,7 +9,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const session = await getServerSession(authOption);
-  // console.log(session);
+  console.log(session);
 
   return (
     <Fragment>
