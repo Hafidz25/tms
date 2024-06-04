@@ -49,7 +49,7 @@ interface User {
 interface Brief {
   id: string;
   title: string;
-  description: string;
+  content: string;
   status: string;
   deadline: {
     from: string;
@@ -103,8 +103,10 @@ export default async function DetailBrief({
       });
     fetch(`/api/briefs/${params.id}`)
       .then((response) => response.json())
-      .then((data) => {
-        setBriefs(data.data);
+      .then((result) => {
+        const newContent = JSON.parse(result.data.content);
+        const mappedData = { ...result.data, content: newContent };
+        setBriefs(mappedData);
         setLoadBrief(true);
       });
     fetch(`/api/auth/session`)
@@ -183,6 +185,8 @@ export default async function DetailBrief({
     }
   };
 
+  console.log(briefs);
+
   return loadUser && loadBrief && loadExist ? (
     <Fragment>
       <div className="container py-10 max-w-[1400px]">
@@ -195,10 +199,6 @@ export default async function DetailBrief({
             >
               <ChevronLeft className="h-4 w-4" />
             </Link>
-
-            <Button size="sm" type="submit">
-              Add Brief
-            </Button>
           </div>
 
           {/* <Divider className="my-10" /> */}
@@ -279,7 +279,9 @@ export default async function DetailBrief({
 
           <Divider className="my-10" />
 
-          <div className="border rounded-lg">{/* <PlateEditor /> */}</div>
+          <div className="border rounded-lg">
+            <PlateEditor initialValue={briefs.content} readOnly />
+          </div>
         </form>
         <Divider className="my-10" />
         <Card>

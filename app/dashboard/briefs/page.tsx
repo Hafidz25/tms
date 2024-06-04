@@ -301,43 +301,6 @@ const Page = () => {
                                       Detail
                                     </Link>
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                                  <DropdownMenuItem>
-                                    <Dialog>
-                                      <DialogTrigger asChild>
-                                        <Link href="" className="w-full">
-                                          Delete
-                                        </Link>
-                                      </DialogTrigger>
-                                      <DialogContent className="sm:max-w-[425px]">
-                                        <DialogHeader>
-                                          <DialogTitle>Delete data</DialogTitle>
-                                          <DialogDescription>
-                                            Are you sure to delete data '
-                                            {data.title}
-                                            '?
-                                          </DialogDescription>
-                                        </DialogHeader>
-                                        <DialogFooter className="mt-4">
-                                          <Button
-                                            type="reset"
-                                            variant="outline"
-                                          >
-                                            Cancel
-                                          </Button>
-                                          <Button
-                                            type="submit"
-                                            onClick={() =>
-                                              handleDelete(data.id)
-                                            }
-                                            variant="destructive"
-                                          >
-                                            Delete
-                                          </Button>
-                                        </DialogFooter>
-                                      </DialogContent>
-                                    </Dialog>
-                                  </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </TableCell>
@@ -518,43 +481,6 @@ const Page = () => {
                                       Detail
                                     </Link>
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                                  <DropdownMenuItem>
-                                    <Dialog>
-                                      <DialogTrigger asChild>
-                                        <Link href="" className="w-full">
-                                          Delete
-                                        </Link>
-                                      </DialogTrigger>
-                                      <DialogContent className="sm:max-w-[425px]">
-                                        <DialogHeader>
-                                          <DialogTitle>Delete data</DialogTitle>
-                                          <DialogDescription>
-                                            Are you sure to delete data '
-                                            {data.title}
-                                            '?
-                                          </DialogDescription>
-                                        </DialogHeader>
-                                        <DialogFooter className="mt-4">
-                                          <Button
-                                            type="reset"
-                                            variant="outline"
-                                          >
-                                            Cancel
-                                          </Button>
-                                          <Button
-                                            type="submit"
-                                            onClick={() =>
-                                              handleDelete(data.id)
-                                            }
-                                            variant="destructive"
-                                          >
-                                            Delete
-                                          </Button>
-                                        </DialogFooter>
-                                      </DialogContent>
-                                    </Dialog>
-                                  </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </TableCell>
@@ -605,7 +531,14 @@ const Page = () => {
                   userExist?.role === "Customer Service" ? (
                     <TableBody>
                       {briefs
-                        .filter((data) => data.status === "In Progress")
+                        .filter(
+                          (data) =>
+                            data.status === "In Progress" ||
+                            data.status === "In Review" ||
+                            data.status === "Waiting for Client" ||
+                            data.status === "Correction" ||
+                            data.status === "Need Review"
+                        )
                         .map((data, i) => (
                           <TableRow key={i}>
                             <TableCell className="font-medium">
@@ -693,8 +626,14 @@ const Page = () => {
                       {briefs
                         .filter(
                           (data) =>
-                            data.status === "In Progress" &&
-                            data.assign.find(({ id }) => id === userExist?.id)
+                            data.status === "In Progress" ||
+                            data.status === "In Review" ||
+                            data.status === "Waiting for Client" ||
+                            data.status === "Correction" ||
+                            (data.status === "Need Review" &&
+                              data.assign.find(
+                                ({ id }) => id === userExist?.id
+                              ))
                         )
                         .map((data, i) => (
                           <TableRow key={i}>
@@ -734,43 +673,6 @@ const Page = () => {
                                     >
                                       Detail
                                     </Link>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                                  <DropdownMenuItem>
-                                    <Dialog>
-                                      <DialogTrigger asChild>
-                                        <Link href="" className="w-full">
-                                          Delete
-                                        </Link>
-                                      </DialogTrigger>
-                                      <DialogContent className="sm:max-w-[425px]">
-                                        <DialogHeader>
-                                          <DialogTitle>Delete data</DialogTitle>
-                                          <DialogDescription>
-                                            Are you sure to delete data '
-                                            {data.title}
-                                            '?
-                                          </DialogDescription>
-                                        </DialogHeader>
-                                        <DialogFooter className="mt-4">
-                                          <Button
-                                            type="reset"
-                                            variant="outline"
-                                          >
-                                            Cancel
-                                          </Button>
-                                          <Button
-                                            type="submit"
-                                            onClick={() =>
-                                              handleDelete(data.id)
-                                            }
-                                            variant="destructive"
-                                          >
-                                            Delete
-                                          </Button>
-                                        </DialogFooter>
-                                      </DialogContent>
-                                    </Dialog>
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
@@ -951,43 +853,6 @@ const Page = () => {
                                     >
                                       Detail
                                     </Link>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                                  <DropdownMenuItem>
-                                    <Dialog>
-                                      <DialogTrigger asChild>
-                                        <Link href="" className="w-full">
-                                          Delete
-                                        </Link>
-                                      </DialogTrigger>
-                                      <DialogContent className="sm:max-w-[425px]">
-                                        <DialogHeader>
-                                          <DialogTitle>Delete data</DialogTitle>
-                                          <DialogDescription>
-                                            Are you sure to delete data '
-                                            {data.title}
-                                            '?
-                                          </DialogDescription>
-                                        </DialogHeader>
-                                        <DialogFooter className="mt-4">
-                                          <Button
-                                            type="reset"
-                                            variant="outline"
-                                          >
-                                            Cancel
-                                          </Button>
-                                          <Button
-                                            type="submit"
-                                            onClick={() =>
-                                              handleDelete(data.id)
-                                            }
-                                            variant="destructive"
-                                          >
-                                            Delete
-                                          </Button>
-                                        </DialogFooter>
-                                      </DialogContent>
-                                    </Dialog>
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
