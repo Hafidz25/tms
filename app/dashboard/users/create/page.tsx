@@ -181,14 +181,14 @@ const Page = () => {
           <Button type="submit" size="sm">
             Add User
           </Button>
-          <Dialog>
+          {/* <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
                 Share
               </Button>
             </DialogTrigger>
             <ShareDialog email={email} password={password} />
-          </Dialog>
+          </Dialog> */}
         </div>
       </form>
     </div>

@@ -175,7 +175,7 @@ function DropdownMenuActions({ data }: any) {
             </DialogContent>
           </Dialog>
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        {/* <DropdownMenuItem>
           <Dialog>
             <DialogTrigger asChild>
               <Link href="" className="w-full">
@@ -184,7 +184,7 @@ function DropdownMenuActions({ data }: any) {
             </DialogTrigger>
             <ShareDialog email={data.email} />
           </Dialog>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -250,24 +250,47 @@ function UsersPage() {
                   </TableHeader>
 
                   {load ? (
-                    <TableBody>
-                      {users.map((data, ui) => (
-                        <TableRow key={data.id}>
-                          <TableCell className="font-medium">
-                            {data.name}
-                          </TableCell>
-                          <TableCell>{data.email}</TableCell>
+                    content === "All" ? (
+                      <TableBody>
+                        {users.map((data, ui) => (
+                          <TableRow key={data.id}>
+                            <TableCell className="font-medium">
+                              {data.name}
+                            </TableCell>
+                            <TableCell>{data.email}</TableCell>
 
-                          <TableCell>
-                            <SelectRole data={data} />
-                          </TableCell>
+                            <TableCell>
+                              <SelectRole data={data} />
+                            </TableCell>
 
-                          <TableCell>
-                            <DropdownMenuActions data={data} />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
+                            <TableCell>
+                              <DropdownMenuActions data={data} />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    ) : (
+                      <TableBody>
+                        {users
+                          .filter((data) => data.role === content)
+                          .map((data, ui) => (
+                            <TableRow key={data.id}>
+                              <TableCell className="font-medium">
+                                {data.name}
+                              </TableCell>
+                              <TableCell>{data.email}</TableCell>
+
+                              <TableCell>
+                                <SelectRole data={data} />
+                              </TableCell>
+
+                              <TableCell>
+                                <DropdownMenuActions data={data} />
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    )
                   ) : null}
                 </Table>
               </CardContent>
