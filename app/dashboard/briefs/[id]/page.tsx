@@ -158,12 +158,12 @@ export default async function DetailBrief({
     }
   };
 
-  const updateStatus = async (dataId: string, status: string) => {
+  const updateStatus = async (dataId: string, status: string, assign: any) => {
     try {
       const response = await fetch(`/api/briefs/${dataId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: status }),
+        body: JSON.stringify({ status: status, assign: assign }),
       });
       // console.log(response);
       if (response.status === 200) {
@@ -213,7 +213,7 @@ export default async function DetailBrief({
                 defaultValue={briefs?.status}
                 onValueChange={(value) => {
                   if (briefs) {
-                    updateStatus(briefs.id, value);
+                    updateStatus(briefs.id, value, briefs.assign);
                   }
                 }}
               >
