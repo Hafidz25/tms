@@ -37,6 +37,7 @@ import Feedback from "@/components/custom/Feedback";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns";
+// import { getSession } from "next-auth/react";
 
 interface User {
   id: string;
@@ -62,30 +63,55 @@ interface Brief {
       role: string;
     }
   ];
-  feedback: [];
+  feedback: Feedback[];
   createdAt: string;
 }
 
-export default function DetailBrief({ params }: { params: { id: string } }) {
+interface Feedback {
+  id: string;
+  content: string;
+  userId: string;
+  briefId: string;
+  createdAt: string;
+}
+
+export default async function DetailBrief({
+  params,
+}: {
+  params: { id: string };
+}) {
   const { control, register, handleSubmit } = useForm();
   const [users, setUsers] = useState<User[]>([]);
-  const [briefs, setBriefs] = useState<Brief[]>([]);
-  const [load, setLoad] = useState(false);
+  const [briefs, setBriefs] = useState<Brief>();
+  const [userExist, setUserExist] = useState<User>();
+  const [loadUser, setLoadUser] = useState(false);
+  const [loadBrief, setLoadBrief] = useState(false);
+  const [loadExist, setLoadExist] = useState(false);
 
   const Router = useRouter();
   const { toast } = useToast();
+
+  // const session = await getSession();
+  // console.log(session);
 
   useEffect(() => {
     fetch("/api/users")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data.data);
+        setLoadUser(true);
       });
     fetch(`/api/briefs/${params.id}`)
       .then((response) => response.json())
       .then((data) => {
         setBriefs(data.data);
-        setLoad(true);
+        setLoadBrief(true);
+      });
+    fetch(`/api/auth/session`)
+      .then((response) => response.json())
+      .then((data) => {
+        setUserExist(data.user);
+        setLoadExist(true);
       });
   }, []);
 
@@ -99,26 +125,28 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
       };
     });
 
-  const handleSubmitBrief = async (data: any) => {
+  const handleSubmitFeedback = async (data: any) => {
+    const newData = {
+      ...data,
+      userId: userExist?.id,
+      briefId: briefs?.id,
+    };
+
+    // console.log(newData);
     try {
-      // console.log(body);
-      const response = await fetch("/api/briefs", {
+      const response = await fetch("/api/feedbacks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: data.Judul,
-          deadline: data.Deadline,
-          content: JSON.stringify(data.Editor),
-          assign: data.Assign,
-        }),
+        body: JSON.stringify(newData),
       });
       // console.log(response);
       if (response.status === 201) {
         toast({
           title: "Success",
-          description: "User created successfully.",
+          description: "Feedback created successfully.",
         });
-        Router.push("/dashboard/briefs");
+        // Router.push("/dashboard/briefs");
+        location.reload();
       }
       return response;
     } catch (error) {
@@ -130,13 +158,35 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
     }
   };
 
-  return load ? (
+  const updateStatus = async (dataId: string, status: string) => {
+    try {
+      const response = await fetch(`/api/briefs/${dataId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: status }),
+      });
+      // console.log(response);
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: "Brief updated successfully.",
+        });
+        Router.refresh();
+      }
+      return response;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return loadUser && loadBrief && loadExist ? (
     <Fragment>
       <div className="container py-10 max-w-[1400px]">
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={handleSubmit(handleSubmitBrief)}
-        >
+        <form className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4 mb-12">
             <Link
               href=""
@@ -155,11 +205,18 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
 
           <div className="flex flex-col gap-y-6">
             <div className="w-full border-0 p-0 ring-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent placeholder:capitalize text-[40px] font-bold">
-              {briefs.title}
+              {briefs?.title}
             </div>
 
             <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 items-center sm:max-w-2xl">
-              <Select defaultValue={briefs.status}>
+              <Select
+                defaultValue={briefs?.status}
+                onValueChange={(value) => {
+                  if (briefs) {
+                    updateStatus(briefs.id, value);
+                  }
+                }}
+              >
                 <SelectTrigger id="status" aria-label="Select status">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
@@ -172,74 +229,37 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
 
               <div className="hidden sm:block sm:w-1 h-1 sm:h-10 sm:border-r sm:border-t-0 border-t border-slate-300"></div>
 
-              {/* <Controller
-                control={control}
-                name="Deadline"
-                render={({ field }) => (
-                  <DateRangePicker
-                    mode="range"
-                    onChange={(range) => {
-                      field.onChange(range);
-                    }}
-                  />
-                )}
-              /> */}
               <div className="font-medium text-base flex gap-2 items-center w-full">
                 <Calendar className="w-6 h-6" />
-                {format(new Date(briefs.deadline.to), "EEEE, dd MMM yyyy")}
+                {briefs &&
+                  format(new Date(briefs.deadline.to), "EEEE, dd MMM yyyy")}
               </div>
 
               <div className="hidden sm:block sm:w-1 h-1 sm:h-10 sm:border-r sm:border-t-0 border-t border-slate-300"></div>
 
-              {/* {load ? (
-                <Controller
-                  control={control}
-                  name="Assign"
-                  render={({ field }) => (
-                    <Chips
-                      chipItems={userChipList}
-                      onChange={(value) => {
-                        field.onChange(value.map((data) => ({ id: data.id })));
-                      }}
-                    />
-                  )}
-                />
-              ) : null} */}
               <div className="font-medium text-base flex gap-2 items-center w-full">
                 <Users className="w-6 h-6" />
-                {briefs.assign.map((user) => user.name).join(", ")}
+                {briefs?.assign.map((user) => user.name).join(", ")}
               </div>
             </div>
           </div>
 
           <Divider className="my-10" />
 
-          <div className="border rounded-lg">
-            <Controller
-              control={control}
-              name="Editor"
-              render={({ field }) => (
-                <PlateEditor
-                  // @ts-ignore
-                  onChange={(editorValue: any) => {
-                    field.onChange(editorValue);
-                  }}
-                />
-              )}
-            />
-          </div>
+          <div className="border rounded-lg">{/* <PlateEditor /> */}</div>
         </form>
         <Divider className="my-10" />
         <Card>
           <CardHeader>
             <CardTitle>
-              Feedback ({briefs.feedback.map((data) => data).length})
+              Feedback ({briefs?.feedback.map((data) => data).length})
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-3">
-              {briefs.feedback.map((data) => (
+              {briefs?.feedback.map((data) => (
                 <Feedback
+                  feedbackId={data.id}
                   user={users
                     .filter((user) => user.id === data.userId)
                     .map((user) => user.name)}
@@ -248,15 +268,27 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
                     .map((user) => user.role)}
                   message={data.content}
                   time={formatDistanceToNow(data.createdAt)}
+                  userExist={userExist?.id}
+                  userId={users
+                    .filter((user) => user.id === data.userId)
+                    .map((user) => user.id)}
+                  briefId={briefs?.id}
                 />
               ))}
             </div>
           </CardContent>
           <CardContent>
-            <form className="grid w-full gap-2">
-              <Textarea placeholder="Type your message here." />
+            <form
+              className="grid w-full gap-2"
+              onSubmit={handleSubmit(handleSubmitFeedback)}
+            >
+              <Textarea
+                placeholder="Type your message here."
+                {...register("content")}
+              />
+
               <div className="flex justify-start">
-                <Button>Send message</Button>
+                <Button type="submit">Send message</Button>
               </div>
             </form>
           </CardContent>
