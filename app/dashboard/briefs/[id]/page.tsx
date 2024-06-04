@@ -280,7 +280,10 @@ export default async function DetailBrief({
           <Divider className="my-10" />
 
           <div className="border rounded-lg">
-            <PlateEditor initialValue={briefs.content} readOnly />
+            {
+              // @ts-ignore
+              <PlateEditor initialValue={briefs.content} readOnly />
+            }
           </div>
         </form>
         <Divider className="my-10" />
@@ -294,6 +297,7 @@ export default async function DetailBrief({
             <div className="flex flex-col gap-3">
               {briefs?.feedback.map((data) => (
                 <Feedback
+                  key={data.id}
                   feedbackId={data.id}
                   user={users
                     .filter((user) => user.id === data.userId)

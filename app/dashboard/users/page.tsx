@@ -156,8 +156,8 @@ function DropdownMenuActions({ data }: any) {
               <DialogHeader>
                 <DialogTitle>Delete data</DialogTitle>
                 <DialogDescription>
-                  Are you sure to delete data '{data.name}
-                  '?
+                  Are you sure to delete data &quot;{data.name}
+                  &quot;?
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter className="mt-4">

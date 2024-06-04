@@ -7,11 +7,11 @@ import { getSession } from "next-auth/react";
 
 import { authOption } from "@/lib/auth";
 
-export const config = {
-  api: {
-    bodyParser: true,
-  },
-};
+// export const config = {
+//   api: {
+//     bodyParser: true,
+//   },
+// };
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOption);

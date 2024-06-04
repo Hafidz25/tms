@@ -6,7 +6,7 @@ import "./globals.css";
 import { TooltipProvider } from "@/components/plate-ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 
-export const fontSans = FontSans({
+const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
 });

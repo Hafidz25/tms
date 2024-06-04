@@ -211,8 +211,8 @@ const Feedback = ({
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete data</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure to delete data feedback '{message}
-                  '?
+                  Are you sure to delete data feedback &quot;{message}
+                  &quot;?
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

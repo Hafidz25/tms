@@ -100,7 +100,7 @@ const Page = () => {
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
-            Don't have an account?{" "}
+            Dont have an account?&nbsp;
             <Link href="/signup" className="underline">
               Sign up
             </Link>

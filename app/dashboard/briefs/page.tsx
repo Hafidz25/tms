@@ -230,9 +230,8 @@ const Page = () => {
                                       <DialogHeader>
                                         <DialogTitle>Delete data</DialogTitle>
                                         <DialogDescription>
-                                          Are you sure to delete data '
-                                          {data.title}
-                                          '?
+                                          Are you sure to delete data &quot;
+                                          {data.title}&quot;?
                                         </DialogDescription>
                                       </DialogHeader>
                                       <DialogFooter className="mt-4">
@@ -403,9 +402,8 @@ const Page = () => {
                                         <DialogHeader>
                                           <DialogTitle>Delete data</DialogTitle>
                                           <DialogDescription>
-                                            Are you sure to delete data '
-                                            {data.title}
-                                            '?
+                                            Are you sure to delete data &quot;
+                                            {data.title}&quot;?
                                           </DialogDescription>
                                         </DialogHeader>
                                         <DialogFooter className="mt-4">
@@ -590,9 +588,8 @@ const Page = () => {
                                         <DialogHeader>
                                           <DialogTitle>Delete data</DialogTitle>
                                           <DialogDescription>
-                                            Are you sure to delete data '
-                                            {data.title}
-                                            '?
+                                            Are you sure to delete data &quot;
+                                            {data.title}&quot;?
                                           </DialogDescription>
                                         </DialogHeader>
                                         <DialogFooter className="mt-4">
@@ -776,9 +773,8 @@ const Page = () => {
                                         <DialogHeader>
                                           <DialogTitle>Delete data</DialogTitle>
                                           <DialogDescription>
-                                            Are you sure to delete data '
-                                            {data.title}
-                                            '?
+                                            Are you sure to delete data &quot;
+                                            {data.title}&quot;?
                                           </DialogDescription>
                                         </DialogHeader>
                                         <DialogFooter className="mt-4">

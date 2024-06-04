@@ -121,7 +121,7 @@ const Page = () => {
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
-            Already have an account?{" "}
+            Already have an account?&nbsp;
             <Link href="/signin" className="underline">
               Sign in
             </Link>
