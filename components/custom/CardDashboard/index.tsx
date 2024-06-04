@@ -42,6 +42,7 @@ interface Brief {
 const CardDashboard = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [briefs, setBriefs] = useState<Brief[]>([]);
+  const [userExist, setUserExist] = useState<User>();
   const [load, setLoad] = useState(false);
 
   useEffect(() => {
@@ -55,6 +56,12 @@ const CardDashboard = () => {
       .then((response) => response.json())
       .then((data) => {
         setBriefs(data.data);
+        setLoad(true);
+      });
+    fetch(`/api/auth/session`)
+      .then((response) => response.json())
+      .then((data) => {
+        setUserExist(data.user);
         setLoad(true);
       });
   }, []);
@@ -98,7 +105,14 @@ const CardDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {briefs.filter((data) => data.status !== "Done").length}
+            {userExist?.role === "Admin" ||
+            userExist?.role === "Customer Service"
+              ? briefs.filter((data) => data.status !== "Done").length
+              : briefs.filter(
+                  (data) =>
+                    data.status !== "Done" &&
+                    data.assign.find(({ id }) => id === userExist?.id)
+                ).length}
           </div>
           {/* <p className="text-xs text-muted-foreground">+19% from last month</p> */}
         </CardContent>
@@ -110,7 +124,14 @@ const CardDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {briefs.filter((data) => data.status === "Done").length}
+            {userExist?.role === "Admin" ||
+            userExist?.role === "Customer Service"
+              ? briefs.filter((data) => data.status === "Done").length
+              : briefs.filter(
+                  (data) =>
+                    data.status === "Done" &&
+                    data.assign.find(({ id }) => id === userExist?.id)
+                ).length}
           </div>
           {/* <p className="text-xs text-muted-foreground">+201 since last hour</p> */}
         </CardContent>

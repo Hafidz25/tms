@@ -106,12 +106,29 @@ function NavbarBrand() {
   );
 }
 
-function NavbarMenu() {
+function NavbarMenu({ data }: any) {
   const pathname = usePathname();
 
-  return (
+  return data.role === "Admin" ? (
     <Fragment>
       {NAVS.map((nav) => (
+        <Link
+          replace={nav.replace}
+          scroll={nav.scroll}
+          prefetch={nav.prefetch}
+          key={nav.id}
+          href={nav.href}
+          className={`${
+            pathname === nav.href ? "text-slate-800" : "text-slate-400"
+          } transition-colors hover:text-slate-800`}
+        >
+          {nav.location}
+        </Link>
+      ))}
+    </Fragment>
+  ) : (
+    <Fragment>
+      {NAVS.filter((data) => !data.location?.includes("Users")).map((nav) => (
         <Link
           replace={nav.replace}
           scroll={nav.scroll}
@@ -208,7 +225,7 @@ function Navbar({ user }: any) {
         <NavbarBrand />
 
         <div className="flex w-full gap-5 justify-end">
-          <NavbarMenu />
+          {loadSession ? <NavbarMenu data={user?.user} /> : null}
         </div>
       </nav>
 
