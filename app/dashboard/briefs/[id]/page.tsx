@@ -220,11 +220,44 @@ export default async function DetailBrief({
                 <SelectTrigger id="status" aria-label="Select status">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Assigned">Assigned</SelectItem>
-                  <SelectItem value="In Progress">In Progress</SelectItem>
-                  <SelectItem value="Done">Done</SelectItem>
-                </SelectContent>
+                {userExist?.role === "Admin" ||
+                userExist?.role === "Customer Service" ? (
+                  <SelectContent>
+                    <SelectItem value="Assigned">Assigned</SelectItem>
+                    <SelectItem value="In Review">In Review</SelectItem>
+                    <SelectItem value="Waiting for Client">
+                      Waiting for Client
+                    </SelectItem>
+                    <SelectItem value="Correction">Correction</SelectItem>
+                    <SelectItem value="In Progress" disabled>
+                      In Progress
+                    </SelectItem>
+                    <SelectItem value="Need Review" disabled>
+                      Need Review
+                    </SelectItem>
+                    <SelectItem value="Done">Done</SelectItem>
+                  </SelectContent>
+                ) : (
+                  <SelectContent>
+                    <SelectItem value="Assigned" disabled>
+                      Assigned
+                    </SelectItem>
+                    <SelectItem value="In Review" disabled>
+                      In Review
+                    </SelectItem>
+                    <SelectItem value="Waiting for Client" disabled>
+                      Waiting for Client
+                    </SelectItem>
+                    <SelectItem value="Correction" disabled>
+                      Correction
+                    </SelectItem>
+                    <SelectItem value="In Progress">In Progress</SelectItem>
+                    <SelectItem value="Need Review">Need Review</SelectItem>
+                    <SelectItem value="Done" disabled>
+                      Done
+                    </SelectItem>
+                  </SelectContent>
+                )}
               </Select>
 
               <div className="hidden sm:block sm:w-1 h-1 sm:h-10 sm:border-r sm:border-t-0 border-t border-slate-300"></div>
