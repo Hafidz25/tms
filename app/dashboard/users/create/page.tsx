@@ -1,6 +1,5 @@
 "use client";
-
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,12 +21,20 @@ import {
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/custom/Navbar";
 import generator from "generate-password";
 import ShareDialog from "@/components/custom/ShareDialog";
 
 const Page = () => {
-  const [password, setPassword] = React.useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("");
+  const [password, setPassword] = useState("");
+  const Router = useRouter();
+  const { toast } = useToast();
+
   function generatePass() {
     const password = generator.generate({
       length: 10,
@@ -35,11 +42,49 @@ const Page = () => {
     });
     setPassword(password);
   }
+
+  const handleSubmit = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    try {
+      const body = { name, email, password, role };
+      // console.log(body);
+      const response = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      // console.log(response);
+      if (response.status === 201) {
+        toast({
+          title: "Success",
+          description: "User created successfully.",
+        });
+        // Router.push("/users");
+      } else if (response.status === 409) {
+        toast({
+          title: "Error",
+          description: "User with this email already exists.",
+          variant: "destructive",
+        });
+      }
+      return response;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen w-full flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-      <div className="mx-auto grid max-w-[59rem] lg:min-w-[59rem] flex-1 auto-rows-max gap-4">
+      <form
+        onSubmit={handleSubmit}
+        className="mx-auto grid max-w-[59rem] lg:min-w-[59rem] flex-1 auto-rows-max gap-4"
+      >
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/users">
+          <Link href="" onClick={() => Router.back()}>
             <Button variant="outline" size="icon" className="h-7 w-7">
               <ChevronLeft className="h-4 w-4" />
               <span className="sr-only">Back</span>
@@ -64,6 +109,9 @@ const Page = () => {
                       type="text"
                       className="w-full"
                       placeholder="Input Name"
+                      required
+                      onChange={(e) => setName(e.target.value)}
+                      value={name}
                     />
                   </div>
                   <div className="grid gap-3">
@@ -73,6 +121,9 @@ const Page = () => {
                       type="email"
                       className="w-full"
                       placeholder="Input Email"
+                      required
+                      onChange={(e) => setEmail(e.target.value)}
+                      value={email}
                     />
                   </div>
                   <div className="grid gap-3">
@@ -84,6 +135,7 @@ const Page = () => {
                         className="w-full"
                         placeholder="Input Password"
                         value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                       />
                       <Button size="sm" onClick={generatePass}>
                         Generate
@@ -103,7 +155,10 @@ const Page = () => {
                 <div className="grid gap-6">
                   <div className="grid gap-3">
                     <Label htmlFor="status">Role</Label>
-                    <Select defaultValue="Default">
+                    <Select
+                      defaultValue="Default"
+                      onValueChange={(value) => setRole(value)}
+                    >
                       <SelectTrigger id="status" aria-label="Select status">
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
@@ -123,17 +178,19 @@ const Page = () => {
           </div>
         </div>
         <div className="flex items-center justify-start gap-2">
-          <Button size="sm">Add User</Button>
-          <Dialog>
+          <Button type="submit" size="sm">
+            Add User
+          </Button>
+          {/* <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
                 Share
               </Button>
             </DialogTrigger>
-            <ShareDialog />
-          </Dialog>
+            <ShareDialog email={email} password={password} />
+          </Dialog> */}
         </div>
-      </div>
+      </form>
     </div>
   );
 };

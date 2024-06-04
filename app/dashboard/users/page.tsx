@@ -1,23 +1,29 @@
+"use client";
+import React, { useEffect, useState } from "react";
+
 import Link from "next/link";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { userList } from "@/data/user";
 
 import { DashboardPanel } from "@/components/layouts/dashboard-panel";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShareDialog from "@/components/custom/ShareDialog";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
   Table,
@@ -34,33 +40,103 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 
-const TAB_LIST = ['All', 'Admin', 'Customer Service', 'Team Member'];
-const TABLE_CONTENT = ['Name', 'Email', 'Role', 'Action'];
-const TABLE_CONTENT_ROLE = [...TAB_LIST].map(role => {
-  if (role === 'All') return 'Default';
+const TAB_LIST = ["All", "Admin", "Customer Service", "Team Member"];
+const TABLE_CONTENT = ["Name", "Email", "Role", "Action"];
+const TABLE_CONTENT_ROLE = [...TAB_LIST].map((role) => {
+  if (role === "All") return "Default";
   return role;
 });
 
-function SelectRole(props: React.ComponentProps<typeof Select>) {
+function SelectRole({ data }: any) {
+  const { toast } = useToast();
+  const Router = useRouter();
+
+  const updateRole = async (
+    dataId: string,
+    role: string,
+    name: string,
+    email: string
+  ) => {
+    try {
+      const response = await fetch(`/api/users/${dataId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name, email: email, role: role }),
+      });
+      // console.log(response);
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: "User updated successfully.",
+        });
+        Router.refresh();
+      }
+      return response;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <Select {...props}>
+    <Select
+      defaultValue={data.role}
+      onValueChange={(value) =>
+        updateRole(data.id, value, data.name, data.email)
+      }
+    >
       <SelectTrigger id="status" aria-label="Select status">
         <SelectValue placeholder="Select role" />
       </SelectTrigger>
 
       <SelectContent>
-        {TABLE_CONTENT_ROLE.map((role,i) => (
-          <SelectItem key={role.trim() + i} value={role}>{role}</SelectItem>
+        {TABLE_CONTENT_ROLE.map((role, i) => (
+          <SelectItem key={role.trim() + i} value={role}>
+            {role}
+          </SelectItem>
         ))}
       </SelectContent>
     </Select>
   );
 }
 
-function DropdownMenuActions(props: React.ComponentProps<typeof DropdownMenu>) {
+function DropdownMenuActions({ data }: any) {
+  const { toast } = useToast();
+  const Router = useRouter();
+
+  const handleDelete = async (dataId: string) => {
+    try {
+      const response = await fetch(`/api/users/${dataId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      // console.log(response);
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: "User deleted successfully.",
+        });
+        // Router.refresh();
+        location.reload();
+      }
+      return response;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <DropdownMenu {...props}>
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button aria-haspopup="true" size="icon" variant="ghost">
           <MoreHorizontal className="h-4 w-4" />
@@ -69,23 +145,71 @@ function DropdownMenuActions(props: React.ComponentProps<typeof DropdownMenu>) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end">
-        <DropdownMenuItem>Delete</DropdownMenuItem>
         <DropdownMenuItem>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Link href="" className="w-full">
+                Delete
+              </Link>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Delete data</DialogTitle>
+                <DialogDescription>
+                  Are you sure to delete data &quot;{data.name}
+                  &quot;?
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="mt-4">
+                <Button type="reset" variant="outline">
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  onClick={() => handleDelete(data.id)}
+                  variant="destructive"
+                >
+                  Delete
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </DropdownMenuItem>
+        {/* <DropdownMenuItem>
           <Dialog>
             <DialogTrigger asChild>
               <Link href="" className="w-full">
                 Share
               </Link>
             </DialogTrigger>
-            <ShareDialog />
+            <ShareDialog email={data.email} />
           </Dialog>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
 function UsersPage() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [load, setLoad] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/users")
+      .then((response) => response.json())
+      .then((data) => {
+        setUsers(data.data);
+        setLoad(true);
+      });
+  }, []);
+
   return (
     <DashboardPanel>
       <Tabs defaultValue={TAB_LIST[0]}>
@@ -125,24 +249,49 @@ function UsersPage() {
                     </TableRow>
                   </TableHeader>
 
-                  <TableBody>
-                    {userList.map((data, ui) => (
-                      <TableRow key={ui}>
-                        <TableCell className="font-medium">
-                          {data.name}
-                        </TableCell>
-                        <TableCell>{data.email}</TableCell>
+                  {load ? (
+                    content === "All" ? (
+                      <TableBody>
+                        {users.map((data, ui) => (
+                          <TableRow key={data.id}>
+                            <TableCell className="font-medium">
+                              {data.name}
+                            </TableCell>
+                            <TableCell>{data.email}</TableCell>
 
-                        <TableCell>
-                          <SelectRole value={data.role} />
-                        </TableCell>
+                            <TableCell>
+                              <SelectRole data={data} />
+                            </TableCell>
 
-                        <TableCell>
-                          <DropdownMenuActions />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
+                            <TableCell>
+                              <DropdownMenuActions data={data} />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    ) : (
+                      <TableBody>
+                        {users
+                          .filter((data) => data.role === content)
+                          .map((data, ui) => (
+                            <TableRow key={data.id}>
+                              <TableCell className="font-medium">
+                                {data.name}
+                              </TableCell>
+                              <TableCell>{data.email}</TableCell>
+
+                              <TableCell>
+                                <SelectRole data={data} />
+                              </TableCell>
+
+                              <TableCell>
+                                <DropdownMenuActions data={data} />
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    )
+                  ) : null}
                 </Table>
               </CardContent>
             </Card>
@@ -151,6 +300,6 @@ function UsersPage() {
       </Tabs>
     </DashboardPanel>
   );
-};
+}
 
 export default UsersPage;

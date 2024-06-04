@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
-import { cn } from '@udecode/cn';
+import { cn } from "@udecode/cn";
 import "./globals.css";
 
-import { TooltipProvider } from '@/components/plate-ui/tooltip';
+import { TooltipProvider } from "@/components/plate-ui/tooltip";
+import { Toaster } from "@/components/ui/toaster";
 
-export const fontSans = FontSans({
+const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
 });
@@ -35,6 +36,7 @@ export default function RootLayout({
         >
           {children}
         </TooltipProvider>
+        <Toaster />
       </body>
     </html>
   );
