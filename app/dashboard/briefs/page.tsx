@@ -63,9 +63,18 @@ interface Brief {
   createdAt: string;
 }
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
 const Page = () => {
   const [briefs, setBriefs] = useState<Brief[]>([]);
   const [load, setLoad] = useState(false);
+  const [userExist, setUserExist] = useState<User>();
+  const [loadSession, setLoadSession] = useState(false);
   const { toast } = useToast();
   const Router = useRouter();
 
@@ -75,6 +84,12 @@ const Page = () => {
       .then((data) => {
         setBriefs(data.data);
         setLoad(true);
+      });
+    fetch(`/api/auth/session`)
+      .then((response) => response.json())
+      .then((data) => {
+        setUserExist(data.user);
+        setLoadSession(true);
       });
   }, []);
 
@@ -160,78 +175,176 @@ const Page = () => {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                {load ? (
-                  <TableBody>
-                    {briefs.map((data, i) => (
-                      <TableRow key={data.id}>
-                        <TableCell className="font-medium">
-                          {data.title}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{data.status}</Badge>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {data.assign.map((user) => user.name).join(", ")}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {data.deadline.to}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {data.createdAt}
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                aria-haspopup="true"
-                                size="icon"
-                                variant="ghost"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>Detail</DropdownMenuItem>
-                              <DropdownMenuItem>Edit</DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Link href="" className="w-full">
-                                      Delete
-                                    </Link>
-                                  </DialogTrigger>
-                                  <DialogContent className="sm:max-w-[425px]">
-                                    <DialogHeader>
-                                      <DialogTitle>Delete data</DialogTitle>
-                                      <DialogDescription>
-                                        Are you sure to delete data '
-                                        {data.title}
-                                        '?
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    <DialogFooter className="mt-4">
-                                      <Button type="reset" variant="outline">
-                                        Cancel
-                                      </Button>
-                                      <Button
-                                        type="submit"
-                                        onClick={() => handleDelete(data.id)}
-                                        variant="destructive"
-                                      >
+                {load && loadSession ? (
+                  userExist?.role === "Admin" ||
+                  userExist?.role === "Customer Service" ? (
+                    <TableBody>
+                      {briefs.map((data, i) => (
+                        <TableRow key={data.id}>
+                          <TableCell className="font-medium">
+                            {data.title}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{data.status}</Badge>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.assign.map((user) => user.name).join(", ")}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.deadline.to}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.createdAt}
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  aria-haspopup="true"
+                                  size="icon"
+                                  variant="ghost"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Toggle menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem>
+                                  <Link
+                                    href={`/dashboard/briefs/${data.id}`}
+                                    className="w-full"
+                                  >
+                                    Detail
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>Edit</DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Link href="" className="w-full">
                                         Delete
-                                      </Button>
-                                    </DialogFooter>
-                                  </DialogContent>
-                                </Dialog>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
+                                      </Link>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-[425px]">
+                                      <DialogHeader>
+                                        <DialogTitle>Delete data</DialogTitle>
+                                        <DialogDescription>
+                                          Are you sure to delete data '
+                                          {data.title}
+                                          '?
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      <DialogFooter className="mt-4">
+                                        <Button type="reset" variant="outline">
+                                          Cancel
+                                        </Button>
+                                        <Button
+                                          type="submit"
+                                          onClick={() => handleDelete(data.id)}
+                                          variant="destructive"
+                                        >
+                                          Delete
+                                        </Button>
+                                      </DialogFooter>
+                                    </DialogContent>
+                                  </Dialog>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  ) : (
+                    <TableBody>
+                      {briefs
+                        .filter((data) =>
+                          data.assign.find(({ id }) => id === userExist?.id)
+                        )
+                        .map((data, i) => (
+                          <TableRow key={data.id}>
+                            <TableCell className="font-medium">
+                              {data.title}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{data.status}</Badge>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.assign.map((user) => user.name).join(", ")}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.deadline.to}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.createdAt}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    aria-haspopup="true"
+                                    size="icon"
+                                    variant="ghost"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Toggle menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem>
+                                    <Link
+                                      href={`/dashboard/briefs/${data.id}`}
+                                      className="w-full"
+                                    >
+                                      Detail
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                    <Dialog>
+                                      <DialogTrigger asChild>
+                                        <Link href="" className="w-full">
+                                          Delete
+                                        </Link>
+                                      </DialogTrigger>
+                                      <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                          <DialogTitle>Delete data</DialogTitle>
+                                          <DialogDescription>
+                                            Are you sure to delete data '
+                                            {data.title}
+                                            '?
+                                          </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogFooter className="mt-4">
+                                          <Button
+                                            type="reset"
+                                            variant="outline"
+                                          >
+                                            Cancel
+                                          </Button>
+                                          <Button
+                                            type="submit"
+                                            onClick={() =>
+                                              handleDelete(data.id)
+                                            }
+                                            variant="destructive"
+                                          >
+                                            Delete
+                                          </Button>
+                                        </DialogFooter>
+                                      </DialogContent>
+                                    </Dialog>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  )
                 ) : null}
               </Table>
             </CardContent>
@@ -270,50 +383,185 @@ const Page = () => {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                {load ? (
-                  <TableBody>
-                    {briefs
-                      .filter((data) => data.status === "Assigned")
-                      .map((data, i) => (
-                        <TableRow key={i}>
-                          <TableCell className="font-medium">
-                            {data.title}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{data.status}</Badge>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {data.assign.map((user) => user.name).join(", ")}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {data.deadline.to}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {data.createdAt}
-                          </TableCell>
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  aria-haspopup="true"
-                                  size="icon"
-                                  variant="ghost"
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                  <span className="sr-only">Toggle menu</span>
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem>Detail</DropdownMenuItem>
-                                <DropdownMenuItem>Edit</DropdownMenuItem>
-                                <DropdownMenuItem>Delete</DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
+                {load && loadSession ? (
+                  userExist?.role === "Admin" ||
+                  userExist?.role === "Customer Service" ? (
+                    <TableBody>
+                      {briefs
+                        .filter((data) => data.status === "Assigned")
+                        .map((data, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="font-medium">
+                              {data.title}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{data.status}</Badge>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.assign.map((user) => user.name).join(", ")}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.deadline.to}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.createdAt}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    aria-haspopup="true"
+                                    size="icon"
+                                    variant="ghost"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Toggle menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem>
+                                    <Link
+                                      href={`/dashboard/briefs/${data.id}`}
+                                      className="w-full"
+                                    >
+                                      Detail
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                    <Dialog>
+                                      <DialogTrigger asChild>
+                                        <Link href="" className="w-full">
+                                          Delete
+                                        </Link>
+                                      </DialogTrigger>
+                                      <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                          <DialogTitle>Delete data</DialogTitle>
+                                          <DialogDescription>
+                                            Are you sure to delete data '
+                                            {data.title}
+                                            '?
+                                          </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogFooter className="mt-4">
+                                          <Button
+                                            type="reset"
+                                            variant="outline"
+                                          >
+                                            Cancel
+                                          </Button>
+                                          <Button
+                                            type="submit"
+                                            onClick={() =>
+                                              handleDelete(data.id)
+                                            }
+                                            variant="destructive"
+                                          >
+                                            Delete
+                                          </Button>
+                                        </DialogFooter>
+                                      </DialogContent>
+                                    </Dialog>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  ) : (
+                    <TableBody>
+                      {briefs
+                        .filter(
+                          (data) =>
+                            data.status === "Assigned" &&
+                            data.assign.find(({ id }) => id === userExist?.id)
+                        )
+                        .map((data, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="font-medium">
+                              {data.title}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{data.status}</Badge>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.assign.map((user) => user.name).join(", ")}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.deadline.to}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.createdAt}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    aria-haspopup="true"
+                                    size="icon"
+                                    variant="ghost"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Toggle menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem>
+                                    <Link
+                                      href={`/dashboard/briefs/${data.id}`}
+                                      className="w-full"
+                                    >
+                                      Detail
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                    <Dialog>
+                                      <DialogTrigger asChild>
+                                        <Link href="" className="w-full">
+                                          Delete
+                                        </Link>
+                                      </DialogTrigger>
+                                      <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                          <DialogTitle>Delete data</DialogTitle>
+                                          <DialogDescription>
+                                            Are you sure to delete data '
+                                            {data.title}
+                                            '?
+                                          </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogFooter className="mt-4">
+                                          <Button
+                                            type="reset"
+                                            variant="outline"
+                                          >
+                                            Cancel
+                                          </Button>
+                                          <Button
+                                            type="submit"
+                                            onClick={() =>
+                                              handleDelete(data.id)
+                                            }
+                                            variant="destructive"
+                                          >
+                                            Delete
+                                          </Button>
+                                        </DialogFooter>
+                                      </DialogContent>
+                                    </Dialog>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  )
                 ) : null}
               </Table>
             </CardContent>
@@ -352,50 +600,185 @@ const Page = () => {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                {load ? (
-                  <TableBody>
-                    {briefs
-                      .filter((data) => data.status === "In Progress")
-                      .map((data, i) => (
-                        <TableRow key={i}>
-                          <TableCell className="font-medium">
-                            {data.title}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{data.status}</Badge>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {data.assign.map((user) => user.name).join(", ")}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {data.deadline.to}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {data.createdAt}
-                          </TableCell>
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  aria-haspopup="true"
-                                  size="icon"
-                                  variant="ghost"
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                  <span className="sr-only">Toggle menu</span>
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem>Detail</DropdownMenuItem>
-                                <DropdownMenuItem>Edit</DropdownMenuItem>
-                                <DropdownMenuItem>Delete</DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
+                {load && loadSession ? (
+                  userExist?.role === "Admin" ||
+                  userExist?.role === "Customer Service" ? (
+                    <TableBody>
+                      {briefs
+                        .filter((data) => data.status === "In Progress")
+                        .map((data, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="font-medium">
+                              {data.title}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{data.status}</Badge>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.assign.map((user) => user.name).join(", ")}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.deadline.to}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.createdAt}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    aria-haspopup="true"
+                                    size="icon"
+                                    variant="ghost"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Toggle menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem>
+                                    <Link
+                                      href={`/dashboard/briefs/${data.id}`}
+                                      className="w-full"
+                                    >
+                                      Detail
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                    <Dialog>
+                                      <DialogTrigger asChild>
+                                        <Link href="" className="w-full">
+                                          Delete
+                                        </Link>
+                                      </DialogTrigger>
+                                      <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                          <DialogTitle>Delete data</DialogTitle>
+                                          <DialogDescription>
+                                            Are you sure to delete data '
+                                            {data.title}
+                                            '?
+                                          </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogFooter className="mt-4">
+                                          <Button
+                                            type="reset"
+                                            variant="outline"
+                                          >
+                                            Cancel
+                                          </Button>
+                                          <Button
+                                            type="submit"
+                                            onClick={() =>
+                                              handleDelete(data.id)
+                                            }
+                                            variant="destructive"
+                                          >
+                                            Delete
+                                          </Button>
+                                        </DialogFooter>
+                                      </DialogContent>
+                                    </Dialog>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  ) : (
+                    <TableBody>
+                      {briefs
+                        .filter(
+                          (data) =>
+                            data.status === "In Progress" &&
+                            data.assign.find(({ id }) => id === userExist?.id)
+                        )
+                        .map((data, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="font-medium">
+                              {data.title}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{data.status}</Badge>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.assign.map((user) => user.name).join(", ")}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.deadline.to}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.createdAt}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    aria-haspopup="true"
+                                    size="icon"
+                                    variant="ghost"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Toggle menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem>
+                                    <Link
+                                      href={`/dashboard/briefs/${data.id}`}
+                                      className="w-full"
+                                    >
+                                      Detail
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                    <Dialog>
+                                      <DialogTrigger asChild>
+                                        <Link href="" className="w-full">
+                                          Delete
+                                        </Link>
+                                      </DialogTrigger>
+                                      <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                          <DialogTitle>Delete data</DialogTitle>
+                                          <DialogDescription>
+                                            Are you sure to delete data '
+                                            {data.title}
+                                            '?
+                                          </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogFooter className="mt-4">
+                                          <Button
+                                            type="reset"
+                                            variant="outline"
+                                          >
+                                            Cancel
+                                          </Button>
+                                          <Button
+                                            type="submit"
+                                            onClick={() =>
+                                              handleDelete(data.id)
+                                            }
+                                            variant="destructive"
+                                          >
+                                            Delete
+                                          </Button>
+                                        </DialogFooter>
+                                      </DialogContent>
+                                    </Dialog>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  )
                 ) : null}
               </Table>
             </CardContent>
@@ -434,50 +817,185 @@ const Page = () => {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                {load ? (
-                  <TableBody>
-                    {briefs
-                      .filter((data) => data.status === "Done")
-                      .map((data, i) => (
-                        <TableRow key={i}>
-                          <TableCell className="font-medium">
-                            {data.title}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{data.status}</Badge>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {data.assign.map((user) => user.name).join(", ")}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {data.deadline.to}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {data.createdAt}
-                          </TableCell>
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  aria-haspopup="true"
-                                  size="icon"
-                                  variant="ghost"
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                  <span className="sr-only">Toggle menu</span>
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem>Detail</DropdownMenuItem>
-                                <DropdownMenuItem>Edit</DropdownMenuItem>
-                                <DropdownMenuItem>Delete</DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
+                {load && loadSession ? (
+                  userExist?.role === "Admin" ||
+                  userExist?.role === "Customer Service" ? (
+                    <TableBody>
+                      {briefs
+                        .filter((data) => data.status === "Done")
+                        .map((data, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="font-medium">
+                              {data.title}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{data.status}</Badge>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.assign.map((user) => user.name).join(", ")}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.deadline.to}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.createdAt}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    aria-haspopup="true"
+                                    size="icon"
+                                    variant="ghost"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Toggle menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem>
+                                    <Link
+                                      href={`/dashboard/briefs/${data.id}`}
+                                      className="w-full"
+                                    >
+                                      Detail
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                    <Dialog>
+                                      <DialogTrigger asChild>
+                                        <Link href="" className="w-full">
+                                          Delete
+                                        </Link>
+                                      </DialogTrigger>
+                                      <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                          <DialogTitle>Delete data</DialogTitle>
+                                          <DialogDescription>
+                                            Are you sure to delete data '
+                                            {data.title}
+                                            '?
+                                          </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogFooter className="mt-4">
+                                          <Button
+                                            type="reset"
+                                            variant="outline"
+                                          >
+                                            Cancel
+                                          </Button>
+                                          <Button
+                                            type="submit"
+                                            onClick={() =>
+                                              handleDelete(data.id)
+                                            }
+                                            variant="destructive"
+                                          >
+                                            Delete
+                                          </Button>
+                                        </DialogFooter>
+                                      </DialogContent>
+                                    </Dialog>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  ) : (
+                    <TableBody>
+                      {briefs
+                        .filter(
+                          (data) =>
+                            data.status === "Done" &&
+                            data.assign.find(({ id }) => id === userExist?.id)
+                        )
+                        .map((data, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="font-medium">
+                              {data.title}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{data.status}</Badge>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.assign.map((user) => user.name).join(", ")}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.deadline.to}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {data.createdAt}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    aria-haspopup="true"
+                                    size="icon"
+                                    variant="ghost"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Toggle menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem>
+                                    <Link
+                                      href={`/dashboard/briefs/${data.id}`}
+                                      className="w-full"
+                                    >
+                                      Detail
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                    <Dialog>
+                                      <DialogTrigger asChild>
+                                        <Link href="" className="w-full">
+                                          Delete
+                                        </Link>
+                                      </DialogTrigger>
+                                      <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                          <DialogTitle>Delete data</DialogTitle>
+                                          <DialogDescription>
+                                            Are you sure to delete data '
+                                            {data.title}
+                                            '?
+                                          </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogFooter className="mt-4">
+                                          <Button
+                                            type="reset"
+                                            variant="outline"
+                                          >
+                                            Cancel
+                                          </Button>
+                                          <Button
+                                            type="submit"
+                                            onClick={() =>
+                                              handleDelete(data.id)
+                                            }
+                                            variant="destructive"
+                                          >
+                                            Delete
+                                          </Button>
+                                        </DialogFooter>
+                                      </DialogContent>
+                                    </Dialog>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  )
                 ) : null}
               </Table>
             </CardContent>

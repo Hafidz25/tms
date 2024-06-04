@@ -75,7 +75,8 @@ export async function GET() {
 
   if (
     session?.user.role === "Admin" ||
-    session?.user.role === "Customer Service"
+    session?.user.role === "Customer Service" ||
+    session?.user.role === "Team Member"
   ) {
     try {
       //get all posts
