@@ -173,6 +173,7 @@ interface User {
 function Navbar({ user }: any) {
   const [briefNotif, setBriefNotif] = useState<BriefNotification[]>([]);
   const [userExist, setUserExist] = useState<User>();
+  const [readNotif, setReadNotif] = useState(false);
   const [loadSession, setLoadSession] = useState(false);
   const [load, setLoad] = useState(false);
   const { toast } = useToast();
@@ -291,7 +292,7 @@ function Navbar({ user }: any) {
                               className={
                                 data.read === false
                                   ? "bg-slate-50 cursor-pointer"
-                                  : "bg-white cursor-pointer"
+                                  : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
                               }
                               key={data.id}
                               onClick={() => updateNotif(data.id, data.briefId)}
@@ -336,7 +337,7 @@ function Navbar({ user }: any) {
                                 className={
                                   data.read === false
                                     ? "bg-slate-50 cursor-pointer"
-                                    : "bg-white cursor-pointer"
+                                    : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
                                 }
                                 key={data.id}
                                 onClick={() =>
@@ -435,7 +436,7 @@ function Navbar({ user }: any) {
                                 className={
                                   data.read === false
                                     ? "bg-slate-50 cursor-pointer"
-                                    : "bg-white cursor-pointer"
+                                    : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
                                 }
                                 key={data.id}
                                 onClick={() =>
@@ -488,7 +489,7 @@ function Navbar({ user }: any) {
                                 className={
                                   data.read === false
                                     ? "bg-slate-50 cursor-pointer"
-                                    : "bg-white cursor-pointer"
+                                    : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
                                 }
                                 key={data.id}
                                 onClick={() =>
