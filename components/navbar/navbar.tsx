@@ -287,6 +287,7 @@ function Navbar({ user }: any) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
+                  aria-label="Notif"
                   variant="ghost"
                   size="icon"
                   className="rounded-full focus-visible:ring-0 focus-visible:ring-offset-0 relative"
@@ -417,6 +418,7 @@ function Navbar({ user }: any) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
+                  aria-label="Notif"
                   size="icon"
                   className="rounded-full focus-visible:ring-0 focus-visible:ring-offset-0 relative"
                 >
@@ -567,6 +569,7 @@ function Navbar({ user }: any) {
           )
         ) : (
           <Button
+            aria-label="Notif"
             variant="ghost"
             size="icon"
             className="rounded-full focus-visible:ring-0 focus-visible:ring-offset-0"
