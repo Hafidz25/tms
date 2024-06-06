@@ -185,7 +185,7 @@ export default async function DetailBrief({
     }
   };
 
-  console.log(briefs);
+  // console.log(briefs);
 
   return loadUser && loadBrief && loadExist ? (
     <Fragment>

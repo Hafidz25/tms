@@ -61,6 +61,8 @@ import { signOut } from "next-auth/react";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 
+import { supabase } from "@/lib/supabaseClient";
+
 interface NavProp extends LinkProps {
   id?: string;
   location?: string | null;
@@ -172,6 +174,7 @@ interface User {
 // perlu refactor
 function Navbar({ user }: any) {
   const [briefNotif, setBriefNotif] = useState<BriefNotification[]>([]);
+  const [notifSupa, setNotifSupa] = useState<BriefNotification[]>([]);
   const [userExist, setUserExist] = useState<User>();
   const [readNotif, setReadNotif] = useState(false);
   const [loadSession, setLoadSession] = useState(false);
@@ -180,18 +183,44 @@ function Navbar({ user }: any) {
   const Router = useRouter();
 
   useEffect(() => {
-    fetch("/api/brief-notifications")
-      .then((response) => response.json())
-      .then((data) => {
-        setBriefNotif(data.data);
-        setLoad(true);
-      });
-    fetch(`/api/auth/session`)
-      .then((response) => response.json())
-      .then((data) => {
-        setUserExist(data.user);
-        setLoadSession(true);
-      });
+    const fetchNotif = async () => {
+      await fetch(`/api/brief-notifications`)
+        .then((response) => response.json())
+        .then((data) => {
+          setBriefNotif(data.data);
+          setLoad(true);
+        });
+    };
+
+    // const fetchNotif = async () => {
+    //   const { data: BriefNotification, error } = await supabase
+    //     .from("BriefNotification")
+    //     .select("*, _BriefNotificationToUser(*, User(*))")
+    //     .order("createdAt", { ascending: false });
+    //   if (error) {
+    //     console.error("Error fetching posts:", error);
+    //   } else {
+    //     setBriefNotif(BriefNotification);
+    //     setLoad(true);
+    //   }
+    // };
+    fetchNotif();
+
+    // const subscription = supabase
+    //   .channel("brief-notif-insert-channel")
+    //   .on(
+    //     "postgres_changes",
+    //     { event: "INSERT", schema: "public", table: "BriefNotification" },
+    //     (payload) => {
+    //       console.log("Change received!", payload);
+    //       setBriefNotif([...briefNotif, payload.new as BriefNotification]);
+    //     }
+    //   )
+    //   .subscribe();
+
+    // return () => {
+    //   supabase.removeChannel(subscription);
+    // };
   }, []);
 
   const updateNotif = async (dataId: string, briefId: string) => {
@@ -207,7 +236,14 @@ function Navbar({ user }: any) {
           title: "Success",
           description: "Notification read successfully.",
         });
-        Router.push(`/dashboard/briefs/${briefId}`);
+        await fetch(`/api/brief-notifications`)
+          .then((response) => response.json())
+          .then((data) => {
+            setBriefNotif(data.data);
+            setLoad(true);
+          });
+        // Router.push(`/dashboard/briefs/${briefId}`);
+        // Router.refresh();
         // location.reload();
       }
       return response;
@@ -220,13 +256,15 @@ function Navbar({ user }: any) {
     }
   };
 
+  // console.log(briefNotif);
+
   return (
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-8">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:w-full md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <NavbarBrand />
 
         <div className="flex w-full gap-5 justify-end">
-          {loadSession ? <NavbarMenu data={user?.user} /> : null}
+          {load ? <NavbarMenu data={user?.user} /> : null}
         </div>
       </nav>
 
@@ -247,9 +285,9 @@ function Navbar({ user }: any) {
       </Sheet>
 
       <div className="md:ml-auto flex gap-2 md:w-auto w-full justify-end">
-        {load && loadSession ? (
-          userExist?.role === "Admin" ||
-          userExist?.role === "Customer Service" ? (
+        {load ? (
+          user?.user.role === "Admin" ||
+          user?.user.role === "Customer Service" ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -390,7 +428,7 @@ function Navbar({ user }: any) {
                   {briefNotif.filter(
                     (data) =>
                       data.read === false &&
-                      data.assign.find(({ id }) => id === userExist?.id)
+                      data.assign.find(({ id }) => id === user?.user.id)
                   ).length > 0 ? (
                     <div className="w-2 h-2 rounded-full bg-red-600 absolute right-3 top-2"></div>
                   ) : null}
@@ -408,7 +446,7 @@ function Navbar({ user }: any) {
                         {briefNotif.filter(
                           (data) =>
                             data.read === false &&
-                            data.assign.find(({ id }) => id === userExist?.id)
+                            data.assign.find(({ id }) => id === user?.user.id)
                         ).length > 0 ? (
                           <Badge className="ms-2">
                             {
@@ -416,7 +454,7 @@ function Navbar({ user }: any) {
                                 (data) =>
                                   data.read === false &&
                                   data.assign.find(
-                                    ({ id }) => id === userExist?.id
+                                    ({ id }) => id === user?.user.id
                                   )
                               ).length
                             }
@@ -429,7 +467,7 @@ function Navbar({ user }: any) {
                         <div className="flex flex-col gap-2">
                           {briefNotif
                             .filter((data) =>
-                              data.assign.find(({ id }) => id === userExist?.id)
+                              data.assign.find(({ id }) => id === user?.user.id)
                             )
                             .map((data) => (
                               <Card
@@ -481,7 +519,7 @@ function Navbar({ user }: any) {
                               (data) =>
                                 data.read === false &&
                                 data.assign.find(
-                                  ({ id }) => id === userExist?.id
+                                  ({ id }) => id === user?.user.id
                                 )
                             )
                             .map((data) => (

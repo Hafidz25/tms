@@ -54,7 +54,7 @@ export default function CreateBrief() {
     });
 
   const handleSubmitBrief = async (data: any) => {
-    console.log(data);
+    // console.log(data);
     try {
       // console.log(body);
       const response = await fetch("/api/briefs", {
