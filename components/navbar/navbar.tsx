@@ -228,17 +228,17 @@ function Navbar({ user }: any) {
       });
       // console.log(response);
       if (response.status === 200) {
-        toast({
-          title: "Success",
-          description: "Notification read successfully.",
-        });
+        // toast({
+        //   title: "Success",
+        //   description: "Notification read successfully.",
+        // });
         await fetch(`/api/brief-notifications`)
           .then((response) => response.json())
           .then((data) => {
             setBriefNotif(data.data);
             setLoad(true);
           });
-        // Router.push(`/dashboard/briefs/${briefId}`);
+        Router.push(`/dashboard/briefs/${briefId}`);
         // Router.refresh();
         // location.reload();
       }
