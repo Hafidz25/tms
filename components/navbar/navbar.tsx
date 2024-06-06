@@ -174,10 +174,6 @@ interface User {
 // perlu refactor
 function Navbar({ user }: any) {
   const [briefNotif, setBriefNotif] = useState<BriefNotification[]>([]);
-  const [notifSupa, setNotifSupa] = useState<BriefNotification[]>([]);
-  const [userExist, setUserExist] = useState<User>();
-  const [readNotif, setReadNotif] = useState(false);
-  const [loadSession, setLoadSession] = useState(false);
   const [load, setLoad] = useState(false);
   const { toast } = useToast();
   const Router = useRouter();
