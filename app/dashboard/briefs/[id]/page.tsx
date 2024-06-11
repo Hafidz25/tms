@@ -87,6 +87,7 @@ export default async function DetailBrief({
   const [loadUser, setLoadUser] = useState(false);
   const [loadBrief, setLoadBrief] = useState(false);
   const [loadExist, setLoadExist] = useState(false);
+  const [title, setTitle] = useState(null);
 
   const Router = useRouter();
   const { toast } = useToast();
@@ -107,6 +108,7 @@ export default async function DetailBrief({
         const newContent = JSON.parse(result.data.content);
         const mappedData = { ...result.data, content: newContent };
         setBriefs(mappedData);
+        setTitle(mappedData.title);
         setLoadBrief(true);
       });
     fetch(`/api/auth/session`)
@@ -189,6 +191,7 @@ export default async function DetailBrief({
 
   return loadUser && loadBrief && loadExist ? (
     <Fragment>
+      <title>{title ? `${title} - Task Management System` : null}</title>
       <div className="container py-10 max-w-[1400px]">
         <form className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4 mb-12">
