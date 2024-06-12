@@ -47,6 +47,7 @@ import { DateRange } from "react-day-picker";
 import { DashboardPanel } from "@/components/layouts/dashboard-panel";
 import { BriefsStatus } from "@/types/briefs";
 import { Roles, User } from "@/types/user";
+import { SpokeSpinner } from "@/components/ui/spinner";
 
 interface Brief {
   id: string;
@@ -237,47 +238,49 @@ const Page = () => {
       });
   }, []);
 
-  return (
-    <DashboardPanel>
-      <Tabs defaultValue={TAB_LIST[0]}>
-        <div className="flex gap-2 items-center sm:justify-between justify-start flex-wrap">
-          <TabsList>
-            {TAB_LIST.map((tab, i) => (
-              <TabsTrigger key={tab.trim() + i} value={tab}>
-                {tab}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+  return load && loadSession ? (
+    userExist?.role === "Admin" || userExist?.role === "Customer Service" ? (
+      <DashboardPanel>
+        <Tabs defaultValue={TAB_LIST[0]}>
+          <div className="flex gap-2 items-center sm:justify-between justify-start flex-wrap">
+            <TabsList>
+              {TAB_LIST.map((tab, i) => (
+                <TabsTrigger key={tab.trim() + i} value={tab}>
+                  {tab}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-          <Link href="/dashboard/briefs/create">
-            <Button size="sm" className="h-8 gap-1">
-              <PlusCircle className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Add Brief
-              </span>
-            </Button>
-          </Link>
-        </div>
+            <Link href="/dashboard/briefs/create">
+              <Button size="sm" className="h-8 gap-1">
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  Add Brief
+                </span>
+              </Button>
+            </Link>
+          </div>
 
-        {TAB_LIST.map((content, i) => (
-          <TabsContent key={content.trim() + i} value={content}>
-            <Card>
-              <CardHeader>
-                <CardTitle>{`${content} Briefs`}</CardTitle>
-              </CardHeader>
+          {TAB_LIST.map((content, i) => (
+            <TabsContent key={content.trim() + i} value={content}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{`${content} Briefs`}</CardTitle>
+                </CardHeader>
 
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      {TABLE_CONTENT.map((header, i) => (
-                        <TableHead key={header.trim() + i}>{header}</TableHead>
-                      ))}
-                    </TableRow>
-                  </TableHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {TABLE_CONTENT.map((header, i) => (
+                          <TableHead key={header.trim() + i}>
+                            {header}
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
 
-                  {load && loadSession ? (
-                    content === "All" ? (
+                    {content === "All" ? (
                       <TableBody>
                         {briefs
                           ? briefs.map((brief, bid) => (
@@ -353,15 +356,159 @@ const Page = () => {
                               ))
                           : null}
                       </TableBody>
-                    )
-                  ) : null}
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        ))}
-      </Tabs>
-    </DashboardPanel>
+                    )}
+                  </Table>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          ))}
+        </Tabs>
+      </DashboardPanel>
+    ) : (
+      <DashboardPanel>
+        <Tabs defaultValue={TAB_LIST[0]}>
+          <div className="flex gap-2 items-center sm:justify-between justify-start flex-wrap">
+            <TabsList>
+              {TAB_LIST.map((tab, i) => (
+                <TabsTrigger key={tab.trim() + i} value={tab}>
+                  {tab}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            <Link href="/dashboard/briefs/create">
+              <Button size="sm" className="h-8 gap-1">
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  Add Brief
+                </span>
+              </Button>
+            </Link>
+          </div>
+
+          {TAB_LIST.map((content, i) => (
+            <TabsContent key={content.trim() + i} value={content}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{`${content} Briefs`}</CardTitle>
+                </CardHeader>
+
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {TABLE_CONTENT.map((header, i) => (
+                          <TableHead key={header.trim() + i}>
+                            {header}
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+
+                    {content === "All" ? (
+                      <TableBody>
+                        {briefs
+                          ? briefs
+                              .filter((data) =>
+                                data.assign.find(
+                                  ({ id }) => id === userExist?.id
+                                )
+                              )
+                              .map((brief, bid) => (
+                                <TableRow key={bid}>
+                                  <TableCell className="font-medium">
+                                    {brief.title}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    <Badge variant={"outline"}>
+                                      {brief.status}
+                                    </Badge>
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {
+                                      // @ts-ignore
+                                      <DeadlineFormat date={brief.deadline} />
+                                    }
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {format(brief.createdAt, FORMAT_DATE)}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    <DropdownMenuActions
+                                      targetId={brief.id}
+                                      data={brief}
+                                      role={userExist ? userExist.role : ""}
+                                    />
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                          : null}
+                      </TableBody>
+                    ) : (
+                      <TableBody>
+                        {briefs
+                          ? briefs
+                              .filter(
+                                (data) =>
+                                  data.status === content &&
+                                  data.assign.find(
+                                    ({ id }) => id === userExist?.id
+                                  )
+                              )
+                              .map((brief, bid) => (
+                                <TableRow key={bid}>
+                                  <TableCell className="font-medium">
+                                    {brief.title}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    <Badge variant={"outline"}>
+                                      {brief.status}
+                                    </Badge>
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {
+                                      // @ts-ignore
+                                      <DeadlineFormat date={brief.deadline} />
+                                    }
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {format(brief.createdAt, FORMAT_DATE)}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    <DropdownMenuActions
+                                      targetId={brief.id}
+                                      data={brief}
+                                      role={userExist ? userExist.role : ""}
+                                    />
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                          : null}
+                      </TableBody>
+                    )}
+                  </Table>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          ))}
+        </Tabs>
+      </DashboardPanel>
+    )
+  ) : (
+    <div className="flex justify-center items-center h-screen">
+      <div className="flex items-center gap-2">
+        <SpokeSpinner size="md" />
+        <span className="text-md font-medium text-slate-500">Loading...</span>
+      </div>
+    </div>
   );
 };
 
