@@ -110,40 +110,47 @@ function NavbarBrand() {
 
 function NavbarMenu({ data }: any) {
   const pathname = usePathname();
+  // console.log(data);
 
-  return data.role === "Admin" ? (
+  return (
     <Fragment>
-      {NAVS.map((nav) => (
-        <Link
-          replace={nav.replace}
-          scroll={nav.scroll}
-          prefetch={nav.prefetch}
-          key={nav.id}
-          href={nav.href}
-          className={`${
-            pathname === nav.href ? "text-slate-800" : "text-slate-400"
-          } transition-colors hover:text-slate-800`}
-        >
-          {nav.location}
-        </Link>
-      ))}
-    </Fragment>
-  ) : (
-    <Fragment>
-      {NAVS.filter((data) => !data.location?.includes("Users")).map((nav) => (
-        <Link
-          replace={nav.replace}
-          scroll={nav.scroll}
-          prefetch={nav.prefetch}
-          key={nav.id}
-          href={nav.href}
-          className={`${
-            pathname === nav.href ? "text-slate-800" : "text-slate-400"
-          } transition-colors hover:text-slate-800`}
-        >
-          {nav.location}
-        </Link>
-      ))}
+      {data.role === "Admin" ? (
+        <>
+          {NAVS.map((nav) => (
+            <Link
+              replace={nav.replace}
+              scroll={nav.scroll}
+              prefetch={nav.prefetch}
+              key={nav.id}
+              href={nav.href}
+              className={`${
+                pathname === nav.href ? "text-slate-800" : "text-slate-400"
+              } transition-colors hover:text-slate-800`}
+            >
+              {nav.location}
+            </Link>
+          ))}
+        </>
+      ) : (
+        <>
+          {NAVS.filter((data) => !data.location?.includes("Users")).map(
+            (nav) => (
+              <Link
+                replace={nav.replace}
+                scroll={nav.scroll}
+                prefetch={nav.prefetch}
+                key={nav.id}
+                href={nav.href}
+                className={`${
+                  pathname === nav.href ? "text-slate-800" : "text-slate-400"
+                } transition-colors hover:text-slate-800`}
+              >
+                {nav.location}
+              </Link>
+            )
+          )}
+        </>
+      )}
     </Fragment>
   );
 }
@@ -260,7 +267,7 @@ function Navbar({ user }: any) {
         <NavbarBrand />
 
         <div className="flex w-full gap-5 justify-end">
-          {load ? <NavbarMenu data={user?.user} /> : null}
+          <NavbarMenu data={user.user} />
         </div>
       </nav>
 
@@ -275,7 +282,7 @@ function Navbar({ user }: any) {
         <SheetContent side="left">
           <nav className="grid gap-6 text-lg font-medium">
             <NavbarBrand />
-            <NavbarMenu />
+            <NavbarMenu data={user.user} />
           </nav>
         </SheetContent>
       </Sheet>
