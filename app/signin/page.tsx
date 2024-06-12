@@ -17,10 +17,12 @@ import { Label } from "@/components/ui/label";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { signIn } from "next-auth/react";
+import { SpokeSpinner } from "@/components/ui/spinner";
 
 const Page = () => {
   const [auth, setAuth] = useState(null);
   const [authLoad, setAuthLoad] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const Router = useRouter();
@@ -43,6 +45,7 @@ const Page = () => {
 
   const submitData = async (e: React.SyntheticEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const signInData = await signIn("credentials", {
       email: email,
@@ -50,6 +53,7 @@ const Page = () => {
       redirect: false,
     });
     if (signInData?.error) {
+      setIsLoading(false);
       toast({
         title: "Error",
         description: "Uh oh! Something went wrong.",
@@ -95,8 +99,15 @@ const Page = () => {
                 value={password}
               />
             </div>
-            <Button type="submit" className="w-full">
-              Sign in
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <SpokeSpinner size="sm" />
+                  Loading...
+                </div>
+              ) : (
+                "Sign in"
+              )}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">

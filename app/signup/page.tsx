@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
+import { SpokeSpinner } from "@/components/ui/spinner";
 
 const Page = () => {
   const [auth, setAuth] = useState(null);
@@ -23,6 +24,7 @@ const Page = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
   const { toast } = useToast();
 
@@ -43,6 +45,7 @@ const Page = () => {
 
   const submitData = async (e: React.SyntheticEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const body = { name, email, password };
       const response = await fetch("/api/users", {
@@ -58,6 +61,7 @@ const Page = () => {
         });
         Router.push("/signin");
       } else if (response.status === 409) {
+        setIsLoading(false);
         toast({
           title: "Error",
           description: "User with this email already exists.",
@@ -66,6 +70,7 @@ const Page = () => {
       }
       return response;
     } catch (error) {
+      setIsLoading(false);
       toast({
         title: "Error",
         description: "Uh oh! Something went wrong.",
@@ -116,8 +121,15 @@ const Page = () => {
                 value={password}
               />
             </div>
-            <Button type="submit" className="w-full">
-              Create an account
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <SpokeSpinner size="sm" />
+                  Loading...
+                </div>
+              ) : (
+                "Create an account"
+              )}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
