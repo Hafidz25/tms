@@ -201,6 +201,7 @@ interface User {
 function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [load, setLoad] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetch("/api/users")
@@ -224,10 +225,22 @@ function UsersPage() {
           </TabsList>
 
           <Link href="/dashboard/users/create">
-            <Button size="sm" className="h-8 gap-1">
+            <Button
+              size="sm"
+              className="h-8 gap-1"
+              onClick={() => setIsLoading(true)}
+              disabled={isLoading}
+            >
               <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Add User
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <SpokeSpinner size="sm" />
+                    Loading...
+                  </div>
+                ) : (
+                  "Add User"
+                )}
               </span>
             </Button>
           </Link>

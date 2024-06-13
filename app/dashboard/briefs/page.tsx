@@ -220,6 +220,7 @@ const Page = () => {
   const [load, setLoad] = useState(false);
   const [userExist, setUserExist] = useState<User>();
   const [loadSession, setLoadSession] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const Router = useRouter();
 
@@ -252,10 +253,22 @@ const Page = () => {
             </TabsList>
 
             <Link href="/dashboard/briefs/create">
-              <Button size="sm" className="h-8 gap-1">
+              <Button
+                size="sm"
+                className="h-8 gap-1"
+                onClick={() => setIsLoading(true)}
+                disabled={isLoading}
+              >
                 <PlusCircle className="h-3.5 w-3.5" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  Add Brief
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <SpokeSpinner size="sm" />
+                      Loading...
+                    </div>
+                  ) : (
+                    "Add Brief"
+                  )}
                 </span>
               </Button>
             </Link>

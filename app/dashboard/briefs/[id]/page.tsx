@@ -37,6 +37,7 @@ import Feedback from "@/components/custom/Feedback";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns";
+import { SpokeSpinner } from "@/components/ui/spinner";
 // import { getSession } from "next-auth/react";
 
 interface User {
@@ -87,6 +88,8 @@ export default async function DetailBrief({
   const [loadUser, setLoadUser] = useState(false);
   const [loadBrief, setLoadBrief] = useState(false);
   const [loadExist, setLoadExist] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [title, setTitle] = useState(null);
 
   const Router = useRouter();
@@ -130,6 +133,7 @@ export default async function DetailBrief({
     });
 
   const handleSubmitFeedback = async (data: any) => {
+    setIsLoading(true);
     const newData = {
       ...data,
       userId: userExist?.id,
@@ -145,15 +149,24 @@ export default async function DetailBrief({
       });
       // console.log(response);
       if (response.status === 201) {
+        setIsLoading(false);
         toast({
           title: "Success",
           description: "Feedback created successfully.",
         });
         // Router.push("/dashboard/briefs");
         location.reload();
+      } else {
+        setIsLoading(false);
+        toast({
+          title: "Error",
+          description: "Uh oh! Something went wrong.",
+          variant: "destructive",
+        });
       }
       return response;
     } catch (error) {
+      setIsLoading(false);
       toast({
         title: "Error",
         description: "Uh oh! Something went wrong.",
@@ -163,6 +176,7 @@ export default async function DetailBrief({
   };
 
   const updateStatus = async (dataId: string, status: string, assign: any) => {
+    setIsLoading(true);
     try {
       const response = await fetch(`/api/briefs/${dataId}`, {
         method: "PATCH",
@@ -171,14 +185,23 @@ export default async function DetailBrief({
       });
       // console.log(response);
       if (response.status === 200) {
+        setIsLoading(false);
         toast({
           title: "Success",
           description: "Brief updated successfully.",
         });
         Router.refresh();
+      } else {
+        setIsLoading(false);
+        toast({
+          title: "Error",
+          description: "Uh oh! Something went wrong.",
+          variant: "destructive",
+        });
       }
       return response;
     } catch (error) {
+      setIsLoading(false);
       toast({
         title: "Error",
         description: "Uh oh! Something went wrong.",
@@ -191,9 +214,13 @@ export default async function DetailBrief({
 
   return loadUser && loadBrief && loadExist ? (
     <Fragment>
-      <title>{title ? `${title} - Task Management System` : null}</title>
-      <div className="container py-10 max-w-[1400px]">
-        <form className="flex flex-col gap-4">
+      <title>
+        {title
+          ? `${title} - Task Management System`
+          : "Detail Brief - Task Management System"}
+      </title>
+      <div className="min-h-screen w-full flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+        <form className="mx-auto grid max-w-[59rem] lg:min-w-[59rem] flex-1 auto-rows-max gap-4">
           <div className="flex items-center justify-between gap-4 mb-12">
             <Link
               href=""
@@ -289,8 +316,8 @@ export default async function DetailBrief({
             }
           </div>
         </form>
-        <Divider className="my-10" />
-        <Card>
+        <Divider className="mx-auto max-w-[59rem] lg:min-w-[59rem]" />
+        <Card className="mx-auto max-w-[59rem] lg:min-w-[59rem]">
           <CardHeader>
             <CardTitle>
               Feedback ({briefs?.feedback.map((data) => data).length})
@@ -330,7 +357,16 @@ export default async function DetailBrief({
               />
 
               <div className="flex justify-start">
-                <Button type="submit">Send message</Button>
+                <Button type="submit" size="sm" disabled={isLoading}>
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <SpokeSpinner size="sm" />
+                      Loading...
+                    </div>
+                  ) : (
+                    "Send message"
+                  )}
+                </Button>
               </div>
             </form>
           </CardContent>

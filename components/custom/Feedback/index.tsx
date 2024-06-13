@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Reply, Trash2, Pencil } from "lucide-react";
@@ -36,6 +36,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { SpokeSpinner } from "@/components/ui/spinner";
 
 const Feedback = ({
   feedbackId,
@@ -48,11 +49,13 @@ const Feedback = ({
   userId,
   briefId,
 }: any) => {
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const Router = useRouter();
   const { control, register, handleSubmit } = useForm();
 
   const handleDelete = async (feedbackId: string) => {
+    setIsLoading(true);
     try {
       const response = await fetch(`/api/feedbacks/${feedbackId}`, {
         method: "DELETE",
@@ -60,6 +63,7 @@ const Feedback = ({
       });
 
       if (response.status === 200) {
+        setIsLoading(false);
         toast({
           title: "Success",
           description: "Feedback deleted successfully.",
@@ -67,14 +71,23 @@ const Feedback = ({
         // Router.refresh();
         location.reload();
       } else if (response.status === 403) {
+        setIsLoading(false);
         toast({
           title: "Error",
           description: "You dont have access.",
           variant: "destructive",
         });
+      } else {
+        setIsLoading(false);
+        toast({
+          title: "Error",
+          description: "Uh oh! Something went wrong.",
+          variant: "destructive",
+        });
       }
       return response;
     } catch (error) {
+      setIsLoading(false);
       toast({
         title: "Error",
         description: "Uh oh! Something went wrong.",
@@ -84,6 +97,7 @@ const Feedback = ({
   };
 
   const handleEditFeedback = async (data: any) => {
+    setIsLoading(true);
     const newData = {
       ...data,
       userId: userExist,
@@ -99,15 +113,24 @@ const Feedback = ({
       });
       // console.log(response);
       if (response.status === 200) {
+        setIsLoading(false);
         toast({
           title: "Success",
           description: "Feedback updated successfully.",
         });
         // Router.push(`/dashboard/briefs/${feedbackId}`);
         location.reload();
+      } else {
+        setIsLoading(false);
+        toast({
+          title: "Error",
+          description: "Uh oh! Something went wrong.",
+          variant: "destructive",
+        });
       }
       return response;
     } catch (error) {
+      setIsLoading(false);
       toast({
         title: "Error",
         description: "Uh oh! Something went wrong.",
@@ -128,22 +151,6 @@ const Feedback = ({
       </p>
       <div className="flex items-center gap-3">
         <span className="text-xs text-slate-600 me-3">{time} ago</span>
-        {/* <Link
-          href=""
-          className="text-xs font-medium underline underline-offset-2 text-slate-600 hover:text-slate-900 transition duration-150"
-        >
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Reply className="w-4 h-4" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Reply</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </Link> */}
-
         {userExist === userId[0] ? (
           <Dialog>
             <DialogTrigger asChild>
@@ -181,7 +188,16 @@ const Feedback = ({
                   <Button type="submit">Save changes</Button>
                 </div> */}
                 <DialogFooter>
-                  <Button type="submit">Save changes</Button>
+                  <Button type="submit" size="sm" disabled={isLoading}>
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <SpokeSpinner size="sm" />
+                        Loading...
+                      </div>
+                    ) : (
+                      "Save changes"
+                    )}
+                  </Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -220,8 +236,16 @@ const Feedback = ({
                 <AlertDialogAction
                   className={buttonVariants({ variant: "destructive" })}
                   onClick={() => handleDelete(feedbackId)}
+                  disabled={isLoading}
                 >
-                  Delete
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <SpokeSpinner size="sm" />
+                      Loading...
+                    </div>
+                  ) : (
+                    "Delete"
+                  )}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
