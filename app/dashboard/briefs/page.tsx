@@ -259,7 +259,7 @@ const Page = () => {
                 onClick={() => setIsLoading(true)}
                 disabled={isLoading}
               >
-                <PlusCircle className="h-3.5 w-3.5" />
+                {isLoading ? null : <PlusCircle className="h-3.5 w-3.5" />}
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                   {isLoading ? (
                     <div className="flex items-center gap-2">
