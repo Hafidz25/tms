@@ -46,10 +46,7 @@ import { SpokeSpinner } from "@/components/ui/spinner";
 
 const TAB_LIST = ["All", "Admin", "Customer Service", "Team Member"];
 const TABLE_CONTENT = ["Name", "Email", "Role", "Action"];
-const TABLE_CONTENT_ROLE = [...TAB_LIST].map((role) => {
-  if (role === "All") return "Default";
-  return role;
-});
+const TABLE_CONTENT_ROLE = ["Admin", "Customer Service", "Team Member"];
 
 function SelectRole({ data }: any) {
   const { toast } = useToast();

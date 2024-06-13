@@ -161,15 +161,11 @@ const Page = () => {
                 <div className="grid gap-6">
                   <div className="grid gap-3">
                     <Label htmlFor="status">Role</Label>
-                    <Select
-                      defaultValue="Default"
-                      onValueChange={(value) => setRole(value)}
-                    >
+                    <Select onValueChange={(value) => setRole(value)}>
                       <SelectTrigger id="status" aria-label="Select status">
-                        <SelectValue placeholder="Select role" />
+                        <SelectValue placeholder="Select role..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Default">Default</SelectItem>
                         <SelectItem value="Admin">Admin</SelectItem>
                         <SelectItem value="Customer Service">
                           Customer Service
