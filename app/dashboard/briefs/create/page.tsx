@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Chips } from "@/components/ui/chips";
 import { Divider } from "@/components/ui/divider";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { SpokeSpinner } from "@/components/ui/spinner";
 
 interface User {
   id: string;
@@ -30,6 +31,7 @@ export default function CreateBrief() {
   const { control, register, handleSubmit } = useForm();
   const [users, setUsers] = useState<User[]>([]);
   const [load, setLoad] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const Router = useRouter();
   const { toast } = useToast();
@@ -54,7 +56,8 @@ export default function CreateBrief() {
     });
 
   const handleSubmitBrief = async (data: any) => {
-    console.log(data);
+    setIsLoading(true);
+    // console.log(data);
     try {
       // console.log(body);
       const response = await fetch("/api/briefs", {
@@ -69,14 +72,23 @@ export default function CreateBrief() {
       });
       // console.log(response);
       if (response.status === 201) {
+        setIsLoading(false);
         toast({
           title: "Success",
           description: "User created successfully.",
         });
         Router.push("/dashboard/briefs");
+      } else {
+        setIsLoading(false);
+        toast({
+          title: "Error",
+          description: "Uh oh! Something went wrong.",
+          variant: "destructive",
+        });
       }
       return response;
     } catch (error) {
+      setIsLoading(false);
       toast({
         title: "Error",
         description: "Uh oh! Something went wrong.",
@@ -87,9 +99,9 @@ export default function CreateBrief() {
 
   return (
     <Fragment>
-      <div className="container py-10 max-w-[1400px]">
+      <div className="min-h-screen w-full flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <form
-          className="flex flex-col gap-4"
+          className="mx-auto grid max-w-[59rem] lg:min-w-[59rem] flex-1 auto-rows-max gap-4"
           onSubmit={handleSubmit(handleSubmitBrief)}
         >
           <div className="flex items-center justify-between gap-4 mb-12">
@@ -100,10 +112,6 @@ export default function CreateBrief() {
             >
               <ChevronLeft className="h-4 w-4" />
             </Link>
-
-            <Button size="sm" type="submit">
-              Add Brief
-            </Button>
           </div>
 
           {/* <Divider className="my-10" /> */}
@@ -172,6 +180,19 @@ export default function CreateBrief() {
                 />
               )}
             />
+          </div>
+
+          <div className="flex items-center justify-start gap-2">
+            <Button type="submit" size="sm" disabled={isLoading}>
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <SpokeSpinner size="sm" />
+                  Loading...
+                </div>
+              ) : (
+                "Create brief"
+              )}
+            </Button>
           </div>
         </form>
       </div>

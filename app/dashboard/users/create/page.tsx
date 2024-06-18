@@ -26,12 +26,14 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/custom/Navbar";
 import generator from "generate-password";
 import ShareDialog from "@/components/custom/ShareDialog";
+import { SpokeSpinner } from "@/components/ui/spinner";
 
 const Page = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
   const { toast } = useToast();
 
@@ -45,6 +47,7 @@ const Page = () => {
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const body = { name, email, password, role };
       // console.log(body);
@@ -55,12 +58,14 @@ const Page = () => {
       });
       // console.log(response);
       if (response.status === 201) {
+        setIsLoading(false);
         toast({
           title: "Success",
           description: "User created successfully.",
         });
         // Router.push("/users");
       } else if (response.status === 409) {
+        setIsLoading(false);
         toast({
           title: "Error",
           description: "User with this email already exists.",
@@ -69,6 +74,7 @@ const Page = () => {
       }
       return response;
     } catch (error) {
+      setIsLoading(false);
       toast({
         title: "Error",
         description: "Uh oh! Something went wrong.",
@@ -137,7 +143,7 @@ const Page = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                       />
-                      <Button size="sm" onClick={generatePass}>
+                      <Button size="sm" type="button" onClick={generatePass}>
                         Generate
                       </Button>
                     </div>
@@ -155,15 +161,11 @@ const Page = () => {
                 <div className="grid gap-6">
                   <div className="grid gap-3">
                     <Label htmlFor="status">Role</Label>
-                    <Select
-                      defaultValue="Default"
-                      onValueChange={(value) => setRole(value)}
-                    >
+                    <Select onValueChange={(value) => setRole(value)}>
                       <SelectTrigger id="status" aria-label="Select status">
-                        <SelectValue placeholder="Select role" />
+                        <SelectValue placeholder="Select role..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Default">Default</SelectItem>
                         <SelectItem value="Admin">Admin</SelectItem>
                         <SelectItem value="Customer Service">
                           Customer Service
@@ -178,17 +180,16 @@ const Page = () => {
           </div>
         </div>
         <div className="flex items-center justify-start gap-2">
-          <Button type="submit" size="sm">
-            Add User
+          <Button type="submit" size="sm" disabled={isLoading}>
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <SpokeSpinner size="sm" />
+                Loading...
+              </div>
+            ) : (
+              "Create an user"
+            )}
           </Button>
-          {/* <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                Share
-              </Button>
-            </DialogTrigger>
-            <ShareDialog email={email} password={password} />
-          </Dialog> */}
         </div>
       </form>
     </div>

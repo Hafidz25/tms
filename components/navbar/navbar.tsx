@@ -61,6 +61,8 @@ import { signOut } from "next-auth/react";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 
+import { supabase } from "@/lib/supabaseClient";
+
 interface NavProp extends LinkProps {
   id?: string;
   location?: string | null;
@@ -108,40 +110,47 @@ function NavbarBrand() {
 
 function NavbarMenu({ data }: any) {
   const pathname = usePathname();
+  // console.log(data);
 
-  return data.role === "Admin" ? (
+  return (
     <Fragment>
-      {NAVS.map((nav) => (
-        <Link
-          replace={nav.replace}
-          scroll={nav.scroll}
-          prefetch={nav.prefetch}
-          key={nav.id}
-          href={nav.href}
-          className={`${
-            pathname === nav.href ? "text-slate-800" : "text-slate-400"
-          } transition-colors hover:text-slate-800`}
-        >
-          {nav.location}
-        </Link>
-      ))}
-    </Fragment>
-  ) : (
-    <Fragment>
-      {NAVS.filter((data) => !data.location?.includes("Users")).map((nav) => (
-        <Link
-          replace={nav.replace}
-          scroll={nav.scroll}
-          prefetch={nav.prefetch}
-          key={nav.id}
-          href={nav.href}
-          className={`${
-            pathname === nav.href ? "text-slate-800" : "text-slate-400"
-          } transition-colors hover:text-slate-800`}
-        >
-          {nav.location}
-        </Link>
-      ))}
+      {data.role === "Admin" ? (
+        <>
+          {NAVS.map((nav) => (
+            <Link
+              replace={nav.replace}
+              scroll={nav.scroll}
+              prefetch={nav.prefetch}
+              key={nav.id}
+              href={nav.href}
+              className={`${
+                pathname === nav.href ? "text-slate-800" : "text-slate-400"
+              } transition-colors hover:text-slate-800`}
+            >
+              {nav.location}
+            </Link>
+          ))}
+        </>
+      ) : (
+        <>
+          {NAVS.filter((data) => !data.location?.includes("Users")).map(
+            (nav) => (
+              <Link
+                replace={nav.replace}
+                scroll={nav.scroll}
+                prefetch={nav.prefetch}
+                key={nav.id}
+                href={nav.href}
+                className={`${
+                  pathname === nav.href ? "text-slate-800" : "text-slate-400"
+                } transition-colors hover:text-slate-800`}
+              >
+                {nav.location}
+              </Link>
+            )
+          )}
+        </>
+      )}
     </Fragment>
   );
 }
@@ -172,25 +181,49 @@ interface User {
 // perlu refactor
 function Navbar({ user }: any) {
   const [briefNotif, setBriefNotif] = useState<BriefNotification[]>([]);
-  const [userExist, setUserExist] = useState<User>();
-  const [loadSession, setLoadSession] = useState(false);
   const [load, setLoad] = useState(false);
   const { toast } = useToast();
   const Router = useRouter();
 
   useEffect(() => {
-    fetch("/api/brief-notifications")
-      .then((response) => response.json())
-      .then((data) => {
-        setBriefNotif(data.data);
-        setLoad(true);
-      });
-    fetch(`/api/auth/session`)
-      .then((response) => response.json())
-      .then((data) => {
-        setUserExist(data.user);
-        setLoadSession(true);
-      });
+    const fetchNotif = async () => {
+      await fetch(`/api/brief-notifications`)
+        .then((response) => response.json())
+        .then((data) => {
+          setBriefNotif(data.data);
+          setLoad(true);
+        });
+    };
+
+    // const fetchNotif = async () => {
+    //   const { data: BriefNotification, error } = await supabase
+    //     .from("BriefNotification")
+    //     .select("*, _BriefNotificationToUser(*, User(*))")
+    //     .order("createdAt", { ascending: false });
+    //   if (error) {
+    //     console.error("Error fetching posts:", error);
+    //   } else {
+    //     setBriefNotif(BriefNotification);
+    //     setLoad(true);
+    //   }
+    // };
+    fetchNotif();
+
+    // const subscription = supabase
+    //   .channel("brief-notif-insert-channel")
+    //   .on(
+    //     "postgres_changes",
+    //     { event: "INSERT", schema: "public", table: "BriefNotification" },
+    //     (payload) => {
+    //       console.log("Change received!", payload);
+    //       setBriefNotif([...briefNotif, payload.new as BriefNotification]);
+    //     }
+    //   )
+    //   .subscribe();
+
+    // return () => {
+    //   supabase.removeChannel(subscription);
+    // };
   }, []);
 
   const updateNotif = async (dataId: string, briefId: string) => {
@@ -202,11 +235,18 @@ function Navbar({ user }: any) {
       });
       // console.log(response);
       if (response.status === 200) {
-        toast({
-          title: "Success",
-          description: "Notification read successfully.",
-        });
+        // toast({
+        //   title: "Success",
+        //   description: "Notification read successfully.",
+        // });
+        await fetch(`/api/brief-notifications`)
+          .then((response) => response.json())
+          .then((data) => {
+            setBriefNotif(data.data);
+            setLoad(true);
+          });
         Router.push(`/dashboard/briefs/${briefId}`);
+        // Router.refresh();
         // location.reload();
       }
       return response;
@@ -219,13 +259,15 @@ function Navbar({ user }: any) {
     }
   };
 
+  // console.log(briefNotif);
+
   return (
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-8">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:w-full md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <NavbarBrand />
 
         <div className="flex w-full gap-5 justify-end">
-          {loadSession ? <NavbarMenu data={user?.user} /> : null}
+          <NavbarMenu data={user.user} />
         </div>
       </nav>
 
@@ -240,18 +282,19 @@ function Navbar({ user }: any) {
         <SheetContent side="left">
           <nav className="grid gap-6 text-lg font-medium">
             <NavbarBrand />
-            <NavbarMenu />
+            <NavbarMenu data={user.user} />
           </nav>
         </SheetContent>
       </Sheet>
 
       <div className="md:ml-auto flex gap-2 md:w-auto w-full justify-end">
-        {load && loadSession ? (
-          userExist?.role === "Admin" ||
-          userExist?.role === "Customer Service" ? (
+        {load ? (
+          user?.user.role === "Admin" ||
+          user?.user.role === "Customer Service" ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
+                  aria-label="Notif"
                   variant="ghost"
                   size="icon"
                   className="rounded-full focus-visible:ring-0 focus-visible:ring-offset-0 relative"
@@ -291,7 +334,7 @@ function Navbar({ user }: any) {
                               className={
                                 data.read === false
                                   ? "bg-slate-50 cursor-pointer"
-                                  : "bg-white cursor-pointer"
+                                  : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
                               }
                               key={data.id}
                               onClick={() => updateNotif(data.id, data.briefId)}
@@ -336,7 +379,7 @@ function Navbar({ user }: any) {
                                 className={
                                   data.read === false
                                     ? "bg-slate-50 cursor-pointer"
-                                    : "bg-white cursor-pointer"
+                                    : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
                                 }
                                 key={data.id}
                                 onClick={() =>
@@ -382,6 +425,7 @@ function Navbar({ user }: any) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
+                  aria-label="Notif"
                   size="icon"
                   className="rounded-full focus-visible:ring-0 focus-visible:ring-offset-0 relative"
                 >
@@ -389,7 +433,7 @@ function Navbar({ user }: any) {
                   {briefNotif.filter(
                     (data) =>
                       data.read === false &&
-                      data.assign.find(({ id }) => id === userExist?.id)
+                      data.assign.find(({ id }) => id === user?.user.id)
                   ).length > 0 ? (
                     <div className="w-2 h-2 rounded-full bg-red-600 absolute right-3 top-2"></div>
                   ) : null}
@@ -407,7 +451,7 @@ function Navbar({ user }: any) {
                         {briefNotif.filter(
                           (data) =>
                             data.read === false &&
-                            data.assign.find(({ id }) => id === userExist?.id)
+                            data.assign.find(({ id }) => id === user?.user.id)
                         ).length > 0 ? (
                           <Badge className="ms-2">
                             {
@@ -415,7 +459,7 @@ function Navbar({ user }: any) {
                                 (data) =>
                                   data.read === false &&
                                   data.assign.find(
-                                    ({ id }) => id === userExist?.id
+                                    ({ id }) => id === user?.user.id
                                   )
                               ).length
                             }
@@ -428,14 +472,14 @@ function Navbar({ user }: any) {
                         <div className="flex flex-col gap-2">
                           {briefNotif
                             .filter((data) =>
-                              data.assign.find(({ id }) => id === userExist?.id)
+                              data.assign.find(({ id }) => id === user?.user.id)
                             )
                             .map((data) => (
                               <Card
                                 className={
                                   data.read === false
                                     ? "bg-slate-50 cursor-pointer"
-                                    : "bg-white cursor-pointer"
+                                    : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
                                 }
                                 key={data.id}
                                 onClick={() =>
@@ -480,7 +524,7 @@ function Navbar({ user }: any) {
                               (data) =>
                                 data.read === false &&
                                 data.assign.find(
-                                  ({ id }) => id === userExist?.id
+                                  ({ id }) => id === user?.user.id
                                 )
                             )
                             .map((data) => (
@@ -488,7 +532,7 @@ function Navbar({ user }: any) {
                                 className={
                                   data.read === false
                                     ? "bg-slate-50 cursor-pointer"
-                                    : "bg-white cursor-pointer"
+                                    : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
                                 }
                                 key={data.id}
                                 onClick={() =>
@@ -532,6 +576,7 @@ function Navbar({ user }: any) {
           )
         ) : (
           <Button
+            aria-label="Notif"
             variant="ghost"
             size="icon"
             className="rounded-full focus-visible:ring-0 focus-visible:ring-offset-0"

@@ -1,13 +1,14 @@
 import type { DateRange } from "react-day-picker";
 import type { User } from "./user";
 
-export type BriefsStatus = 
-  'Assigned' |
-  'In Review' |
-  'Waiting Client Feedback' | 
-  'Correction' | 
-  'Done'
-;
+export type BriefsStatus =
+  | "Assigned"
+  | "In Review"
+  | "In Progress"
+  | "Waiting Client Feedback"
+  | "Correction"
+  | "Need Review"
+  | "Done";
 
 export interface Brief {
   id: string;

@@ -42,13 +42,11 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
+import { SpokeSpinner } from "@/components/ui/spinner";
 
 const TAB_LIST = ["All", "Admin", "Customer Service", "Team Member"];
 const TABLE_CONTENT = ["Name", "Email", "Role", "Action"];
-const TABLE_CONTENT_ROLE = [...TAB_LIST].map((role) => {
-  if (role === "All") return "Default";
-  return role;
-});
+const TABLE_CONTENT_ROLE = ["Admin", "Customer Service", "Team Member"];
 
 function SelectRole({ data }: any) {
   const { toast } = useToast();
@@ -200,6 +198,7 @@ interface User {
 function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [load, setLoad] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetch("/api/users")
@@ -210,7 +209,7 @@ function UsersPage() {
       });
   }, []);
 
-  return (
+  return load ? (
     <DashboardPanel>
       <Tabs defaultValue={TAB_LIST[0]}>
         <div className="flex gap-2 items-center sm:justify-between justify-start flex-wrap">
@@ -223,10 +222,22 @@ function UsersPage() {
           </TabsList>
 
           <Link href="/dashboard/users/create">
-            <Button size="sm" className="h-8 gap-1">
-              <PlusCircle className="h-3.5 w-3.5" />
+            <Button
+              size="sm"
+              className="h-8 gap-1"
+              onClick={() => setIsLoading(true)}
+              disabled={isLoading}
+            >
+              {isLoading ? null : <PlusCircle className="h-3.5 w-3.5" />}
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Add User
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <SpokeSpinner size="sm" />
+                    Loading...
+                  </div>
+                ) : (
+                  "Add User"
+                )}
               </span>
             </Button>
           </Link>
@@ -249,10 +260,30 @@ function UsersPage() {
                     </TableRow>
                   </TableHeader>
 
-                  {load ? (
-                    content === "All" ? (
-                      <TableBody>
-                        {users.map((data, ui) => (
+                  {content === "All" ? (
+                    <TableBody>
+                      {users.map((data, ui) => (
+                        <TableRow key={data.id}>
+                          <TableCell className="font-medium">
+                            {data.name}
+                          </TableCell>
+                          <TableCell>{data.email}</TableCell>
+
+                          <TableCell>
+                            <SelectRole data={data} />
+                          </TableCell>
+
+                          <TableCell>
+                            <DropdownMenuActions data={data} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  ) : (
+                    <TableBody>
+                      {users
+                        .filter((data) => data.role === content)
+                        .map((data, ui) => (
                           <TableRow key={data.id}>
                             <TableCell className="font-medium">
                               {data.name}
@@ -268,30 +299,8 @@ function UsersPage() {
                             </TableCell>
                           </TableRow>
                         ))}
-                      </TableBody>
-                    ) : (
-                      <TableBody>
-                        {users
-                          .filter((data) => data.role === content)
-                          .map((data, ui) => (
-                            <TableRow key={data.id}>
-                              <TableCell className="font-medium">
-                                {data.name}
-                              </TableCell>
-                              <TableCell>{data.email}</TableCell>
-
-                              <TableCell>
-                                <SelectRole data={data} />
-                              </TableCell>
-
-                              <TableCell>
-                                <DropdownMenuActions data={data} />
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    )
-                  ) : null}
+                    </TableBody>
+                  )}
                 </Table>
               </CardContent>
             </Card>
@@ -299,6 +308,13 @@ function UsersPage() {
         ))}
       </Tabs>
     </DashboardPanel>
+  ) : (
+    <div className="flex justify-center items-center h-screen">
+      <div className="flex items-center gap-2">
+        <SpokeSpinner size="md" />
+        <span className="text-md font-medium text-slate-500">Loading...</span>
+      </div>
+    </div>
   );
 }
 
