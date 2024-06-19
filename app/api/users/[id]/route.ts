@@ -83,3 +83,58 @@ export async function PATCH(
     );
   }
 }
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const session = await getServerSession(authOption);
+
+  try {
+    //get all posts
+    const user = await db.user.findUnique({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        briefs: true,
+      },
+      where: { id: params.id },
+    });
+
+    //return response JSON
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Data User",
+        data: user,
+      },
+      {
+        status: 200,
+      }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error", message: error },
+      {
+        status: 500,
+      }
+    );
+  }
+
+  // if (
+  //   session?.user.role === "Admin" ||
+  //   session?.user.role === "Customer Service" ||
+  //   session?.user.role === "Team Member"
+  // ) {
+
+  // } else {
+  //   return NextResponse.json(
+  //     { error: "You dont have access" },
+  //     {
+  //       status: 403,
+  //     }
+  //   );
+  // }
+}

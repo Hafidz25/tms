@@ -238,7 +238,7 @@ export default async function DetailBrief({
               {briefs?.title}
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 items-center sm:max-w-2xl">
+            <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 items-center">
               <Select
                 defaultValue={briefs?.status}
                 onValueChange={(value) => {

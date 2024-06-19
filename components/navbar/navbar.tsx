@@ -61,8 +61,6 @@ import { signOut } from "next-auth/react";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 
-import { supabase } from "@/lib/supabaseClient";
-
 interface NavProp extends LinkProps {
   id?: string;
   location?: string | null;
@@ -262,7 +260,7 @@ function Navbar({ user }: any) {
   // console.log(briefNotif);
 
   return (
-    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-8">
+    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-8 z-50">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:w-full md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <NavbarBrand />
 
