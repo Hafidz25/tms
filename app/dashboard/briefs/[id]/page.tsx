@@ -12,8 +12,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+
 import { ChevronLeft } from "lucide-react";
 import { PlateEditor } from "@/components/plate-ui/plate-editor";
+import { PlateEditorPreview } from "@/components/plate-ui/plate-editor-preview";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Chips } from "@/components/ui/chips";
@@ -135,7 +139,7 @@ export default async function DetailBrief({
   const handleSubmitFeedback = async (data: any) => {
     setIsLoading(true);
     const newData = {
-      ...data,
+      content: JSON.stringify(data.content),
       userId: userExist?.id,
       briefId: briefs?.id,
     };
@@ -312,7 +316,7 @@ export default async function DetailBrief({
           <div className="border rounded-lg">
             {
               // @ts-ignore
-              <PlateEditor initialValue={briefs.content} readOnly />
+              <PlateEditorPreview initialValue={briefs.content} readOnly />
             }
           </div>
         </form>
@@ -323,53 +327,77 @@ export default async function DetailBrief({
               Feedback ({briefs?.feedback.map((data) => data).length})
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-3">
-              {briefs?.feedback.map((data) => (
-                <Feedback
-                  key={data.id}
-                  feedbackId={data.id}
-                  user={users
-                    .filter((user) => user.id === data.userId)
-                    .map((user) => user.name)}
-                  role={users
-                    .filter((user) => user.id === data.userId)
-                    .map((user) => user.role)}
-                  message={data.content}
-                  time={formatDistanceToNow(data.createdAt)}
-                  userExist={userExist?.id}
-                  userId={users
-                    .filter((user) => user.id === data.userId)
-                    .map((user) => user.id)}
-                  briefId={briefs?.id}
-                />
-              ))}
-            </div>
-          </CardContent>
-          <CardContent>
-            <form
-              className="grid w-full gap-2"
-              onSubmit={handleSubmit(handleSubmitFeedback)}
-            >
-              <Textarea
+          <DndProvider backend={HTML5Backend}>
+            <CardContent>
+              <div className="flex flex-col gap-3">
+                {briefs?.feedback
+                  .sort(function compare(a, b) {
+                    var dateA = new Date(a.createdAt);
+                    var dateB = new Date(b.createdAt);
+                    // @ts-ignore
+                    return dateA - dateB;
+                  })
+                  .map((data) => (
+                    <Feedback
+                      key={data.id}
+                      feedbackId={data.id}
+                      user={users
+                        .filter((user) => user.id === data.userId)
+                        .map((user) => user.name)}
+                      role={users
+                        .filter((user) => user.id === data.userId)
+                        .map((user) => user.role)}
+                      message={data.content}
+                      time={formatDistanceToNow(data.createdAt)}
+                      userExist={userExist?.id}
+                      userId={users
+                        .filter((user) => user.id === data.userId)
+                        .map((user) => user.id)}
+                      briefId={briefs?.id}
+                    />
+                  ))}
+              </div>
+            </CardContent>
+            <CardContent>
+              <form
+                className="grid w-full gap-2"
+                onSubmit={handleSubmit(handleSubmitFeedback)}
+              >
+                {/* <Textarea
                 placeholder="Type your message here."
                 {...register("content")}
-              />
+              /> */}
 
-              <div className="flex justify-start">
-                <Button type="submit" size="sm" disabled={isLoading}>
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <SpokeSpinner size="sm" />
-                      Loading...
-                    </div>
-                  ) : (
-                    "Send message"
-                  )}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
+                <div className="border rounded-lg">
+                  <Controller
+                    control={control}
+                    name="content"
+                    render={({ field }) => (
+                      <PlateEditor
+                        // @ts-ignore
+                        onChange={(editorValue: any) => {
+                          field.onChange(editorValue);
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+
+                <div className="flex justify-start">
+                  <Button type="submit" size="sm" disabled={isLoading}>
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <SpokeSpinner size="sm" />
+                        Loading...
+                      </div>
+                    ) : (
+                      "Send message"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </DndProvider>
         </Card>
       </div>
 

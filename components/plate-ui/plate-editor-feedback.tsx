@@ -17,44 +17,27 @@ import { FloatingToolbar } from "@/components/plate-ui/floating-toolbar";
 import { MentionCombobox } from "@/components/plate-ui/mention-combobox";
 
 // butuh refactor
-const PlateEditor = forwardRef((props, ref) => {
+const PlateEditorFeedback = forwardRef((props, ref) => {
   const containerRef = useRef(null);
 
   return (
     // @ts-ignore
     <Plate plugins={plugins} editorRef={ref} {...props}>
-      <div
-        ref={containerRef}
-        className={cn(
-          "relative",
-          // Block selection
-          "[&_.slate-start-area-left]:!w-[64px] [&_.slate-start-area-right]:!w-[64px] [&_.slate-start-area-top]:!h-4"
-        )}
-      >
-        <FixedToolbar>
-          <FixedToolbarButtons />
-        </FixedToolbar>
-
+      <div ref={containerRef}>
         <Editor
+          // @ts-ignore
           placeholder="Masukan text..."
-          className="px-8 py-8"
+          className="px-0 py-0 mb-0 min-h-[0px]"
           autoFocus
           focusRing={false}
           variant="ghost"
-          size="md"
+          size="sm"
         />
-
-        <FloatingToolbar>
-          <FloatingToolbarButtons />
-        </FloatingToolbar>
-
-        <MentionCombobox items={MENTIONABLES} />
-        <CursorOverlay containerRef={containerRef} />
       </div>
     </Plate>
   );
 });
 
-PlateEditor.displayName = "PlateEditor";
+PlateEditorFeedback.displayName = "PlateEditorFeedback";
 
-export { PlateEditor };
+export { PlateEditorFeedback };

@@ -17,7 +17,7 @@ import { FloatingToolbar } from "@/components/plate-ui/floating-toolbar";
 import { MentionCombobox } from "@/components/plate-ui/mention-combobox";
 
 // butuh refactor
-const PlateEditor = forwardRef((props, ref) => {
+const PlateEditorPreview = forwardRef((props, ref) => {
   const containerRef = useRef(null);
 
   return (
@@ -31,9 +31,9 @@ const PlateEditor = forwardRef((props, ref) => {
           "[&_.slate-start-area-left]:!w-[64px] [&_.slate-start-area-right]:!w-[64px] [&_.slate-start-area-top]:!h-4"
         )}
       >
-        <FixedToolbar>
-          <FixedToolbarButtons />
-        </FixedToolbar>
+        {/* <FixedToolbar>
+              <FixedToolbarButtons />
+            </FixedToolbar> */}
 
         <Editor
           placeholder="Masukan text..."
@@ -55,6 +55,6 @@ const PlateEditor = forwardRef((props, ref) => {
   );
 });
 
-PlateEditor.displayName = "PlateEditor";
+PlateEditorPreview.displayName = "PlateEditorPreview";
 
-export { PlateEditor };
+export { PlateEditorPreview };

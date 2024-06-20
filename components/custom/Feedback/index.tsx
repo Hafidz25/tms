@@ -37,6 +37,9 @@ import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SpokeSpinner } from "@/components/ui/spinner";
+import { PlateEditorFeedback } from "@/components/plate-ui/plate-editor-feedback";
+import { PlateEditorFeedbackEdit } from "@/components/plate-ui/plate-editor-feedback-edit";
+import { PlateEditor } from "@/components/plate-ui/plate-editor";
 
 const Feedback = ({
   feedbackId,
@@ -53,6 +56,7 @@ const Feedback = ({
   const { toast } = useToast();
   const Router = useRouter();
   const { control, register, handleSubmit } = useForm();
+  const messageParse = message ? JSON.parse(message) : null;
 
   const handleDelete = async (feedbackId: string) => {
     setIsLoading(true);
@@ -99,7 +103,7 @@ const Feedback = ({
   const handleEditFeedback = async (data: any) => {
     setIsLoading(true);
     const newData = {
-      ...data,
+      content: JSON.stringify(data.content),
       userId: userExist,
       briefId: briefId,
     };
@@ -147,7 +151,10 @@ const Feedback = ({
       </div>
       <p className="text-sm">
         {tag ? <Badge className="mr-2">@{tag}</Badge> : null}
-        {message}
+        {
+          // @ts-ignore
+          <PlateEditorFeedback initialValue={messageParse} readOnly />
+        }
       </p>
       <div className="flex items-center gap-3">
         <span className="text-xs text-slate-600 me-3">{time} ago</span>
@@ -170,7 +177,7 @@ const Feedback = ({
                 </TooltipProvider>
               </Link>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[50%]">
               <DialogHeader>
                 <DialogTitle>Edit feedback message</DialogTitle>
               </DialogHeader>
@@ -178,15 +185,21 @@ const Feedback = ({
                 className="grid w-full gap-2"
                 onSubmit={handleSubmit(handleEditFeedback)}
               >
-                <Textarea
-                  placeholder="Type your message here."
-                  {...register("content")}
-                  defaultValue={message}
-                />
-
-                {/* <div className="flex justify-start">
-                  <Button type="submit">Save changes</Button>
-                </div> */}
+                <div className="border rounded-lg">
+                  <Controller
+                    control={control}
+                    name="content"
+                    render={({ field }) => (
+                      <PlateEditorFeedbackEdit
+                        // @ts-ignore
+                        initialValue={messageParse ? messageParse : null}
+                        onChange={(editorValue: any) => {
+                          field.onChange(editorValue);
+                        }}
+                      />
+                    )}
+                  />
+                </div>
                 <DialogFooter>
                   <Button type="submit" size="sm" disabled={isLoading}>
                     {isLoading ? (
@@ -227,8 +240,7 @@ const Feedback = ({
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete data</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure to delete data feedback &quot;{message}
-                  &quot;?
+                  Are you sure to delete this feedback?
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

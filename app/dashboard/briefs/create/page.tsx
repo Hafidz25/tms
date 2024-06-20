@@ -6,6 +6,9 @@ import { addDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { userList } from "@/data/user";
 
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+
 import { DevTool } from "@hookform/devtools";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -168,18 +171,20 @@ export default function CreateBrief() {
           <Divider className="my-10" />
 
           <div className="border rounded-lg">
-            <Controller
-              control={control}
-              name="Editor"
-              render={({ field }) => (
-                <PlateEditor
-                  // @ts-ignore
-                  onChange={(editorValue: any) => {
-                    field.onChange(editorValue);
-                  }}
-                />
-              )}
-            />
+            <DndProvider backend={HTML5Backend}>
+              <Controller
+                control={control}
+                name="Editor"
+                render={({ field }) => (
+                  <PlateEditor
+                    // @ts-ignore
+                    onChange={(editorValue: any) => {
+                      field.onChange(editorValue);
+                    }}
+                  />
+                )}
+              />
+            </DndProvider>
           </div>
 
           <div className="flex items-center justify-start gap-2">
