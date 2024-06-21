@@ -40,7 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { SpokeSpinner } from "@/components/ui/spinner";
 
@@ -49,7 +49,6 @@ const TABLE_CONTENT = ["Name", "Email", "Role", "Action"];
 const TABLE_CONTENT_ROLE = ["Admin", "Customer Service", "Team Member"];
 
 function SelectRole({ data }: any) {
-  const { toast } = useToast();
   const Router = useRouter();
 
   const updateRole = async (
@@ -66,19 +65,12 @@ function SelectRole({ data }: any) {
       });
       // console.log(response);
       if (response.status === 200) {
-        toast({
-          title: "Success",
-          description: "User updated successfully.",
-        });
+        toast.success("User updated successfully.");
         Router.refresh();
       }
       return response;
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 
@@ -105,7 +97,6 @@ function SelectRole({ data }: any) {
 }
 
 function DropdownMenuActions({ data }: any) {
-  const { toast } = useToast();
   const Router = useRouter();
 
   const handleDelete = async (dataId: string) => {
@@ -116,20 +107,13 @@ function DropdownMenuActions({ data }: any) {
       });
       // console.log(response);
       if (response.status === 200) {
-        toast({
-          title: "Success",
-          description: "User deleted successfully.",
-        });
+        toast.success("User deleted successfully.");
         // Router.refresh();
         location.reload();
       }
       return response;
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 

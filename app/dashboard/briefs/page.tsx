@@ -40,7 +40,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
@@ -119,7 +119,6 @@ function DropdownMenuActions({
   role,
   ...props
 }: DropdownMenuActionsProps) {
-  const { toast } = useToast();
   const handleDelete = async (dataId: string) => {
     try {
       const response = await fetch(`/api/briefs/${dataId}`, {
@@ -128,26 +127,15 @@ function DropdownMenuActions({
       });
 
       if (response.status === 200) {
-        toast({
-          title: "Success",
-          description: "Brief deleted successfully.",
-        });
+        toast.success("Brief deleted successfully.");
         // Router.refresh();
         location.reload();
       } else if (response.status === 403) {
-        toast({
-          title: "Error",
-          description: "You dont have access.",
-          variant: "destructive",
-        });
+        toast.warning("You dont have access.");
       }
       return response;
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
   return (
@@ -221,7 +209,6 @@ const Page = () => {
   const [userExist, setUserExist] = useState<User>();
   const [loadSession, setLoadSession] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
   const Router = useRouter();
 
   useEffect(() => {

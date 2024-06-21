@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ToastAction } from "@/components/ui/toast";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { signIn } from "next-auth/react";
 import { SpokeSpinner } from "@/components/ui/spinner";
 
@@ -26,7 +26,6 @@ const Page = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const Router = useRouter();
-  const { toast } = useToast();
 
   useEffect(() => {
     fetch("/api")
@@ -54,16 +53,9 @@ const Page = () => {
     });
     if (signInData?.error) {
       setIsLoading(false);
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     } else {
-      toast({
-        title: "Success",
-        description: "Sign in successfully.",
-      });
+      toast.success("Sign in successfully.");
       Router.push("/dashboard");
     }
   };

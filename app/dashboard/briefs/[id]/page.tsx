@@ -10,7 +10,7 @@ import { Calendar, Users } from "lucide-react";
 import { DevTool } from "@hookform/devtools";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -97,7 +97,6 @@ export default async function DetailBrief({
   const [title, setTitle] = useState(null);
 
   const Router = useRouter();
-  const { toast } = useToast();
 
   // const session = await getSession();
   // console.log(session);
@@ -154,28 +153,17 @@ export default async function DetailBrief({
       // console.log(response);
       if (response.status === 201) {
         setIsLoading(false);
-        toast({
-          title: "Success",
-          description: "Feedback created successfully.",
-        });
+        toast.success("Feedback created successfully.");
         // Router.push("/dashboard/briefs");
         location.reload();
       } else {
         setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "Uh oh! Something went wrong.",
-          variant: "destructive",
-        });
+        toast.error("Uh oh! Something went wrong.");
       }
       return response;
     } catch (error) {
       setIsLoading(false);
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 
@@ -190,27 +178,16 @@ export default async function DetailBrief({
       // console.log(response);
       if (response.status === 200) {
         setIsLoading(false);
-        toast({
-          title: "Success",
-          description: "Brief updated successfully.",
-        });
+        toast.success("Brief updated successfully.");
         Router.refresh();
       } else {
         setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "Uh oh! Something went wrong.",
-          variant: "destructive",
-        });
+        toast.error("Uh oh! Something went wrong.");
       }
       return response;
     } catch (error) {
       setIsLoading(false);
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 

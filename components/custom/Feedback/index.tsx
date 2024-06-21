@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Reply, Trash2, Pencil } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -53,7 +53,6 @@ const Feedback = ({
   briefId,
 }: any) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
   const Router = useRouter();
   const { control, register, handleSubmit } = useForm();
   const messageParse = message ? JSON.parse(message) : null;
@@ -68,35 +67,20 @@ const Feedback = ({
 
       if (response.status === 200) {
         setIsLoading(false);
-        toast({
-          title: "Success",
-          description: "Feedback deleted successfully.",
-        });
+        toast.success("Feedback deleted successfully.");
         // Router.refresh();
         location.reload();
       } else if (response.status === 403) {
         setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "You dont have access.",
-          variant: "destructive",
-        });
+        toast.warning("You dont have access.");
       } else {
         setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "Uh oh! Something went wrong.",
-          variant: "destructive",
-        });
+        toast.error("Uh oh! Something went wrong.");
       }
       return response;
     } catch (error) {
       setIsLoading(false);
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 
@@ -118,28 +102,17 @@ const Feedback = ({
       // console.log(response);
       if (response.status === 200) {
         setIsLoading(false);
-        toast({
-          title: "Success",
-          description: "Feedback updated successfully.",
-        });
+        toast.success("Feedback updated successfully.");
         // Router.push(`/dashboard/briefs/${feedbackId}`);
         location.reload();
       } else {
         setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "Uh oh! Something went wrong.",
-          variant: "destructive",
-        });
+        toast.error("Uh oh! Something went wrong.");
       }
       return response;
     } catch (error) {
       setIsLoading(false);
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 

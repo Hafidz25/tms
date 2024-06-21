@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ToastAction } from "@/components/ui/toast";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { SpokeSpinner } from "@/components/ui/spinner";
 
 const Page = () => {
@@ -26,7 +26,6 @@ const Page = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
-  const { toast } = useToast();
 
   useEffect(() => {
     fetch("/api")
@@ -55,27 +54,16 @@ const Page = () => {
       });
       // console.log(response);
       if (response.status === 201) {
-        toast({
-          title: "Success",
-          description: "User created successfully.",
-        });
+        toast.success("User created successfully.");
         Router.push("/signin");
       } else if (response.status === 409) {
         setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "User with this email already exists.",
-          variant: "destructive",
-        });
+        toast.warning("User with this email already exists.");
       }
       return response;
     } catch (error) {
       setIsLoading(false);
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 

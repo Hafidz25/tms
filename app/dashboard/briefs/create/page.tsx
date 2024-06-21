@@ -12,7 +12,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { DevTool } from "@hookform/devtools";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 import { ChevronLeft } from "lucide-react";
 import { PlateEditor } from "@/components/plate-ui/plate-editor";
@@ -37,7 +37,6 @@ export default function CreateBrief() {
   const [isLoading, setIsLoading] = useState(false);
 
   const Router = useRouter();
-  const { toast } = useToast();
 
   useEffect(() => {
     fetch("/api/users")
@@ -76,27 +75,16 @@ export default function CreateBrief() {
       // console.log(response);
       if (response.status === 201) {
         setIsLoading(false);
-        toast({
-          title: "Success",
-          description: "User created successfully.",
-        });
+        toast.success("Brief created successfully.");
         Router.push("/dashboard/briefs");
       } else {
         setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "Uh oh! Something went wrong.",
-          variant: "destructive",
-        });
+        toast.error("Uh oh! Something went wrong.");
       }
       return response;
     } catch (error) {
       setIsLoading(false);
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 
