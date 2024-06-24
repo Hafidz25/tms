@@ -86,20 +86,20 @@ export function FixedToolbarButtons() {
             <ToolbarGroup>
               <AlignDropdownMenu />
 
-              <LineHeightDropdownMenu />
+              {/* <LineHeightDropdownMenu /> */}
 
               <IndentListToolbarButton nodeType={ListStyleType.Disc} />
               <IndentListToolbarButton nodeType={ListStyleType.Decimal} />
 
-              <OutdentToolbarButton />
-              <IndentToolbarButton />
+              {/* <OutdentToolbarButton />
+              <IndentToolbarButton /> */}
             </ToolbarGroup>
 
             <ToolbarGroup>
-              <LinkToolbarButton />
-              <MediaToolbarButton nodeType={ELEMENT_IMAGE} />
+              {/* <LinkToolbarButton />
+              <MediaToolbarButton nodeType={ELEMENT_IMAGE} /> */}
               <TableDropdownMenu />
-              <MoreDropdownMenu />
+              {/* <MoreDropdownMenu /> */}
             </ToolbarGroup>
           </>
         )}
