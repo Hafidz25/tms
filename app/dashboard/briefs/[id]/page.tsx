@@ -5,7 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { addDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { userList } from "@/data/user";
-import { Calendar, Users } from "lucide-react";
+import { Calendar, Users, CircleFadingPlus } from "lucide-react";
 
 import { DevTool } from "@hookform/devtools";
 import Link from "next/link";
@@ -99,7 +99,7 @@ export default async function DetailBrief({
   const Router = useRouter();
 
   // const session = await getSession();
-  // console.log(session);
+  // console.log(userExist);
 
   useEffect(() => {
     fetch("/api/users")
@@ -220,56 +220,59 @@ export default async function DetailBrief({
             </div>
 
             <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 items-center">
-              <Select
-                defaultValue={briefs?.status}
-                onValueChange={(value) => {
-                  if (briefs) {
-                    updateStatus(briefs.id, value, briefs.assign);
-                  }
-                }}
-              >
-                <SelectTrigger id="status" aria-label="Select status">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                {userExist?.role === "Admin" ||
-                userExist?.role === "Customer Service" ? (
-                  <SelectContent>
-                    <SelectItem value="Assigned">Assigned</SelectItem>
-                    <SelectItem value="In Review">In Review</SelectItem>
-                    <SelectItem value="Waiting for Client">
-                      Waiting for Client
-                    </SelectItem>
-                    <SelectItem value="Correction">Correction</SelectItem>
-                    <SelectItem value="In Progress" disabled>
-                      In Progress
-                    </SelectItem>
-                    <SelectItem value="Need Review" disabled>
-                      Need Review
-                    </SelectItem>
-                    <SelectItem value="Done">Done</SelectItem>
-                  </SelectContent>
-                ) : (
-                  <SelectContent>
-                    <SelectItem value="Assigned" disabled>
-                      Assigned
-                    </SelectItem>
-                    <SelectItem value="In Review" disabled>
-                      In Review
-                    </SelectItem>
-                    <SelectItem value="Waiting for Client" disabled>
-                      Waiting for Client
-                    </SelectItem>
-                    <SelectItem value="Correction" disabled>
-                      Correction
-                    </SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Need Review">Need Review</SelectItem>
-                    <SelectItem value="Done" disabled>
-                      Done
-                    </SelectItem>
-                  </SelectContent>
-                )}
-              </Select>
+              <div className="font-medium text-base flex gap-2 items-center w-full">
+                <CircleFadingPlus className="w-6 h-6" />
+                <Select
+                  defaultValue={briefs?.status}
+                  onValueChange={(value) => {
+                    if (briefs) {
+                      updateStatus(briefs.id, value, briefs.assign);
+                    }
+                  }}
+                >
+                  <SelectTrigger id="status" aria-label="Select status">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  {userExist?.role === "Admin" ||
+                  userExist?.role === "Customer Service" ? (
+                    <SelectContent>
+                      <SelectItem value="Assigned">Assigned</SelectItem>
+                      <SelectItem value="In Review">In Review</SelectItem>
+                      <SelectItem value="Waiting for Client">
+                        Waiting for Client
+                      </SelectItem>
+                      <SelectItem value="Correction">Correction</SelectItem>
+                      <SelectItem value="In Progress" disabled>
+                        In Progress
+                      </SelectItem>
+                      <SelectItem value="Need Review" disabled>
+                        Need Review
+                      </SelectItem>
+                      <SelectItem value="Done">Done</SelectItem>
+                    </SelectContent>
+                  ) : (
+                    <SelectContent>
+                      <SelectItem value="Assigned" disabled>
+                        Assigned
+                      </SelectItem>
+                      <SelectItem value="In Review" disabled>
+                        In Review
+                      </SelectItem>
+                      <SelectItem value="Waiting for Client" disabled>
+                        Waiting for Client
+                      </SelectItem>
+                      <SelectItem value="Correction" disabled>
+                        Correction
+                      </SelectItem>
+                      <SelectItem value="In Progress">In Progress</SelectItem>
+                      <SelectItem value="Need Review">Need Review</SelectItem>
+                      <SelectItem value="Done" disabled>
+                        Done
+                      </SelectItem>
+                    </SelectContent>
+                  )}
+                </Select>
+              </div>
 
               <div className="hidden sm:block sm:w-1 h-1 sm:h-10 sm:border-r sm:border-t-0 border-t border-slate-300"></div>
 
@@ -283,7 +286,10 @@ export default async function DetailBrief({
 
               <div className="font-medium text-base flex gap-2 items-center w-full">
                 <Users className="w-6 h-6" />
-                {briefs?.assign.map((user) => user.name).join(", ")}
+                {userExist?.role === "Admin" ||
+                userExist?.role === "Customer Service"
+                  ? briefs?.assign.map((user) => user.name).join(", ")
+                  : userExist?.name}
               </div>
             </div>
           </div>
