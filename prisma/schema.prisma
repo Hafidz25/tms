@@ -20,8 +20,10 @@ model User {
   email                String    @unique @db.VarChar(255)
   role                 String    @default("Team Member")
   password             String    @db.VarChar(255)
-  briefs               Brief[]   // user have many brief
-  feedbacks            Feedback[]   // user have many feedback
+  briefs               Brief[]   @relation("assign") // user have many brief
+  briefsCreated        Brief[]   @relation("author") // user have many brief
+  feedbacks            Feedback[]  @relation("user") // user have many feedback
+  feedbackPrivate      Feedback[]  @relation("userSent") // user have many feedback
   briefNotification    BriefNotification[]
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
@@ -33,7 +35,9 @@ model Brief {
   deadline        Json   // {to: DateTime, from: DateTime} - Butuh konfigurasi typed json
   content         String
   status          String
-  assign          User[]
+  author          User?     @relation("author", fields: [authorId], references: [id]) // A feedback can have one brief
+  authorId        String?
+  assign          User[]    @relation("assign")
   feedback        Feedback[]   // brief have many feedback
   notification    BriefNotification[]
   createdAt       DateTime  @default(now())
@@ -43,8 +47,11 @@ model Brief {
 model Feedback {
   id              String    @id @default(cuid())
   content         String
-  user            User?     @relation(fields: [userId], references: [id]) // A feedback can have one brief
+  isPrivate       Boolean   @default(false)
+  user            User?     @relation("user", fields: [userId], references: [id]) // A feedback can have one brief
   userId          String?
+  userSent        User?     @relation("userSent", fields: [userSentId], references: [id]) // A feedback can have one brief
+  userSentId      String?
   brief           Brief?    @relation(fields: [briefId], references: [id]) // A feedback can have one brief
   briefId         String?
   createdAt       DateTime  @default(now())

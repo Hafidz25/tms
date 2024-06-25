@@ -115,6 +115,7 @@ export async function GET(
         content: true,
         status: true,
         assign: true,
+        authorId: true,
         feedback: true,
         createdAt: true,
         updatedAt: true,

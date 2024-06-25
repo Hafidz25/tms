@@ -5,7 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { addDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { userList } from "@/data/user";
-import { Calendar, Users, CircleFadingPlus } from "lucide-react";
+import { Calendar, Users, CircleFadingPlus, PenTool } from "lucide-react";
 
 import { DevTool } from "@hookform/devtools";
 import Link from "next/link";
@@ -37,6 +37,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import Feedback from "@/components/custom/Feedback";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
@@ -56,6 +58,7 @@ interface Brief {
   title: string;
   content: string;
   status: string;
+  authorId: string;
   deadline: {
     from: string;
     to: string;
@@ -77,6 +80,8 @@ interface Feedback {
   content: string;
   userId: string;
   briefId: string;
+  userSentId: string;
+  isPrivate: boolean;
   createdAt: string;
 }
 
@@ -85,7 +90,7 @@ export default async function DetailBrief({
 }: {
   params: { id: string };
 }) {
-  const { control, register, handleSubmit } = useForm();
+  const { control, register, handleSubmit, watch } = useForm();
   const [users, setUsers] = useState<User[]>([]);
   const [briefs, setBriefs] = useState<Brief>();
   const [userExist, setUserExist] = useState<User>();
@@ -93,13 +98,14 @@ export default async function DetailBrief({
   const [loadBrief, setLoadBrief] = useState(false);
   const [loadExist, setLoadExist] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showUsers, setShowUsers] = useState(false);
 
   const [title, setTitle] = useState(null);
 
   const Router = useRouter();
 
   // const session = await getSession();
-  // console.log(userExist);
+  console.log(briefs);
 
   useEffect(() => {
     fetch("/api/users")
@@ -141,6 +147,8 @@ export default async function DetailBrief({
       content: JSON.stringify(data.content),
       userId: userExist?.id,
       briefId: briefs?.id,
+      userSentId: data.userSentId,
+      isPrivate: data.isPrivate,
     };
 
     // console.log(newData);
@@ -217,6 +225,16 @@ export default async function DetailBrief({
           <div className="flex flex-col gap-y-6">
             <div className="w-full border-0 p-0 ring-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent placeholder:capitalize text-[40px] font-bold">
               {briefs?.title}
+            </div>
+
+            <div className="flex gap-1 font-medium text-base items-center">
+              <div className="flex gap-2 items-center">
+                <PenTool className="w-5 h-5" />
+                by
+              </div>
+              {users
+                .filter((user) => user.id === briefs?.authorId)
+                .map((user) => user.name)}
             </div>
 
             <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 items-center">
@@ -327,6 +345,9 @@ export default async function DetailBrief({
                       user={users
                         .filter((user) => user.id === data.userId)
                         .map((user) => user.name)}
+                      userSent={users
+                        .filter((user) => user.id === data.userSentId)
+                        .map((user) => user.name)}
                       role={users
                         .filter((user) => user.id === data.userId)
                         .map((user) => user.role)}
@@ -336,7 +357,9 @@ export default async function DetailBrief({
                       userId={users
                         .filter((user) => user.id === data.userId)
                         .map((user) => user.id)}
+                      userSentId={data.userSentId}
                       briefId={briefs?.id}
+                      isPrivate={data.isPrivate}
                     />
                   ))}
               </div>
@@ -364,6 +387,83 @@ export default async function DetailBrief({
                       />
                     )}
                   />
+                </div>
+
+                <div className="flex flex-col gap-4 my-2 w-full">
+                  <div className="flex gap-3 items-center">
+                    <Controller
+                      control={control}
+                      name="isPrivate"
+                      render={({ field }) => (
+                        <Switch
+                          id="isPrivate"
+                          onCheckedChange={(value) => {
+                            field.onChange(value);
+                            setShowUsers(value);
+                          }}
+                        />
+                      )}
+                    />
+                    <Label htmlFor="isPrivate">Private message</Label>
+                  </div>
+
+                  {showUsers ? (
+                    <div className="flex flex-col gap-3 w-1/2">
+                      <Label htmlFor="userSentId" className="line-clamp-1">
+                        Send to
+                      </Label>
+                      <Controller
+                        control={control}
+                        name="userSentId"
+                        render={({ field }) => (
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                            }}
+                          >
+                            <SelectTrigger
+                              id="userSentId"
+                              aria-label="Select user"
+                            >
+                              <SelectValue placeholder="Select user" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {userExist?.id === briefs?.authorId
+                                ? users
+                                  ? users
+                                      .filter(
+                                        (user) =>
+                                          user.id !== userExist?.id &&
+                                          briefs?.assign.find(
+                                            ({ id }) => id === user.id
+                                          )
+                                      )
+                                      .map((user) => (
+                                        <SelectItem value={user.id}>
+                                          {user.name}
+                                        </SelectItem>
+                                      ))
+                                  : null
+                                : users
+                                ? users
+                                    .filter(
+                                      (user) => user.id === briefs?.authorId
+                                      // briefs?.assign.find(
+                                      //   ({ id }) => id === user.id
+                                      // )
+                                    )
+                                    .map((user) => (
+                                      <SelectItem value={user.id}>
+                                        {user.name}
+                                      </SelectItem>
+                                    ))
+                                : null}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="flex justify-start">
