@@ -54,6 +54,7 @@ const Feedback = ({
   userSentId,
   briefId,
   isPrivate,
+  isEdited,
 }: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
@@ -93,6 +94,7 @@ const Feedback = ({
       content: JSON.stringify(data.content),
       userId: userExist,
       briefId: briefId,
+      isEdited: true,
     };
 
     // console.log(newData);
@@ -133,10 +135,15 @@ const Feedback = ({
               {userSent}
             </Badge>
           ) : null}
-          {
-            // @ts-ignore
-            <PlateEditorFeedback initialValue={messageParse} readOnly />
-          }
+          <div className="flex items-center gap-3">
+            {
+              // @ts-ignore
+              <PlateEditorFeedback initialValue={messageParse} readOnly />
+            }
+            {isEdited ? (
+              <span className="text-xs text-slate-600 italic">edited</span>
+            ) : null}
+          </div>
         </p>
         <div className="flex items-center gap-3">
           <span className="text-xs text-slate-600 me-3">{time} ago</span>
@@ -261,10 +268,15 @@ const Feedback = ({
             {userSent}
           </Badge>
         ) : null}
-        {
-          // @ts-ignore
-          <PlateEditorFeedback initialValue={messageParse} readOnly />
-        }
+        <div className="flex items-center gap-3">
+          {
+            // @ts-ignore
+            <PlateEditorFeedback initialValue={messageParse} readOnly />
+          }
+          {isEdited ? (
+            <span className="text-xs text-slate-600 italic">edited</span>
+          ) : null}
+        </div>
       </p>
       <div className="flex items-center gap-3">
         <span className="text-xs text-slate-600 me-3">{time} ago</span>
