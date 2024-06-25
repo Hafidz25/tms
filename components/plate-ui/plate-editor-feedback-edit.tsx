@@ -36,7 +36,7 @@ const PlateEditorFeedbackEdit = forwardRef((props, ref) => {
         </FixedToolbar>
 
         <Editor
-          placeholder="Masukan text..."
+          placeholder="Insert text..."
           className="px-8 py-8"
           autoFocus
           focusRing={false}

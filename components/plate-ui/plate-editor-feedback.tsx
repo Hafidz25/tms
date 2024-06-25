@@ -26,7 +26,7 @@ const PlateEditorFeedback = forwardRef((props, ref) => {
       <div ref={containerRef}>
         <Editor
           // @ts-ignore
-          placeholder="Masukan text..."
+          placeholder="Insert text..."
           className="px-0 py-0 mb-0 min-h-[0px]"
           autoFocus
           focusRing={false}
