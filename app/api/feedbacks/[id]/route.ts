@@ -58,7 +58,7 @@ export async function PATCH(
     session?.user.role === "Team Member"
   ) {
     const body = await req.json();
-    const { content, briefId, userId } = body;
+    const { content, briefId, userId, isEdited } = body;
 
     const feedbacks = await db.feedback.update({
       where: { id: params.id },
@@ -66,6 +66,7 @@ export async function PATCH(
         content: content,
         briefId: briefId,
         userId: userId,
+        isEdited: isEdited,
       },
     });
 

@@ -82,6 +82,7 @@ interface Feedback {
   briefId: string;
   userSentId: string;
   isPrivate: boolean;
+  isEdited: boolean;
   createdAt: string;
 }
 
@@ -360,6 +361,7 @@ export default async function DetailBrief({
                       userSentId={data.userSentId}
                       briefId={briefs?.id}
                       isPrivate={data.isPrivate}
+                      isEdited={data.isEdited}
                     />
                   ))}
               </div>

@@ -78,6 +78,7 @@ export async function GET() {
           userId: true,
           userSentId: true,
           isPrivate: true,
+          isEdited: true,
         },
       });
 
