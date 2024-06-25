@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   ) {
     try {
       const body = await req.json();
-      const { title, deadline, content, status, assign } = body;
+      const { title, deadline, content, status, assign, authorId } = body;
 
       // Create data
       const newBrief = await db.brief.create({
@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
           content: content,
           status: "Assigned",
           assign: { connect: assign },
+          authorId: authorId,
         },
       });
 
@@ -88,7 +89,17 @@ export async function GET() {
           content: true,
           status: true,
           assign: true,
-          feedback: true,
+          authorId: true,
+          feedback: {
+            select: {
+              id: true,
+              content: true,
+              briefId: true,
+              userId: true,
+              userSentId: true,
+              isPrivate: true,
+            },
+          },
           createdAt: true,
           updatedAt: true,
         },

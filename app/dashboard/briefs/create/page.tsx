@@ -33,6 +33,8 @@ interface User {
 export default function CreateBrief() {
   const { control, register, handleSubmit } = useForm();
   const [users, setUsers] = useState<User[]>([]);
+  const [userExist, setUserExist] = useState<User>();
+  const [loadExist, setLoadExist] = useState(false);
   const [load, setLoad] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,6 +46,12 @@ export default function CreateBrief() {
       .then((data) => {
         setUsers(data.data);
         setLoad(true);
+      });
+    fetch(`/api/auth/session`)
+      .then((response) => response.json())
+      .then((data) => {
+        setUserExist(data.user);
+        setLoadExist(true);
       });
   }, []);
 
@@ -70,6 +78,7 @@ export default function CreateBrief() {
           deadline: data.Deadline,
           content: JSON.stringify(data.Editor),
           assign: data.Assign,
+          authorId: data.authorId,
         }),
       });
       // console.log(response);
@@ -88,7 +97,7 @@ export default function CreateBrief() {
     }
   };
 
-  return (
+  return loadExist ? (
     <Fragment>
       <div className="min-h-screen w-full flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <form
@@ -121,6 +130,13 @@ export default function CreateBrief() {
                 type="hidden"
                 {...register("status", {
                   value: "Assigned",
+                })}
+              />
+              <input
+                type="hidden"
+                value={userExist?.id}
+                {...register("authorId", {
+                  value: userExist?.id,
                 })}
               />
 
@@ -192,5 +208,5 @@ export default function CreateBrief() {
 
       {/* <DevTool control={control} /> */}
     </Fragment>
-  );
+  ) : null;
 }
