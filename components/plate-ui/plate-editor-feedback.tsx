@@ -28,7 +28,7 @@ const PlateEditorFeedback = forwardRef((props, ref) => {
           // @ts-ignore
           placeholder="Insert text..."
           className="px-0 py-0 mb-0 min-h-[0px]"
-          autoFocus
+          // autoFocus
           focusRing={false}
           variant="ghost"
           size="sm"

@@ -38,7 +38,7 @@ const PlateEditor = forwardRef((props, ref) => {
         <Editor
           placeholder="Insert text..."
           className="px-8 py-8"
-          autoFocus
+          // autoFocus
           focusRing={false}
           variant="ghost"
           size="md"
