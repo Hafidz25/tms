@@ -449,10 +449,12 @@ export default async function DetailBrief({
                                 : users
                                 ? users
                                     .filter(
-                                      (user) => user.id === briefs?.authorId
-                                      // briefs?.assign.find(
-                                      //   ({ id }) => id === user.id
-                                      // )
+                                      (user) =>
+                                        user.id === briefs?.authorId ||
+                                        (briefs?.assign.find(
+                                          ({ id }) => id === user.id
+                                        ) &&
+                                          user.id !== userExist?.id)
                                     )
                                     .map((user) => (
                                       <SelectItem value={user.id}>
