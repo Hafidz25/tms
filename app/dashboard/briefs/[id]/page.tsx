@@ -106,7 +106,7 @@ export default async function DetailBrief({
   const Router = useRouter();
 
   // const session = await getSession();
-  console.log(briefs);
+  // console.log(briefs);
 
   useEffect(() => {
     fetch("/api/users")
