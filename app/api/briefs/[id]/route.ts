@@ -70,20 +70,20 @@ export async function PATCH(
       },
     });
 
-    const newBriefNotif = await db.briefNotification.create({
-      data: {
-        message: `Status brief "${briefs.title}" just updated to ${briefs.status}`,
-        briefId: briefs.id,
-        assign: { connect: assign },
-      },
-    });
+    // const newBriefNotif = await db.briefNotification.create({
+    //   data: {
+    //     message: `Status brief "${briefs.title}" just updated to ${briefs.status}`,
+    //     briefId: briefs.id,
+    //     assign: { connect: assign },
+    //   },
+    // });
 
     return NextResponse.json(
       {
         success: true,
         message: "Brief update successfully",
         data: briefs,
-        notification: newBriefNotif,
+        // notification: newBriefNotif,
       },
       {
         status: 200,

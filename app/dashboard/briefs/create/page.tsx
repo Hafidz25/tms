@@ -120,7 +120,7 @@ export default function CreateBrief() {
             <Input
               type="text"
               className="w-full border-0 p-0 ring-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent placeholder:capitalize text-[40px] font-bold"
-              placeholder="Judul Brief..."
+              placeholder="Brief Title..."
               autoComplete="off"
               {...register("Judul")}
             />

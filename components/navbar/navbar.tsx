@@ -344,8 +344,13 @@ function Navbar({ user }: any) {
                                       <Package2 className="h-6 w-6" />
                                     </div>
                                     <div className="w-full">
-                                      <div className="text-black text-md">
-                                        {data.message}
+                                      <div
+                                        className="text-black text-md"
+                                        dangerouslySetInnerHTML={{
+                                          __html: data.message,
+                                        }}
+                                      >
+                                        {/* {data.message} */}
                                         {/* {data.assign
                                         .map((user) => user.name)
                                         .join(", ")} */}

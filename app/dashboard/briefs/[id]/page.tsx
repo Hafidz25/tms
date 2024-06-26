@@ -176,13 +176,27 @@ export default async function DetailBrief({
     }
   };
 
-  const updateStatus = async (dataId: string, status: string, assign: any) => {
+  const updateStatus = async (
+    dataId: string,
+    status: string,
+    assign: any,
+    briefTitle: string
+  ) => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/briefs/${dataId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: status, assign: assign }),
+      });
+      const responseNotif = await fetch(`/api/brief-notifications`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: `Status brief ${briefTitle.italics()} just updated to ${status.italics()}`,
+          briefId: dataId,
+          assign: assign,
+        }),
       });
       // console.log(response);
       if (response.status === 200) {
@@ -245,7 +259,12 @@ export default async function DetailBrief({
                   defaultValue={briefs?.status}
                   onValueChange={(value) => {
                     if (briefs) {
-                      updateStatus(briefs.id, value, briefs.assign);
+                      updateStatus(
+                        briefs.id,
+                        value,
+                        briefs.assign,
+                        briefs.title
+                      );
                     }
                   }}
                 >
