@@ -159,6 +159,27 @@ export default async function DetailBrief({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newData),
       });
+      if (data.isPrivate === true) {
+        const responseNotif = await fetch(`/api/brief-notifications`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: `${userExist?.name.italics()} has sent private feedback on ${briefs?.title.italics()}`,
+            briefId: briefs?.id,
+            assign: [{ id: data.userSentId }],
+          }),
+        });
+      } else {
+        const responseNotif = await fetch(`/api/brief-notifications`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: `${userExist?.name.italics()} has sent feedback on ${briefs?.title.italics()}`,
+            briefId: briefs?.id,
+            assign: briefs?.assign,
+          }),
+        });
+      }
       // console.log(response);
       if (response.status === 201) {
         setIsLoading(false);
