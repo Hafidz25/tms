@@ -98,7 +98,7 @@ const TAB_LIST = [
   "Need Review",
   "Done",
 ];
-const TABLE_CONTENT = ["Title", "Status", "Deadline", "Created At", "Action"];
+const TABLE_CONTENT = ["Title", "Status", "Assign", "Deadline", "Action"];
 const FORMAT_DATE = "dd LLL, y";
 const CURRENT_SEGMENT_ROUTE = "/dashboard/briefs";
 
@@ -296,14 +296,16 @@ const Page = () => {
                                 </TableCell>
 
                                 <TableCell>
+                                  {brief.assign
+                                    .map((user) => user.name)
+                                    .join(", ")}
+                                </TableCell>
+
+                                <TableCell>
                                   {
                                     // @ts-ignore
                                     <DeadlineFormat date={brief.deadline} />
                                   }
-                                </TableCell>
-
-                                <TableCell>
-                                  {format(brief.createdAt, FORMAT_DATE)}
                                 </TableCell>
 
                                 <TableCell>
@@ -335,14 +337,16 @@ const Page = () => {
                                   </TableCell>
 
                                   <TableCell>
+                                    {brief.assign
+                                      .map((user) => user.name)
+                                      .join(", ")}
+                                  </TableCell>
+
+                                  <TableCell>
                                     {
                                       // @ts-ignore
                                       <DeadlineFormat date={brief.deadline} />
                                     }
-                                  </TableCell>
-
-                                  <TableCell>
-                                    {format(brief.createdAt, FORMAT_DATE)}
                                   </TableCell>
 
                                   <TableCell>
@@ -426,15 +430,13 @@ const Page = () => {
                                     </Badge>
                                   </TableCell>
 
+                                  <TableCell>{userExist?.name}</TableCell>
+
                                   <TableCell>
                                     {
                                       // @ts-ignore
                                       <DeadlineFormat date={brief.deadline} />
                                     }
-                                  </TableCell>
-
-                                  <TableCell>
-                                    {format(brief.createdAt, FORMAT_DATE)}
                                   </TableCell>
 
                                   <TableCell>
@@ -471,15 +473,13 @@ const Page = () => {
                                     </Badge>
                                   </TableCell>
 
+                                  <TableCell>{userExist?.name}</TableCell>
+
                                   <TableCell>
                                     {
                                       // @ts-ignore
                                       <DeadlineFormat date={brief.deadline} />
                                     }
-                                  </TableCell>
-
-                                  <TableCell>
-                                    {format(brief.createdAt, FORMAT_DATE)}
                                   </TableCell>
 
                                   <TableCell>

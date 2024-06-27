@@ -102,7 +102,7 @@ export default async function DetailBrief({
   const [showUsers, setShowUsers] = useState(false);
 
   const [title, setTitle] = useState(null);
-
+  const FORMAT_DATE = "dd LLL, y";
   const Router = useRouter();
 
   // const session = await getSession();
@@ -266,11 +266,14 @@ export default async function DetailBrief({
             <div className="flex gap-1 font-medium text-base items-center">
               <div className="flex gap-2 items-center">
                 <PenTool className="w-5 h-5" />
-                by
+                Created by
               </div>
               {users
                 .filter((user) => user.id === briefs?.authorId)
                 .map((user) => user.name)}
+              <div>
+                at {briefs?.createdAt && format(briefs?.createdAt, FORMAT_DATE)}
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 items-center">
