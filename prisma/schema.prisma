@@ -47,7 +47,7 @@ model Brief {
 model Feedback {
   id              String    @id @default(cuid())
   content         String
-  isPrivate       Boolean   @default(false)
+  isReply         Boolean   @default(false)
   isEdited        Boolean   @default(false)
   user            User?     @relation("user", fields: [userId], references: [id]) // A feedback can have one brief
   userId          String?

@@ -2,9 +2,6 @@
 
 import { useState, Fragment, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { addDays } from "date-fns";
-import { DateRange } from "react-day-picker";
-import { userList } from "@/data/user";
 
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -14,7 +11,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, CircleHelp } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { PlateEditor } from "@/components/plate-ui/plate-editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +20,12 @@ import { Chips } from "@/components/ui/chips";
 import { Divider } from "@/components/ui/divider";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { SpokeSpinner } from "@/components/ui/spinner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface User {
   id: string;
@@ -68,32 +72,65 @@ export default function CreateBrief() {
   const handleSubmitBrief = async (data: any) => {
     setIsLoading(true);
     // console.log(data);
-    try {
-      // console.log(body);
-      const response = await fetch("/api/briefs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: data.Judul,
-          deadline: data.Deadline,
-          content: JSON.stringify(data.Editor),
-          assign: data.Assign,
-          authorId: data.authorId,
-        }),
-      });
-      // console.log(response);
-      if (response.status === 201) {
-        setIsLoading(false);
-        toast.success("Brief created successfully.");
-        Router.push("/dashboard/briefs");
-      } else {
+
+    if (data.Mode === false) {
+      try {
+        // console.log(body);
+        const response = await fetch("/api/briefs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: data.Judul,
+            deadline: data.Deadline,
+            content: JSON.stringify(data.Editor),
+            assign: data.Assign,
+            authorId: data.authorId,
+          }),
+        });
+        // console.log(response);
+        if (response.status === 201) {
+          setIsLoading(false);
+          toast.success("Public brief created successfully.");
+          Router.push("/dashboard/briefs");
+        } else {
+          setIsLoading(false);
+          toast.error("Uh oh! Something went wrong.");
+        }
+        return response;
+      } catch (error) {
         setIsLoading(false);
         toast.error("Uh oh! Something went wrong.");
       }
-      return response;
-    } catch (error) {
-      setIsLoading(false);
-      toast.error("Uh oh! Something went wrong.");
+    } else {
+      try {
+        // console.log(body);
+        const response = await data.Assign.map((assign: any) => {
+          fetch("/api/briefs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: data.Judul,
+              deadline: data.Deadline,
+              content: JSON.stringify(data.Editor),
+              assign: assign,
+              authorId: data.authorId,
+            }),
+          }).then((response) => {
+            if (response.status === 201) {
+              setIsLoading(false);
+              toast.success("Private brief created successfully.");
+              Router.push("/dashboard/briefs");
+            } else {
+              setIsLoading(false);
+              toast.error("Uh oh! Something went wrong.");
+            }
+          });
+        });
+        return response;
+      } catch (error) {
+        setIsLoading(false);
+        toast.error("Uh oh! Something went wrong.");
+      }
     }
   };
 
@@ -125,7 +162,7 @@ export default function CreateBrief() {
               {...register("Judul")}
             />
 
-            <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 items-start sm:max-w-2xl">
+            <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 ">
               <input
                 type="hidden"
                 {...register("status", {
@@ -169,6 +206,41 @@ export default function CreateBrief() {
                   )}
                 />
               ) : null}
+
+              <div className="hidden sm:block sm:w-1 h-1 sm:h-10 sm:border-r sm:border-t-0 border-t border-slate-300"></div>
+
+              <Controller
+                name="Mode"
+                control={control}
+                defaultValue={false}
+                render={({ field }) => (
+                  <div className="flex items-center gap-3 w-full">
+                    <Checkbox
+                      id="terms"
+                      value={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                    <label
+                      htmlFor="terms"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex gap-1 items-center"
+                    >
+                      Single mode
+                      <TooltipProvider delayDuration={0}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <CircleHelp className="w-4 h-4" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              Brief akan dikirimkan ke masing-masing team member
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </label>
+                  </div>
+                )}
+              ></Controller>
             </div>
           </div>
 
@@ -205,8 +277,8 @@ export default function CreateBrief() {
           </div>
         </form>
       </div>
-
-      {/* <DevTool control={control} /> */}
+      {/* 
+      <DevTool control={control} /> */}
     </Fragment>
   ) : null;
 }

@@ -97,7 +97,7 @@ export async function GET() {
               briefId: true,
               userId: true,
               userSentId: true,
-              isPrivate: true,
+              isReply: true,
             },
           },
           createdAt: true,
