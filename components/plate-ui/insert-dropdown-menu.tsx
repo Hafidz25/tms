@@ -149,12 +149,12 @@ const items = [
         description: "Embed",
         icon: Icons.embed,
       },
-      {
-        value: ELEMENT_EXCALIDRAW,
-        label: "Excalidraw",
-        description: "Excalidraw",
-        icon: Icons.excalidraw,
-      },
+      // {
+      //   value: ELEMENT_EXCALIDRAW,
+      //   label: "Excalidraw",
+      //   description: "Excalidraw",
+      //   icon: Icons.excalidraw,
+      // },
     ],
   },
   {
