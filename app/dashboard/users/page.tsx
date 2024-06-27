@@ -246,28 +246,8 @@ function UsersPage() {
 
                   {content === "All" ? (
                     <TableBody>
-                      {users.map((data, ui) => (
-                        <TableRow key={data.id}>
-                          <TableCell className="font-medium">
-                            {data.name}
-                          </TableCell>
-                          <TableCell>{data.email}</TableCell>
-
-                          <TableCell>
-                            <SelectRole data={data} />
-                          </TableCell>
-
-                          <TableCell>
-                            <DropdownMenuActions data={data} />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  ) : (
-                    <TableBody>
-                      {users
-                        .filter((data) => data.role === content)
-                        .map((data, ui) => (
+                      {users.length !== 0 ? (
+                        users.map((data, ui) => (
                           <TableRow key={data.id}>
                             <TableCell className="font-medium">
                               {data.name}
@@ -282,7 +262,48 @@ function UsersPage() {
                               <DropdownMenuActions data={data} />
                             </TableCell>
                           </TableRow>
-                        ))}
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={5}>
+                            <div className="flex justify-center my-4">
+                              No result
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  ) : (
+                    <TableBody>
+                      {users.filter((data) => data.role === content).length !==
+                      0 ? (
+                        users
+                          .filter((data) => data.role === content)
+                          .map((data, ui) => (
+                            <TableRow key={data.id}>
+                              <TableCell className="font-medium">
+                                {data.name}
+                              </TableCell>
+                              <TableCell>{data.email}</TableCell>
+
+                              <TableCell>
+                                <SelectRole data={data} />
+                              </TableCell>
+
+                              <TableCell>
+                                <DropdownMenuActions data={data} />
+                              </TableCell>
+                            </TableRow>
+                          ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={5}>
+                            <div className="flex justify-center my-4">
+                              No result
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
                     </TableBody>
                   )}
                 </Table>

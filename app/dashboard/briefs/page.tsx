@@ -282,8 +282,58 @@ const Page = () => {
 
                     {content === "All" ? (
                       <TableBody>
-                        {briefs
-                          ? briefs.map((brief, bid) => (
+                        {briefs.length !== 0 ? (
+                          briefs.map((brief, bid) => (
+                            <TableRow key={bid}>
+                              <TableCell className="font-medium">
+                                {brief.title}
+                              </TableCell>
+
+                              <TableCell>
+                                <Badge variant={"outline"}>
+                                  {brief.status}
+                                </Badge>
+                              </TableCell>
+
+                              <TableCell>
+                                {brief.assign
+                                  .map((user) => user.name)
+                                  .join(", ")}
+                              </TableCell>
+
+                              <TableCell>
+                                {
+                                  // @ts-ignore
+                                  <DeadlineFormat date={brief.deadline} />
+                                }
+                              </TableCell>
+
+                              <TableCell>
+                                <DropdownMenuActions
+                                  targetId={brief.id}
+                                  data={brief}
+                                  role={userExist ? userExist.role : ""}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5}>
+                              <div className="flex justify-center my-4">
+                                No result
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    ) : (
+                      <TableBody>
+                        {briefs.filter((data) => data.status === content)
+                          .length !== 0 ? (
+                          briefs
+                            .filter((data) => data.status === content)
+                            .map((brief, bid) => (
                               <TableRow key={bid}>
                                 <TableCell className="font-medium">
                                   {brief.title}
@@ -317,48 +367,15 @@ const Page = () => {
                                 </TableCell>
                               </TableRow>
                             ))
-                          : null}
-                      </TableBody>
-                    ) : (
-                      <TableBody>
-                        {briefs
-                          ? briefs
-                              .filter((data) => data.status === content)
-                              .map((brief, bid) => (
-                                <TableRow key={bid}>
-                                  <TableCell className="font-medium">
-                                    {brief.title}
-                                  </TableCell>
-
-                                  <TableCell>
-                                    <Badge variant={"outline"}>
-                                      {brief.status}
-                                    </Badge>
-                                  </TableCell>
-
-                                  <TableCell>
-                                    {brief.assign
-                                      .map((user) => user.name)
-                                      .join(", ")}
-                                  </TableCell>
-
-                                  <TableCell>
-                                    {
-                                      // @ts-ignore
-                                      <DeadlineFormat date={brief.deadline} />
-                                    }
-                                  </TableCell>
-
-                                  <TableCell>
-                                    <DropdownMenuActions
-                                      targetId={brief.id}
-                                      data={brief}
-                                      role={userExist ? userExist.role : ""}
-                                    />
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                          : null}
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5}>
+                              <div className="flex justify-center my-4">
+                                No result
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
                       </TableBody>
                     )}
                   </Table>
@@ -411,87 +428,105 @@ const Page = () => {
 
                     {content === "All" ? (
                       <TableBody>
-                        {briefs
-                          ? briefs
-                              .filter((data) =>
-                                data.assign.find(
-                                  ({ id }) => id === userExist?.id
-                                )
-                              )
-                              .map((brief, bid) => (
-                                <TableRow key={bid}>
-                                  <TableCell className="font-medium">
-                                    {brief.title}
-                                  </TableCell>
+                        {briefs ? (
+                          briefs
+                            .filter((data) =>
+                              data.assign.find(({ id }) => id === userExist?.id)
+                            )
+                            .map((brief, bid) => (
+                              <TableRow key={bid}>
+                                <TableCell className="font-medium">
+                                  {brief.title}
+                                </TableCell>
 
-                                  <TableCell>
-                                    <Badge variant={"outline"}>
-                                      {brief.status}
-                                    </Badge>
-                                  </TableCell>
+                                <TableCell>
+                                  <Badge variant={"outline"}>
+                                    {brief.status}
+                                  </Badge>
+                                </TableCell>
 
-                                  <TableCell>{userExist?.name}</TableCell>
+                                <TableCell>{userExist?.name}</TableCell>
 
-                                  <TableCell>
-                                    {
-                                      // @ts-ignore
-                                      <DeadlineFormat date={brief.deadline} />
-                                    }
-                                  </TableCell>
+                                <TableCell>
+                                  {
+                                    // @ts-ignore
+                                    <DeadlineFormat date={brief.deadline} />
+                                  }
+                                </TableCell>
 
-                                  <TableCell>
-                                    <DropdownMenuActions
-                                      targetId={brief.id}
-                                      data={brief}
-                                      role={userExist ? userExist.role : ""}
-                                    />
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                          : null}
+                                <TableCell>
+                                  <DropdownMenuActions
+                                    targetId={brief.id}
+                                    data={brief}
+                                    role={userExist ? userExist.role : ""}
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5}>
+                              <div className="flex justify-center my-4">
+                                No result
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
                       </TableBody>
                     ) : (
                       <TableBody>
-                        {briefs
-                          ? briefs
-                              .filter(
-                                (data) =>
-                                  data.status === content &&
-                                  data.assign.find(
-                                    ({ id }) => id === userExist?.id
-                                  )
-                              )
-                              .map((brief, bid) => (
-                                <TableRow key={bid}>
-                                  <TableCell className="font-medium">
-                                    {brief.title}
-                                  </TableCell>
+                        {briefs.filter(
+                          (data) =>
+                            data.status === content &&
+                            data.assign.find(({ id }) => id === userExist?.id)
+                        ).length !== 0 ? (
+                          briefs
+                            .filter(
+                              (data) =>
+                                data.status === content &&
+                                data.assign.find(
+                                  ({ id }) => id === userExist?.id
+                                )
+                            )
+                            .map((brief, bid) => (
+                              <TableRow key={bid}>
+                                <TableCell className="font-medium">
+                                  {brief.title}
+                                </TableCell>
 
-                                  <TableCell>
-                                    <Badge variant={"outline"}>
-                                      {brief.status}
-                                    </Badge>
-                                  </TableCell>
+                                <TableCell>
+                                  <Badge variant={"outline"}>
+                                    {brief.status}
+                                  </Badge>
+                                </TableCell>
 
-                                  <TableCell>{userExist?.name}</TableCell>
+                                <TableCell>{userExist?.name}</TableCell>
 
-                                  <TableCell>
-                                    {
-                                      // @ts-ignore
-                                      <DeadlineFormat date={brief.deadline} />
-                                    }
-                                  </TableCell>
+                                <TableCell>
+                                  {
+                                    // @ts-ignore
+                                    <DeadlineFormat date={brief.deadline} />
+                                  }
+                                </TableCell>
 
-                                  <TableCell>
-                                    <DropdownMenuActions
-                                      targetId={brief.id}
-                                      data={brief}
-                                      role={userExist ? userExist.role : ""}
-                                    />
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                          : null}
+                                <TableCell>
+                                  <DropdownMenuActions
+                                    targetId={brief.id}
+                                    data={brief}
+                                    role={userExist ? userExist.role : ""}
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5}>
+                              <div className="flex justify-center my-4">
+                                No result
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
                       </TableBody>
                     )}
                   </Table>
