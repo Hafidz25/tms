@@ -81,7 +81,7 @@ interface Feedback {
   userId: string;
   briefId: string;
   userSentId: string;
-  isPrivate: boolean;
+  isReply: boolean;
   isEdited: boolean;
   createdAt: string;
 }
@@ -99,7 +99,6 @@ export default async function DetailBrief({
   const [loadBrief, setLoadBrief] = useState(false);
   const [loadExist, setLoadExist] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showUsers, setShowUsers] = useState(false);
 
   const [title, setTitle] = useState(null);
   const FORMAT_DATE = "dd LLL, y";
@@ -149,7 +148,6 @@ export default async function DetailBrief({
       userId: userExist?.id,
       briefId: briefs?.id,
       userSentId: data.userSentId,
-      isPrivate: data.isPrivate,
     };
 
     // console.log(newData);
@@ -397,13 +395,15 @@ export default async function DetailBrief({
                         .map((user) => user.role)}
                       message={data.content}
                       time={formatDistanceToNow(data.createdAt)}
-                      userExist={userExist?.id}
+                      userExist={userExist}
                       userId={users
                         .filter((user) => user.id === data.userId)
                         .map((user) => user.id)}
                       userSentId={data.userSentId}
                       briefId={briefs?.id}
-                      isPrivate={data.isPrivate}
+                      briefTitle={briefs?.title}
+                      assignBrief={briefs?.assign}
+                      isReply={data.isReply}
                       isEdited={data.isEdited}
                     />
                   ))}
@@ -432,85 +432,6 @@ export default async function DetailBrief({
                       />
                     )}
                   />
-                </div>
-
-                <div className="flex flex-col gap-4 my-2 w-full">
-                  <div className="flex gap-3 items-center">
-                    <Controller
-                      control={control}
-                      name="isPrivate"
-                      render={({ field }) => (
-                        <Switch
-                          id="isPrivate"
-                          onCheckedChange={(value) => {
-                            field.onChange(value);
-                            setShowUsers(value);
-                          }}
-                        />
-                      )}
-                    />
-                    <Label htmlFor="isPrivate">Private message</Label>
-                  </div>
-
-                  {showUsers ? (
-                    <div className="flex flex-col gap-3 w-1/2">
-                      <Label htmlFor="userSentId" className="line-clamp-1">
-                        Send to
-                      </Label>
-                      <Controller
-                        control={control}
-                        name="userSentId"
-                        render={({ field }) => (
-                          <Select
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                            }}
-                          >
-                            <SelectTrigger
-                              id="userSentId"
-                              aria-label="Select user"
-                            >
-                              <SelectValue placeholder="Select user" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {userExist?.id === briefs?.authorId
-                                ? users
-                                  ? users
-                                      .filter(
-                                        (user) =>
-                                          user.id !== userExist?.id &&
-                                          briefs?.assign.find(
-                                            ({ id }) => id === user.id
-                                          )
-                                      )
-                                      .map((user) => (
-                                        <SelectItem value={user.id}>
-                                          {user.name}
-                                        </SelectItem>
-                                      ))
-                                  : null
-                                : users
-                                ? users
-                                    .filter(
-                                      (user) =>
-                                        user.id === briefs?.authorId ||
-                                        (briefs?.assign.find(
-                                          ({ id }) => id === user.id
-                                        ) &&
-                                          user.id !== userExist?.id)
-                                    )
-                                    .map((user) => (
-                                      <SelectItem value={user.id}>
-                                        {user.name}
-                                      </SelectItem>
-                                    ))
-                                : null}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      />
-                    </div>
-                  ) : null}
                 </div>
 
                 <div className="flex justify-start">

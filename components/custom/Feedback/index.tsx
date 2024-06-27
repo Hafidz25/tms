@@ -14,8 +14,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +31,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SpokeSpinner } from "@/components/ui/spinner";
@@ -53,8 +50,10 @@ const Feedback = ({
   userId,
   userSentId,
   briefId,
-  isPrivate,
+  isReply,
   isEdited,
+  briefTitle,
+  assignBrief,
 }: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
@@ -92,7 +91,7 @@ const Feedback = ({
     setIsLoading(true);
     const newData = {
       content: JSON.stringify(data.content),
-      userId: userExist,
+      userId: userExist.id,
       briefId: briefId,
       isEdited: true,
     };
@@ -121,153 +120,57 @@ const Feedback = ({
     }
   };
 
-  return isPrivate ? (
-    userSentId === userExist || userId[0] === userExist ? (
-      <div className="flex flex-col gap-2  border-slate-200 py-2">
-        <div className="flex gap-2 items-center">
-          <div className="text-base font-semibold">{user}</div>
-          <Badge variant="outline">{role}</Badge>
-        </div>
-        <p className="text-sm">
-          {isPrivate ? (
-            <Badge className="flex w-fit items-center gap-2">
-              <Lock className="w-3 h-3" />
-              {userSent}
-            </Badge>
-          ) : null}
-          <div className="flex items-center gap-3">
-            {
-              // @ts-ignore
-              <PlateEditorFeedback initialValue={messageParse} readOnly />
-            }
-            {isEdited ? (
-              <span className="text-xs text-slate-600 italic">edited</span>
-            ) : null}
-          </div>
-        </p>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-600 me-3">{time} ago</span>
-          {userExist === userId[0] ? (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Link
-                  href=""
-                  className="text-xs font-medium underline underline-offset-2 text-slate-600 hover:text-slate-900 transition duration-150"
-                >
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Pencil className="w-4 h-4" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Edit</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </Link>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[50%]">
-                <DialogHeader>
-                  <DialogTitle>Edit feedback message</DialogTitle>
-                </DialogHeader>
-                <form
-                  className="grid w-full gap-2"
-                  onSubmit={handleSubmit(handleEditFeedback)}
-                >
-                  <div className="border rounded-lg">
-                    <Controller
-                      control={control}
-                      name="content"
-                      render={({ field }) => (
-                        <PlateEditorFeedbackEdit
-                          // @ts-ignore
-                          initialValue={messageParse ? messageParse : null}
-                          onChange={(editorValue: any) => {
-                            field.onChange(editorValue);
-                          }}
-                        />
-                      )}
-                    />
-                  </div>
-                  <DialogFooter>
-                    <Button type="submit" size="sm" disabled={isLoading}>
-                      {isLoading ? (
-                        <div className="flex items-center gap-2">
-                          <SpokeSpinner size="sm" />
-                          Loading...
-                        </div>
-                      ) : (
-                        "Save changes"
-                      )}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-          ) : null}
+  const handleReplyFeedback = async (data: any) => {
+    setIsLoading(true);
+    const newData = {
+      content: JSON.stringify(data.content),
+      userId: userExist.id,
+      briefId: briefId,
+      userSentId: userId[0],
+      isReply: true,
+    };
 
-          {userExist === userId[0] ? (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Link
-                  href=""
-                  className="text-xs font-medium underline underline-offset-2 text-red-600 hover:text-red-900 transition duration-150"
-                >
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Trash2 className="w-4 h-4" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Delete</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </Link>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete data</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure to delete this feedback?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    className={buttonVariants({ variant: "destructive" })}
-                    onClick={() => handleDelete(feedbackId)}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <SpokeSpinner size="sm" />
-                        Loading...
-                      </div>
-                    ) : (
-                      "Delete"
-                    )}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          ) : null}
-        </div>
-      </div>
-    ) : null
-  ) : (
+    // console.log(newData);
+    try {
+      const response = await fetch(`/api/feedbacks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newData),
+      });
+      const responseNotif = await fetch(`/api/brief-notifications`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: `${userExist?.name.italics()} has reply feedback on ${briefTitle.italics()}`,
+          briefId: briefId,
+          assign: assignBrief,
+        }),
+      });
+      // console.log(response);
+      if (response.status === 201) {
+        setIsLoading(false);
+        toast.success("Reply feedback sent successfully.");
+        // Router.push(`/dashboard/briefs/${feedbackId}`);
+        location.reload();
+      } else {
+        setIsLoading(false);
+        toast.error("Uh oh! Something went wrong.");
+      }
+      return response;
+    } catch (error) {
+      setIsLoading(false);
+      toast.error("Uh oh! Something went wrong.");
+    }
+  };
+
+  return (
     <div className="flex flex-col gap-2  border-slate-200 py-2">
       <div className="flex gap-2 items-center">
         <div className="text-base font-semibold">{user}</div>
         <Badge variant="outline">{role}</Badge>
       </div>
       <p className="text-sm">
-        {isPrivate ? (
-          <Badge className="flex w-fit items-center gap-2">
-            <Lock className="w-3 h-3" />
-            {userSent}
-          </Badge>
-        ) : null}
+        {isReply ? <Badge className="mr-2">@{userSent}</Badge> : null}
         <div className="flex items-center gap-3">
           {
             // @ts-ignore
@@ -280,14 +183,14 @@ const Feedback = ({
       </p>
       <div className="flex items-center gap-3">
         <span className="text-xs text-slate-600 me-3">{time} ago</span>
-        {userExist === userId[0] ? (
+        {userExist.id === userId[0] ? (
           <Dialog>
             <DialogTrigger asChild>
               <Link
                 href=""
                 className="text-xs font-medium underline underline-offset-2 text-slate-600 hover:text-slate-900 transition duration-150"
               >
-                <TooltipProvider>
+                <TooltipProvider delayDuration={0}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Pencil className="w-4 h-4" />
@@ -339,14 +242,72 @@ const Feedback = ({
           </Dialog>
         ) : null}
 
-        {userExist === userId[0] ? (
+        {userExist.id !== userId[0] ? (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Link
+                href=""
+                className="text-xs font-medium underline underline-offset-2 text-slate-600 hover:text-slate-900 transition duration-150"
+              >
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Reply className="w-4 h-4" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Reply</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </Link>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[50%]">
+              <DialogHeader>
+                <DialogTitle>Reply feedback message</DialogTitle>
+              </DialogHeader>
+              <form
+                className="grid w-full gap-2"
+                onSubmit={handleSubmit(handleReplyFeedback)}
+              >
+                <div className="border rounded-lg">
+                  <Controller
+                    control={control}
+                    name="content"
+                    render={({ field }) => (
+                      <PlateEditorFeedbackEdit
+                        // @ts-ignore
+                        onChange={(editorValue: any) => {
+                          field.onChange(editorValue);
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+                <DialogFooter>
+                  <Button type="submit" size="sm" disabled={isLoading}>
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <SpokeSpinner size="sm" />
+                        Loading...
+                      </div>
+                    ) : (
+                      "Send reply"
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        ) : null}
+
+        {userExist.id === userId[0] ? (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Link
                 href=""
                 className="text-xs font-medium underline underline-offset-2 text-red-600 hover:text-red-900 transition duration-150"
               >
-                <TooltipProvider>
+                <TooltipProvider delayDuration={0}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Trash2 className="w-4 h-4" />
