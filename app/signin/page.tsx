@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ToastAction } from "@/components/ui/toast";
 import { toast } from "sonner";
 import { signIn } from "next-auth/react";
 import { SpokeSpinner } from "@/components/ui/spinner";
@@ -23,8 +23,7 @@ const Page = () => {
   const [auth, setAuth] = useState(null);
   const [authLoad, setAuthLoad] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { control, register, handleSubmit, getValues } = useForm();
   const Router = useRouter();
 
   useEffect(() => {
@@ -42,21 +41,26 @@ const Page = () => {
     }
   }
 
-  const submitData = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
+  const submitData = async (data: any) => {
     setIsLoading(true);
+    // console.log(getValues("password"));
 
-    const signInData = await signIn("credentials", {
-      email: email,
-      password: password,
-      redirect: false,
-    });
-    if (signInData?.error) {
+    try {
+      const signInData = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+      if (signInData?.error) {
+        setIsLoading(false);
+        toast.error("Credentials do not match!");
+      } else {
+        toast.success("Sign in successfully.");
+        Router.push("/dashboard");
+      }
+    } catch (error) {
       setIsLoading(false);
       toast.error("Uh oh! Something went wrong.");
-    } else {
-      toast.success("Sign in successfully.");
-      Router.push("/dashboard");
     }
   };
 
@@ -70,27 +74,44 @@ const Page = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={submitData} className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-                onChange={(e) => setEmail(e.target.value)}
-                value={email}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <PasswordInput
-                id="password"
-                placeholder="Input Password"
-                onChange={(e) => setPassword(e.target.value)}
-                value={password}
-              />
-            </div>
+          <form onSubmit={handleSubmit(submitData)} className="grid gap-4">
+            <Controller
+              control={control}
+              name="email"
+              render={({ field }) => (
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    required
+                    onChange={(range) => {
+                      field.onChange(range);
+                    }}
+                  />
+                </div>
+              )}
+            />
+            <Controller
+              control={control}
+              name="password"
+              render={({ field }) => (
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Password</Label>
+                  <PasswordInput
+                    required
+                    minLength={6}
+                    id="password"
+                    placeholder="Input Password"
+                    onChange={(range) => {
+                      field.onChange(range);
+                    }}
+                    value={getValues("password")}
+                  />
+                </div>
+              )}
+            />
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <div className="flex items-center gap-2">
