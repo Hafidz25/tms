@@ -7,12 +7,14 @@
       "request": "launch",
       "command": "npm run dev"
     },
+
     {
       "name": "Next.js: debug client-side",
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:3000"
     },
+
     {
       "name": "Next.js: debug full stack",
       "type": "node-terminal",
@@ -23,6 +25,18 @@
         "uriFormat": "%s",
         "action": "debugWithChrome"
       }
+    },
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Current Test File (vitest)",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
+      "args": ["run", "${relativeFile}", "--disable-console-intercept"],
+      "smartStep": true,
+      "console": "internalConsole"
     }
   ]
 }
