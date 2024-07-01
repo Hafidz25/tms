@@ -243,7 +243,9 @@ function Navbar({ user }: any) {
             setBriefNotif(data.data);
             setLoad(true);
           });
-        Router.push(`/dashboard/briefs/${briefId}`);
+        briefId
+          ? Router.push(`/dashboard/briefs/${briefId}`)
+          : Router.refresh();
         // Router.refresh();
         // location.reload();
       }
