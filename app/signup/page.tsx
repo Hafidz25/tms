@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -14,16 +15,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ToastAction } from "@/components/ui/toast";
 import { toast } from "sonner";
 import { SpokeSpinner } from "@/components/ui/spinner";
 
 const Page = () => {
   const [auth, setAuth] = useState(null);
   const [authLoad, setAuthLoad] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { control, register, handleSubmit, getValues } = useForm();
   const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
 
@@ -42,15 +40,17 @@ const Page = () => {
     }
   }
 
-  const submitData = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
+  const submitData = async (data: any) => {
     setIsLoading(true);
     try {
-      const body = { name, email, password };
       const response = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        }),
       });
       // console.log(response);
       if (response.status === 201) {
@@ -77,7 +77,74 @@ const Page = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={submitData} className="grid gap-4">
+          <form onSubmit={handleSubmit(submitData)} className="grid gap-4">
+            <Controller
+              control={control}
+              name="name"
+              render={({ field }) => (
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    type="name"
+                    placeholder="Input Name"
+                    required
+                    onChange={(range) => {
+                      field.onChange(range);
+                    }}
+                  />
+                </div>
+              )}
+            />
+            <Controller
+              control={control}
+              name="email"
+              render={({ field }) => (
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    required
+                    onChange={(range) => {
+                      field.onChange(range);
+                    }}
+                  />
+                </div>
+              )}
+            />
+            <Controller
+              control={control}
+              name="password"
+              render={({ field }) => (
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Password</Label>
+                  <PasswordInput
+                    required
+                    minLength={6}
+                    id="password"
+                    placeholder="Input Password"
+                    onChange={(range) => {
+                      field.onChange(range);
+                    }}
+                    value={getValues("password")}
+                  />
+                </div>
+              )}
+            />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <SpokeSpinner size="sm" />
+                  Loading...
+                </div>
+              ) : (
+                "Sign in"
+              )}
+            </Button>
+          </form>
+          {/* <form onSubmit={submitData} className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>
               <Input
@@ -119,7 +186,7 @@ const Page = () => {
                 "Create an account"
               )}
             </Button>
-          </form>
+          </form> */}
           <div className="mt-4 text-center text-sm">
             Already have an account?&nbsp;
             <Link href="/signin" className="underline">
