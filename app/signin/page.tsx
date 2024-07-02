@@ -53,7 +53,7 @@ const Page = () => {
       });
       if (signInData?.error) {
         setIsLoading(false);
-        toast.error("Credentials do not match!");
+        toast.error(signInData.error);
       } else {
         toast.success("Sign in successfully.");
         Router.push("/dashboard");

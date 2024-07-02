@@ -89,6 +89,7 @@ const Page = () => {
                     type="name"
                     placeholder="Input Name"
                     required
+                    minLength={2}
                     onChange={(range) => {
                       field.onChange(range);
                     }}

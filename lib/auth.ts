@@ -20,6 +20,7 @@ export const authOption: NextAuthOptions = {
         email: { label: "Email", type: "email", placeholder: "m@example.com" },
         password: { label: "Password", type: "password" },
       },
+      //@ts-ignore
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           return null;
@@ -29,7 +30,7 @@ export const authOption: NextAuthOptions = {
           where: { email: credentials.email },
         });
         if (!existingUser) {
-          return null;
+          return { error: "User with this email not exists!", success: false };
         }
 
         const passwordMatch = await compare(
@@ -37,7 +38,7 @@ export const authOption: NextAuthOptions = {
           existingUser.password
         );
         if (!passwordMatch) {
-          return null;
+          return { error: "Invalid password!", success: false };
         }
 
         return {
@@ -50,6 +51,14 @@ export const authOption: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user }) {
+      //@ts-ignore
+      if (user?.error) {
+        //@ts-ignore
+        throw new Error(user?.error);
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         return {
