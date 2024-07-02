@@ -134,50 +134,12 @@ const Page = () => {
                 </div>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <SpokeSpinner size="sm" />
-                  Loading...
-                </div>
-              ) : (
-                "Sign in"
-              )}
-            </Button>
-          </form>
-          {/* <form onSubmit={submitData} className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Input Name"
-                required
-                onChange={(e) => setName(e.target.value)}
-                value={name}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-                onChange={(e) => setEmail(e.target.value)}
-                value={email}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <PasswordInput
-                id="password"
-                placeholder="Input Password"
-                onChange={(e) => setPassword(e.target.value)}
-                value={password}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              variant="gooeyRight"
+              type="submit"
+              className="w-full"
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <SpokeSpinner size="sm" />
@@ -187,11 +149,16 @@ const Page = () => {
                 "Create an account"
               )}
             </Button>
-          </form> */}
+          </form>
           <div className="mt-4 text-center text-sm">
             Already have an account?&nbsp;
-            <Link href="/signin" className="underline">
-              Sign in
+            <Link href="/signin">
+              <Button
+                variant="linkHover2"
+                className="p-0 after:w-full font-normal"
+              >
+                Sign in
+              </Button>
             </Link>
           </div>
         </CardContent>

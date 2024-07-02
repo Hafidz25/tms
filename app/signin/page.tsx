@@ -112,7 +112,12 @@ const Page = () => {
                 </div>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              variant="gooeyLeft"
+              type="submit"
+              className="w-full"
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <SpokeSpinner size="sm" />
@@ -125,8 +130,13 @@ const Page = () => {
           </form>
           <div className="mt-4 text-center text-sm">
             Dont have an account?&nbsp;
-            <Link href="/signup" className="underline">
-              Sign up
+            <Link href="/signup">
+              <Button
+                variant="linkHover2"
+                className="p-0 after:w-full font-normal"
+              >
+                Sign up
+              </Button>
             </Link>
           </div>
         </CardContent>
