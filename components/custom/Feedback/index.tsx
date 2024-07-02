@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Reply, Trash2, Pencil, Lock } from "lucide-react";
+import { Reply, Trash2, Pencil, Save, MessageCircleReply } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -226,7 +226,15 @@ const Feedback = ({
                   />
                 </div>
                 <DialogFooter>
-                  <Button type="submit" size="sm" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={isLoading}
+                    variant="expandIcon"
+                    Icon={Save}
+                    iconStyle="h-4 w-4"
+                    iconPlacement="left"
+                  >
                     {isLoading ? (
                       <div className="flex items-center gap-2">
                         <SpokeSpinner size="sm" />
@@ -284,7 +292,15 @@ const Feedback = ({
                   />
                 </div>
                 <DialogFooter>
-                  <Button type="submit" size="sm" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={isLoading}
+                    variant="expandIcon"
+                    Icon={MessageCircleReply}
+                    iconStyle="h-4 w-4"
+                    iconPlacement="left"
+                  >
                     {isLoading ? (
                       <div className="flex items-center gap-2">
                         <SpokeSpinner size="sm" />

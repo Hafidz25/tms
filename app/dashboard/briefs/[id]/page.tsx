@@ -5,7 +5,13 @@ import { useForm, Controller } from "react-hook-form";
 import { addDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { userList } from "@/data/user";
-import { Calendar, Users, CircleFadingPlus, PenTool } from "lucide-react";
+import {
+  Calendar,
+  Users,
+  CircleFadingPlus,
+  PenTool,
+  SendHorizonal,
+} from "lucide-react";
 
 import { DevTool } from "@hookform/devtools";
 import Link from "next/link";
@@ -435,7 +441,15 @@ export default async function DetailBrief({
                 </div>
 
                 <div className="flex justify-start">
-                  <Button type="submit" size="sm" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={isLoading}
+                    variant="expandIcon"
+                    Icon={SendHorizonal}
+                    iconStyle="h-4 w-4"
+                    iconPlacement="right"
+                  >
                     {isLoading ? (
                       <div className="flex items-center gap-2">
                         <SpokeSpinner size="sm" />

@@ -264,7 +264,12 @@ export default function CreateBrief() {
           </div>
 
           <div className="flex items-center justify-start gap-2">
-            <Button type="submit" size="sm" disabled={isLoading}>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isLoading}
+              variant="gooeyLeft"
+            >
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <SpokeSpinner size="sm" />
