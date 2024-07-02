@@ -146,6 +146,7 @@ const Page = () => {
                             size="sm"
                             type="button"
                             onClick={generatePass}
+                            variant="shine"
                           >
                             Generate
                           </Button>
@@ -195,7 +196,12 @@ const Page = () => {
           </div>
         </div>
         <div className="flex items-center justify-start gap-2">
-          <Button type="submit" size="sm" disabled={isLoading}>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={isLoading}
+            variant="gooeyLeft"
+          >
             {isLoading ? (
               <div className="flex items-center gap-2">
                 <SpokeSpinner size="sm" />
