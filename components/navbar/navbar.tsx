@@ -108,31 +108,14 @@ function NavbarBrand() {
 
 function NavbarMenu({ data }: any) {
   const pathname = usePathname();
-  // console.log(data);
+  console.log(pathname);
 
   return (
     <Fragment>
       {data.role === "Admin" ? (
         <>
-          {NAVS.map((nav) => (
-            <Link
-              replace={nav.replace}
-              scroll={nav.scroll}
-              prefetch={nav.prefetch}
-              key={nav.id}
-              href={nav.href}
-              className={`${
-                pathname === nav.href ? "text-slate-800" : "text-slate-400"
-              } transition-colors hover:text-slate-800`}
-            >
-              {nav.location}
-            </Link>
-          ))}
-        </>
-      ) : (
-        <>
-          {NAVS.filter((data) => !data.location?.includes("Users")).map(
-            (nav) => (
+          {NAVS.map((nav) =>
+            pathname === "/dashboard" ? (
               <Link
                 replace={nav.replace}
                 scroll={nav.scroll}
@@ -141,6 +124,59 @@ function NavbarMenu({ data }: any) {
                 href={nav.href}
                 className={`${
                   pathname === nav.href ? "text-slate-800" : "text-slate-400"
+                } transition-colors hover:text-slate-800`}
+              >
+                {nav.location}
+              </Link>
+            ) : (
+              <Link
+                replace={nav.replace}
+                scroll={nav.scroll}
+                prefetch={nav.prefetch}
+                key={nav.id}
+                href={nav.href}
+                className={`${
+                  //@ts-ignore
+                  pathname.includes(nav.href) === true &&
+                  nav.href !== "/dashboard"
+                    ? "text-slate-800"
+                    : "text-slate-400"
+                } transition-colors hover:text-slate-800`}
+              >
+                {nav.location}
+              </Link>
+            )
+          )}
+        </>
+      ) : (
+        <>
+          {NAVS.filter((data) => !data.location?.includes("Users")).map((nav) =>
+            pathname === "/dashboard" ? (
+              <Link
+                replace={nav.replace}
+                scroll={nav.scroll}
+                prefetch={nav.prefetch}
+                key={nav.id}
+                href={nav.href}
+                className={`${
+                  pathname === nav.href ? "text-slate-800" : "text-slate-400"
+                } transition-colors hover:text-slate-800`}
+              >
+                {nav.location}
+              </Link>
+            ) : (
+              <Link
+                replace={nav.replace}
+                scroll={nav.scroll}
+                prefetch={nav.prefetch}
+                key={nav.id}
+                href={nav.href}
+                className={`${
+                  //@ts-ignore
+                  pathname.includes(nav.href) === true &&
+                  nav.href !== "/dashboard"
+                    ? "text-slate-800"
+                    : "text-slate-400"
                 } transition-colors hover:text-slate-800`}
               >
                 {nav.location}
