@@ -54,6 +54,7 @@ interface Brief {
   title: string;
   description: string;
   status: string;
+  authorId: string;
   deadline: {
     from: string;
     to: string;
@@ -227,7 +228,7 @@ const Page = () => {
   }, []);
 
   return load && loadSession ? (
-    userExist?.role === "Admin" || userExist?.role === "Customer Service" ? (
+    userExist?.role === "Admin" ? (
       <DashboardPanel>
         <Tabs defaultValue={TAB_LIST[0]}>
           <div className="flex gap-2 items-center sm:justify-between justify-start flex-wrap">
@@ -334,6 +335,173 @@ const Page = () => {
                       <TableBody>
                         {briefs.filter((data) => data.status === content)
                           .length !== 0 ? (
+                          briefs
+                            .filter((data) => data.status === content)
+                            .map((brief, bid) => (
+                              <TableRow key={bid}>
+                                <TableCell className="font-medium">
+                                  {brief.title}
+                                </TableCell>
+
+                                <TableCell>
+                                  <Badge variant={"outline"}>
+                                    {brief.status}
+                                  </Badge>
+                                </TableCell>
+
+                                <TableCell>
+                                  {brief.assign
+                                    .map((user) => user.name)
+                                    .join(", ")}
+                                </TableCell>
+
+                                <TableCell>
+                                  {
+                                    // @ts-ignore
+                                    <DeadlineFormat date={brief.deadline} />
+                                  }
+                                </TableCell>
+
+                                <TableCell>
+                                  <DropdownMenuActions
+                                    targetId={brief.id}
+                                    data={brief}
+                                    role={userExist ? userExist.role : ""}
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5}>
+                              <div className="flex justify-center my-4">
+                                No result
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    )}
+                  </Table>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          ))}
+        </Tabs>
+      </DashboardPanel>
+    ) : userExist?.role === "Customer Service" ? (
+      <DashboardPanel>
+        <Tabs defaultValue={TAB_LIST[0]}>
+          <div className="flex gap-2 items-center sm:justify-between justify-start flex-wrap">
+            <TabsList>
+              {TAB_LIST.map((tab, i) => (
+                <TabsTrigger key={tab.trim() + i} value={tab}>
+                  {tab}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            <Link href="/dashboard/briefs/create">
+              <Button
+                size="sm"
+                className="h-8 gap-1"
+                onClick={() => setIsLoading(true)}
+                disabled={isLoading}
+                variant="expandIcon"
+                Icon={PlusCircle}
+                iconStyle="h-4 w-4"
+                iconPlacement="left"
+              >
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <SpokeSpinner size="sm" />
+                      Loading...
+                    </div>
+                  ) : (
+                    "Add Brief"
+                  )}
+                </span>
+              </Button>
+            </Link>
+          </div>
+
+          {TAB_LIST.map((content, i) => (
+            <TabsContent key={content.trim() + i} value={content}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{`${content} Briefs`}</CardTitle>
+                </CardHeader>
+
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {TABLE_CONTENT.map((header, i) => (
+                          <TableHead key={header.trim() + i}>
+                            {header}
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+
+                    {content === "All" ? (
+                      <TableBody>
+                        {briefs.filter((data) => data.authorId === userExist.id)
+                          .length !== 0 ? (
+                          briefs
+                            .filter((data) => data.authorId === userExist.id)
+                            .map((brief, bid) => (
+                              <TableRow key={bid}>
+                                <TableCell className="font-medium">
+                                  {brief.title}
+                                </TableCell>
+
+                                <TableCell>
+                                  <Badge variant={"outline"}>
+                                    {brief.status}
+                                  </Badge>
+                                </TableCell>
+
+                                <TableCell>
+                                  {brief.assign
+                                    .map((user) => user.name)
+                                    .join(", ")}
+                                </TableCell>
+
+                                <TableCell>
+                                  {
+                                    // @ts-ignore
+                                    <DeadlineFormat date={brief.deadline} />
+                                  }
+                                </TableCell>
+
+                                <TableCell>
+                                  <DropdownMenuActions
+                                    targetId={brief.id}
+                                    data={brief}
+                                    role={userExist ? userExist.role : ""}
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5}>
+                              <div className="flex justify-center my-4">
+                                No result
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    ) : (
+                      <TableBody>
+                        {briefs.filter(
+                          (data) =>
+                            data.status === content &&
+                            data.authorId === userExist.id
+                        ).length !== 0 ? (
                           briefs
                             .filter((data) => data.status === content)
                             .map((brief, bid) => (
