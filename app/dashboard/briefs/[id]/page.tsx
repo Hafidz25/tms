@@ -25,10 +25,7 @@ import { ChevronLeft } from "lucide-react";
 import { PlateEditor } from "@/components/plate-ui/plate-editor";
 import { PlateEditorPreview } from "@/components/plate-ui/plate-editor-preview";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Chips } from "@/components/ui/chips";
 import { Divider } from "@/components/ui/divider";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
 import {
   Select,
   SelectContent,
@@ -43,13 +40,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import Feedback from "@/components/custom/Feedback";
-import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns";
 import { SpokeSpinner } from "@/components/ui/spinner";
+import generator from "generate-password";
 // import { getSession } from "next-auth/react";
 
 interface User {
@@ -87,7 +82,9 @@ interface Feedback {
   userId: string;
   briefId: string;
   userSentId: string;
+  status: string;
   isReply: boolean;
+  replyId: string;
   isEdited: boolean;
   createdAt: string;
 }
@@ -154,6 +151,12 @@ export default async function DetailBrief({
       userId: userExist?.id,
       briefId: briefs?.id,
       userSentId: data.userSentId,
+      isReply: false,
+      replyId: generator.generate({
+        length: 24,
+        numbers: true,
+      }),
+      status: "Not Approved",
     };
 
     // console.log(newData);
@@ -163,17 +166,11 @@ export default async function DetailBrief({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newData),
       });
-      if (data.isPrivate === true) {
-        const responseNotif = await fetch(`/api/brief-notifications`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message: `${userExist?.name.italics()} has sent private feedback on ${briefs?.title.italics()}`,
-            briefId: briefs?.id,
-            assign: [{ id: data.userSentId }],
-          }),
-        });
-      } else {
+
+      // console.log(response);
+      if (response.status === 201) {
+        setIsLoading(false);
+        toast.success("Feedback created successfully.");
         const responseNotif = await fetch(`/api/brief-notifications`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -183,11 +180,6 @@ export default async function DetailBrief({
             assign: briefs?.assign,
           }),
         });
-      }
-      // console.log(response);
-      if (response.status === 201) {
-        setIsLoading(false);
-        toast.success("Feedback created successfully.");
         // Router.push("/dashboard/briefs");
         location.reload();
       } else {
@@ -373,48 +365,16 @@ export default async function DetailBrief({
         <Card className="mx-auto max-w-[59rem] lg:min-w-[59rem]">
           <CardHeader>
             <CardTitle>
-              Feedback ({briefs?.feedback.map((data) => data).length})
+              Feedback (
+              {
+                briefs?.feedback
+                  .filter((data) => data.isReply === false)
+                  .map((data) => data).length
+              }
+              )
             </CardTitle>
           </CardHeader>
           <DndProvider backend={HTML5Backend}>
-            <CardContent>
-              <div className="flex flex-col gap-3">
-                {briefs?.feedback
-                  .sort(function compare(a, b) {
-                    var dateA = new Date(a.createdAt);
-                    var dateB = new Date(b.createdAt);
-                    // @ts-ignore
-                    return dateA - dateB;
-                  })
-                  .map((data) => (
-                    <Feedback
-                      key={data.id}
-                      feedbackId={data.id}
-                      user={users
-                        .filter((user) => user.id === data.userId)
-                        .map((user) => user.name)}
-                      userSent={users
-                        .filter((user) => user.id === data.userSentId)
-                        .map((user) => user.name)}
-                      role={users
-                        .filter((user) => user.id === data.userId)
-                        .map((user) => user.role)}
-                      message={data.content}
-                      time={formatDistanceToNow(data.createdAt)}
-                      userExist={userExist}
-                      userId={users
-                        .filter((user) => user.id === data.userId)
-                        .map((user) => user.id)}
-                      userSentId={data.userSentId}
-                      briefId={briefs?.id}
-                      briefTitle={briefs?.title}
-                      assignBrief={briefs?.assign}
-                      isReply={data.isReply}
-                      isEdited={data.isEdited}
-                    />
-                  ))}
-              </div>
-            </CardContent>
             <CardContent>
               <form
                 className="grid w-full gap-2"
@@ -440,7 +400,7 @@ export default async function DetailBrief({
                   />
                 </div>
 
-                <div className="flex justify-start">
+                <div className="flex justify-end">
                   <Button
                     type="submit"
                     size="sm"
@@ -461,6 +421,109 @@ export default async function DetailBrief({
                   </Button>
                 </div>
               </form>
+            </CardContent>
+            <CardContent>
+              <div className="flex flex-col gap-3">
+                {briefs?.feedback
+                  .sort(function compare(a, b) {
+                    var dateA = new Date(a.createdAt);
+                    var dateB = new Date(b.createdAt);
+                    // @ts-ignore
+                    return dateA - dateB;
+                  })
+                  .filter((data) => data.isReply === false)
+                  .map((data) => (
+                    <div
+                      className={
+                        data.status === "Not Approved"
+                          ? "p-6 border border-slate-200 rounded-lg"
+                          : "p-6 border border-slate-900 rounded-lg"
+                      }
+                    >
+                      <Feedback
+                        key={data.id}
+                        feedbackId={data.id}
+                        user={users
+                          .filter((user) => user.id === data.userId)
+                          .map((user) => user.name)}
+                        userSent={users
+                          .filter((user) => user.id === data.userSentId)
+                          .map((user) => user.name)}
+                        role={users
+                          .filter((user) => user.id === data.userId)
+                          .map((user) => user.role)}
+                        message={data.content}
+                        time={formatDistanceToNow(data.createdAt)}
+                        userExist={userExist}
+                        userId={users
+                          .filter((user) => user.id === data.userId)
+                          .map((user) => user.id)}
+                        userSentId={data.userSentId}
+                        briefId={briefs?.id}
+                        briefTitle={briefs?.title}
+                        assignBrief={briefs?.assign}
+                        isReply={data.isReply}
+                        isEdited={data.isEdited}
+                        replyId={data.replyId}
+                        status={data.status}
+                      />
+                      <div className="pl-6 border-l-4  border-l-slate-100">
+                        {briefs.feedback
+                          .sort(function compare(a, b) {
+                            var dateA = new Date(a.createdAt);
+                            var dateB = new Date(b.createdAt);
+                            // @ts-ignore
+                            return dateA - dateB;
+                          })
+                          .filter(
+                            (dataReply) =>
+                              dataReply.isReply === true &&
+                              dataReply.replyId === data.replyId
+                          )
+                          .map((dataReply) => (
+                            <>
+                              <Feedback
+                                key={dataReply.id}
+                                feedbackId={dataReply.id}
+                                user={users
+                                  .filter(
+                                    (user) => user.id === dataReply.userId
+                                  )
+                                  .map((user) => user.name)}
+                                userSent={users
+                                  .filter(
+                                    (user) => user.id === dataReply.userSentId
+                                  )
+                                  .map((user) => user.name)}
+                                role={users
+                                  .filter(
+                                    (user) => user.id === dataReply.userId
+                                  )
+                                  .map((user) => user.role)}
+                                message={dataReply.content}
+                                time={formatDistanceToNow(dataReply.createdAt)}
+                                userExist={userExist}
+                                userId={users
+                                  .filter(
+                                    (user) => user.id === dataReply.userId
+                                  )
+                                  .map((user) => user.id)}
+                                userSentId={dataReply.userSentId}
+                                briefId={briefs?.id}
+                                briefTitle={briefs?.title}
+                                assignBrief={briefs?.assign}
+                                isReply={dataReply.isReply}
+                                isEdited={dataReply.isEdited}
+                                replyId={data.replyId}
+                                status={dataReply.status}
+                                parentStatus={data.status}
+                              />
+                            </>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+              </div>
             </CardContent>
           </DndProvider>
         </Card>

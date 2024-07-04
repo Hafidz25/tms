@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Reply, Trash2, Pencil, Save, MessageCircleReply } from "lucide-react";
+import {
+  Reply,
+  Trash2,
+  Pencil,
+  Save,
+  MessageCircleReply,
+  CircleAlert,
+  CircleCheck,
+} from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -36,14 +44,12 @@ import { useRouter } from "next/navigation";
 import { SpokeSpinner } from "@/components/ui/spinner";
 import { PlateEditorFeedback } from "@/components/plate-ui/plate-editor-feedback";
 import { PlateEditorFeedbackEdit } from "@/components/plate-ui/plate-editor-feedback-edit";
-import { PlateEditor } from "@/components/plate-ui/plate-editor";
 
 const Feedback = ({
   feedbackId,
   user,
   userSent,
   role,
-  tag,
   message,
   time,
   userExist,
@@ -54,6 +60,9 @@ const Feedback = ({
   isEdited,
   briefTitle,
   assignBrief,
+  replyId,
+  status,
+  parentStatus,
 }: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
@@ -71,6 +80,35 @@ const Feedback = ({
       if (response.status === 200) {
         setIsLoading(false);
         toast.success("Feedback deleted successfully.");
+        // Router.refresh();
+        location.reload();
+      } else if (response.status === 403) {
+        setIsLoading(false);
+        toast.warning("You dont have access.");
+      } else {
+        setIsLoading(false);
+        toast.error("Uh oh! Something went wrong.");
+      }
+      return response;
+    } catch (error) {
+      setIsLoading(false);
+      toast.error("Uh oh! Something went wrong.");
+    }
+  };
+
+  const handleUpdateStatus = async (feedbackId: string, status: string) => {
+    setIsLoading(true);
+    const newStatus = status === "Not Approved" ? "Approved" : "Not Approved";
+    try {
+      const response = await fetch(`/api/feedbacks/${feedbackId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.status === 200) {
+        setIsLoading(false);
+        toast.success("Feedback status updated successfully.");
         // Router.refresh();
         location.reload();
       } else if (response.status === 403) {
@@ -128,6 +166,7 @@ const Feedback = ({
       briefId: briefId,
       userSentId: userId[0],
       isReply: true,
+      replyId: replyId,
     };
 
     // console.log(newData);
@@ -137,19 +176,20 @@ const Feedback = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newData),
       });
-      const responseNotif = await fetch(`/api/brief-notifications`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: `${userExist?.name.italics()} has reply feedback on ${briefTitle.italics()}`,
-          briefId: briefId,
-          assign: assignBrief,
-        }),
-      });
+
       // console.log(response);
       if (response.status === 201) {
         setIsLoading(false);
         toast.success("Reply feedback sent successfully.");
+        const responseNotif = await fetch(`/api/brief-notifications`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: `${userExist?.name.italics()} has reply feedback on ${briefTitle.italics()}`,
+            briefId: briefId,
+            assign: assignBrief,
+          }),
+        });
         // Router.push(`/dashboard/briefs/${feedbackId}`);
         location.reload();
       } else {
@@ -168,6 +208,20 @@ const Feedback = ({
       <div className="flex gap-2 items-center">
         <div className="text-base font-semibold">{user}</div>
         <Badge variant="outline">{role}</Badge>
+        {status !== "Default" ? (
+          <Badge
+            variant={status === "Not Approved" ? "secondary" : "default"}
+            className="cursor-pointer flex gap-1 items-center"
+            onClick={() => handleUpdateStatus(feedbackId, status)}
+          >
+            {status === "Not Approved" ? (
+              <CircleAlert className="w-3.5 h-3.5" />
+            ) : (
+              <CircleCheck className="w-3.5 h-3.5" />
+            )}
+            {status}
+          </Badge>
+        ) : null}
       </div>
       <p className="text-sm">
         {isReply ? <Badge className="mr-2">@{userSent}</Badge> : null}
@@ -183,7 +237,10 @@ const Feedback = ({
       </p>
       <div className="flex items-center gap-3">
         <span className="text-xs text-slate-600 me-3">{time} ago</span>
-        {userExist.id === userId[0] ? (
+        {(userExist.id === userId[0] && status === "Not Approved") ||
+        (userExist.id === userId[0] &&
+          status === "Default" &&
+          parentStatus === "Not Approved") ? (
           <Dialog>
             <DialogTrigger asChild>
               <Link
@@ -250,7 +307,10 @@ const Feedback = ({
           </Dialog>
         ) : null}
 
-        {userExist.id !== userId[0] ? (
+        {(userExist.id !== userId[0] && status === "Not Approved") ||
+        (userExist.id !== userId[0] &&
+          status === "Default" &&
+          parentStatus === "Not Approved") ? (
           <Dialog>
             <DialogTrigger asChild>
               <Link
@@ -316,7 +376,10 @@ const Feedback = ({
           </Dialog>
         ) : null}
 
-        {userExist.id === userId[0] ? (
+        {(userExist.id === userId[0] && status === "Not Approved") ||
+        (userExist.id === userId[0] &&
+          status === "Default" &&
+          parentStatus === "Not Approved") ? (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Link
