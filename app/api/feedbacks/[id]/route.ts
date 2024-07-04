@@ -54,11 +54,10 @@ export async function PATCH(
 
   if (
     session?.user.role === "Admin" ||
-    session?.user.role === "Customer Service" ||
-    session?.user.role === "Team Member"
+    session?.user.role === "Customer Service"
   ) {
     const body = await req.json();
-    const { content, briefId, userId, isEdited } = body;
+    const { content, briefId, userId, isEdited, status } = body;
 
     const feedbacks = await db.feedback.update({
       where: { id: params.id },
@@ -67,6 +66,7 @@ export async function PATCH(
         briefId: briefId,
         userId: userId,
         isEdited: isEdited,
+        status: status,
       },
     });
 

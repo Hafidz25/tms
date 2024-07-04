@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
   ) {
     try {
       const body = await req.json();
-      const { content, briefId, userId, userSentId, isReply } = body;
+      const { content, briefId, userId, userSentId, isReply, status, replyId } =
+        body;
 
       // Create data
       const newFeedback = await db.feedback.create({
@@ -31,6 +32,8 @@ export async function POST(req: NextRequest) {
           userId: userId,
           userSentId: userSentId,
           isReply: isReply,
+          replyId: replyId,
+          status: status,
         },
       });
 
@@ -78,7 +81,9 @@ export async function GET() {
           userId: true,
           userSentId: true,
           isReply: true,
+          replyId: true,
           isEdited: true,
+          status: true,
         },
       });
 
