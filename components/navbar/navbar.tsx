@@ -108,7 +108,7 @@ function NavbarBrand() {
 
 function NavbarMenu({ data }: any) {
   const pathname = usePathname();
-  console.log(pathname);
+  // console.log(pathname);
 
   return (
     <Fragment>
