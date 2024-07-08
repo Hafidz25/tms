@@ -1,3 +1,4 @@
+"use client";
 import { Ellipsis } from "lucide-react";
 import { Row } from "@tanstack/react-table";
 
@@ -9,14 +10,49 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Roles } from "@/types/user";
+import { Brief } from "@/types/briefs";
+import Link from "next/link";
+import { toast } from "sonner";
 
-interface DataTableRowActionsProps<TData> {
-  row: Row<TData>;
+const CURRENT_SEGMENT_ROUTE = "/dashboard/briefs";
+
+interface DropdownMenuActionsProps
+  extends React.ComponentProps<typeof DropdownMenu> {
+  dataId: string;
 }
 
-export function DataTableRowActions<TData>({
-  row,
-}: DataTableRowActionsProps<TData>) {
+export function DataTableRowActions({ dataId }: DropdownMenuActionsProps) {
+  // console.log(data);
+
+  const handleDelete = async (dataId: string) => {
+    try {
+      const response = await fetch(`/api/briefs/${dataId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response.status === 200) {
+        toast.success("Brief deleted successfully.");
+        // Router.refresh();
+        location.reload();
+      } else if (response.status === 403) {
+        toast.warning("You dont have access.");
+      }
+      return response;
+    } catch (error) {
+      toast.error("Uh oh! Something went wrong.");
+    }
+  };
 
   return (
     <DropdownMenu>
@@ -30,11 +66,50 @@ export function DataTableRowActions<TData>({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[160px]">
-        <DropdownMenuItem>Edit</DropdownMenuItem>
-        <DropdownMenuItem>Detail</DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link href={CURRENT_SEGMENT_ROUTE + `/${dataId}`} className="w-full">
+            Detail
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem>
+          <Link
+            href={CURRENT_SEGMENT_ROUTE + `/edit/${dataId}`}
+            className="w-full"
+          >
+            Edit
+          </Link>
+        </DropdownMenuItem>
+
         <DropdownMenuSeparator />
         <DropdownMenuItem>
-          Delete
+          <Dialog>
+            <DialogTrigger asChild>
+              <Link href="" className="w-full">
+                Delete
+              </Link>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Delete data</DialogTitle>
+                <DialogDescription>
+                  Are you sure to delete this data?
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="mt-4">
+                <Button type="reset" variant="outline">
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  onClick={() => handleDelete(dataId)}
+                  variant="destructive"
+                >
+                  Delete
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

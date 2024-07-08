@@ -25,7 +25,7 @@ function DeadlineFormat({ date }: { date: DateRange | undefined }) {
   return (
     <>
       {date.from ? format(date.from, FORMAT_DATE) : ""}
-      {date.to ? `- ${format(date.to, FORMAT_DATE)}` : ""}
+      {date.to ? ` - ${format(date.to, FORMAT_DATE)}` : ""}
     </>
   );
 }
@@ -38,8 +38,25 @@ export const columns: ColumnDef<Brief>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex space-x-2">
-        <span className="w-[500px] truncate font-medium">
+        <span className="w-[300px] truncate font-medium">
           {row.getValue("title")}
+        </span>
+      </div>
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "assign",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Assign" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="w-[200px] truncate font-medium">
+          {(row.getValue("assign") as any[])
+            .map((user) => user.name)
+            .join(", ")}
         </span>
       </div>
     ),
@@ -54,7 +71,7 @@ export const columns: ColumnDef<Brief>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex w-[180px] items-center">
-        <Badge>{row.getValue("status")}</Badge>
+        <Badge variant="outline">{row.getValue("status")}</Badge>
       </div>
     ),
     filterFn: (row, id, value) => {
@@ -88,7 +105,7 @@ export const columns: ColumnDef<Brief>[] = [
         <span>{format(row.getValue("createdAt"), FORMAT_DATE)}</span>
       </div>
     ),
-    enableSorting: false,
+    enableSorting: true,
     enableHiding: false,
   },
 
@@ -96,7 +113,10 @@ export const columns: ColumnDef<Brief>[] = [
     id: "actions",
     cell: ({ row }) => (
       <div className="flex w-[80px] justify-end">
-        <DataTableRowActions row={row} />
+        {
+          //@ts-ignore
+          <DataTableRowActions dataId={row.original.id} />
+        }
       </div>
     ),
   },

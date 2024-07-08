@@ -225,6 +225,7 @@ export default async function DetailBrief({
         setIsLoading(false);
         toast.success("Brief updated successfully.");
         Router.refresh();
+        location.reload();
       } else {
         setIsLoading(false);
         toast.error("Uh oh! Something went wrong.");
