@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, CornerRightDown } from "lucide-react";
 import { PlateEditor } from "@/components/plate-ui/plate-editor";
 import { PlateEditorPreview } from "@/components/plate-ui/plate-editor-preview";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import Feedback from "@/components/custom/Feedback";
 import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns";
@@ -467,60 +472,87 @@ export default async function DetailBrief({
                         replyId={data.replyId}
                         status={data.status}
                       />
-                      <div className="pl-6 border-l-4  border-l-slate-100">
-                        {briefs.feedback
-                          .sort(function compare(a, b) {
-                            var dateA = new Date(a.createdAt);
-                            var dateB = new Date(b.createdAt);
-                            // @ts-ignore
-                            return dateA - dateB;
-                          })
-                          .filter(
-                            (dataReply) =>
-                              dataReply.isReply === true &&
-                              dataReply.replyId === data.replyId
-                          )
-                          .map((dataReply) => (
-                            <>
-                              <Feedback
-                                key={dataReply.id}
-                                feedbackId={dataReply.id}
-                                user={users
-                                  .filter(
-                                    (user) => user.id === dataReply.userId
-                                  )
-                                  .map((user) => user.name)}
-                                userSent={users
-                                  .filter(
-                                    (user) => user.id === dataReply.userSentId
-                                  )
-                                  .map((user) => user.name)}
-                                role={users
-                                  .filter(
-                                    (user) => user.id === dataReply.userId
-                                  )
-                                  .map((user) => user.role)}
-                                message={dataReply.content}
-                                time={formatDistanceToNow(dataReply.createdAt)}
-                                userExist={userExist}
-                                userId={users
-                                  .filter(
-                                    (user) => user.id === dataReply.userId
-                                  )
-                                  .map((user) => user.id)}
-                                userSentId={dataReply.userSentId}
-                                briefId={briefs?.id}
-                                briefTitle={briefs?.title}
-                                assignBrief={briefs?.assign}
-                                isReply={dataReply.isReply}
-                                isEdited={dataReply.isEdited}
-                                replyId={data.replyId}
-                                status={dataReply.status}
-                                parentStatus={data.status}
-                              />
-                            </>
-                          ))}
-                      </div>
+                      {briefs.feedback.filter(
+                        (dataReply) =>
+                          dataReply.isReply === true &&
+                          dataReply.replyId === data.replyId
+                      ).length ? (
+                        <Collapsible>
+                          <CollapsibleTrigger>
+                            <div className="text-xs font-semibold text-slate-500 hover:text-slate-950 transition duration-300 flex gap-1 items-end">
+                              Comments (
+                              {
+                                briefs.feedback.filter(
+                                  (dataReply) =>
+                                    dataReply.isReply === true &&
+                                    dataReply.replyId === data.replyId
+                                ).length
+                              }
+                              )
+                              <CornerRightDown className="w-3 h-3" />
+                            </div>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="pl-6 border-l-4  border-l-slate-100">
+                              {briefs.feedback
+                                .sort(function compare(a, b) {
+                                  var dateA = new Date(a.createdAt);
+                                  var dateB = new Date(b.createdAt);
+                                  // @ts-ignore
+                                  return dateA - dateB;
+                                })
+                                .filter(
+                                  (dataReply) =>
+                                    dataReply.isReply === true &&
+                                    dataReply.replyId === data.replyId
+                                )
+                                .map((dataReply) => (
+                                  <>
+                                    <Feedback
+                                      key={dataReply.id}
+                                      feedbackId={dataReply.id}
+                                      user={users
+                                        .filter(
+                                          (user) => user.id === dataReply.userId
+                                        )
+                                        .map((user) => user.name)}
+                                      userSent={users
+                                        .filter(
+                                          (user) =>
+                                            user.id === dataReply.userSentId
+                                        )
+                                        .map((user) => user.name)}
+                                      role={users
+                                        .filter(
+                                          (user) => user.id === dataReply.userId
+                                        )
+                                        .map((user) => user.role)}
+                                      message={dataReply.content}
+                                      time={formatDistanceToNow(
+                                        dataReply.createdAt
+                                      )}
+                                      userExist={userExist}
+                                      userId={users
+                                        .filter(
+                                          (user) => user.id === dataReply.userId
+                                        )
+                                        .map((user) => user.id)}
+                                      userSentId={dataReply.userSentId}
+                                      briefId={briefs?.id}
+                                      briefTitle={briefs?.title}
+                                      assignBrief={briefs?.assign}
+                                      isReply={dataReply.isReply}
+                                      isEdited={dataReply.isEdited}
+                                      replyId={data.replyId}
+                                      status={dataReply.status}
+                                      parentStatus={data.status}
+                                    />
+                                  </>
+                                ))}
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      ) : null}
                     </div>
                   ))}
               </div>
