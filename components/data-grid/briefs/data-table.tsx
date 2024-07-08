@@ -29,11 +29,13 @@ import { DataTableToolbar } from "./data-table-toolbar";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  meta?: any
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  ...props
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -47,6 +49,7 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       columnFilters,
     },
+    meta: props.meta,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,

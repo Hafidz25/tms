@@ -1,5 +1,5 @@
 import { Ellipsis } from "lucide-react";
-import { Row } from "@tanstack/react-table";
+import { CellContext, Row } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,14 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface DataTableRowActionsProps<TData> {
-  row: Row<TData>;
-}
-
 export function DataTableRowActions<TData>({
-  row,
-}: DataTableRowActionsProps<TData>) {
-
+  table,
+}: CellContext<TData, unknown>) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -33,9 +28,7 @@ export function DataTableRowActions<TData>({
         <DropdownMenuItem>Edit</DropdownMenuItem>
         <DropdownMenuItem>Detail</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          Delete
-        </DropdownMenuItem>
+        <DropdownMenuItem>Delete</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
