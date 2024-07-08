@@ -7,7 +7,7 @@
     "build": "next build && prisma generate",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "test": "vitest"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.4.2",
@@ -34,7 +34,9 @@
     "@radix-ui/react-toggle-group": "^1.0.4",
     "@radix-ui/react-toolbar": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.0.7",
-    "@supabase/supabase-js": "^2.43.6",
+    "@tanstack/react-query": "^5.40.1",
+    "@tanstack/react-query-next-experimental": "^5.40.1",
+    "@tanstack/react-table": "^8.17.3",
     "@udecode/cn": "^33.0.0",
     "@udecode/plate": "^33.0.6",
     "@udecode/plate-alignment": "^33.0.6",
@@ -106,19 +108,23 @@
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
     "@hookform/devtools": "^4.3.1",
-    "@types/bcrypt": "^5.0.2",
+    "@tanstack/react-query-devtools": "^5.40.1",
+    "@testing-library/jest-dom": "^6.4.6",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.3",
+    "jsdom": "^24.1.0",
     "lodash-es": "^4.17.21",
     "postcss": "^8",
     "prisma": "^5.14.0",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.11.0",
     "typescript": "^5",
-    "xlsx-style": "^0.8.13"
+    "vitest": "^1.6.0"
   }
 }
