@@ -111,12 +111,9 @@ export const columns: ColumnDef<Brief>[] = [
 
   {
     id: "actions",
-    cell: ({ row }) => (
+    cell: ({ row, ...props }) => (
       <div className="flex w-[80px] justify-end">
-        {
-          //@ts-ignore
-          <DataTableRowActions dataId={row.original.id} />
-        }
+        <DataTableRowActions row={row} {...props} />
       </div>
     ),
   },

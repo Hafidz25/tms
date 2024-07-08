@@ -1,6 +1,6 @@
 "use client";
 import { Ellipsis } from "lucide-react";
-import { Row } from "@tanstack/react-table";
+import { CellContext, Row } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
 import {
