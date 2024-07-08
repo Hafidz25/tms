@@ -164,6 +164,8 @@ const BriefChart = () => {
   const resetFilter = () => {
     setBriefUser([]);
     setBriefMonth([]);
+    setBriefMonthDone([]);
+    setBriefMonthTotal([]);
     setSelect("");
   };
 
