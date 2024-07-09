@@ -233,12 +233,12 @@ const BriefChart = ({ users, briefs }: ChartProps) => {
           </div>
         ) : null}
         {briefMonth.length ? (
-          <div className="aspect-[16/9]">
+          <div>
             <ChartContainer
               config={{
-                desktop: {
+                brief: {
                   label: "Brief",
-                  color: "hsl(var(--chart-1))",
+                  color: "#020617",
                 },
               }}
             >
@@ -246,11 +246,12 @@ const BriefChart = ({ users, briefs }: ChartProps) => {
                 accessibilityLayer
                 data={briefMonth}
                 margin={{
-                  left: 28,
-                  right: 28,
+                  left: 20,
+                  right: 20,
+                  top: 12,
                 }}
               >
-                <CartesianGrid vertical={true} />
+                <CartesianGrid vertical={false} />
                 <XAxis
                   dataKey="week"
                   tickLine={false}
@@ -260,7 +261,7 @@ const BriefChart = ({ users, briefs }: ChartProps) => {
                 />
                 <ChartTooltip
                   cursor={false}
-                  content={<ChartTooltipContent />}
+                  content={<ChartTooltipContent indicator="line" />}
                 />
                 <Line
                   dataKey="brief"
