@@ -23,6 +23,8 @@ import { Roles, User } from "@/types/user";
 import { Brief } from "@/types/briefs";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useState } from "react";
+import { SpokeSpinner } from "@/components/ui/spinner";
 
 const CURRENT_SEGMENT_ROUTE = "/dashboard/briefs";
 
@@ -35,6 +37,8 @@ export function DataTableRowActions<TData>({
   table,
   row,
 }: CellContext<TData, unknown>) {
+  const [isLoading, setIsLoading] = useState(false);
+
   const user = table.options.meta?.user;
   const rawData = row.original as Brief;
 
@@ -74,8 +78,19 @@ export function DataTableRowActions<TData>({
 
       <DropdownMenuContent align="end" className="w-[160px]">
         <DropdownMenuItem>
-          <Link href={CURRENT_SEGMENT_ROUTE + `/${dataId}`} className="w-full">
-            Detail
+          <Link
+            onClick={() => setIsLoading(true)}
+            href={CURRENT_SEGMENT_ROUTE + `/${dataId}`}
+            className="w-full"
+          >
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <SpokeSpinner size="xs" />
+                Loading...
+              </div>
+            ) : (
+              "Detail"
+            )}
           </Link>
         </DropdownMenuItem>
 
