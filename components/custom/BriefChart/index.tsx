@@ -218,7 +218,7 @@ const BriefChart = () => {
                     />
                   </TooltipTrigger>
                   <TooltipContent side="right">
-                    <p>Refresh</p>
+                    <p>Reset filter</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
