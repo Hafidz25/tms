@@ -19,7 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Roles } from "@/types/user";
+import { Roles, User } from "@/types/user";
 import { Brief } from "@/types/briefs";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -31,8 +31,14 @@ interface DropdownMenuActionsProps
   dataId: string;
 }
 
-export function DataTableRowActions({ dataId }: DropdownMenuActionsProps) {
-  // console.log(data);
+export function DataTableRowActions<TData>({
+  table,
+  row,
+}: CellContext<TData, unknown>) {
+  const user = table.options.meta?.user;
+  const rawData = row.original as Brief;
+
+  const dataId = rawData.id;
 
   const handleDelete = async (dataId: string) => {
     try {
@@ -65,6 +71,7 @@ export function DataTableRowActions({ dataId }: DropdownMenuActionsProps) {
           <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent align="end" className="w-[160px]">
         <DropdownMenuItem>
           <Link href={CURRENT_SEGMENT_ROUTE + `/${dataId}`} className="w-full">
@@ -72,45 +79,51 @@ export function DataTableRowActions({ dataId }: DropdownMenuActionsProps) {
           </Link>
         </DropdownMenuItem>
 
-        <DropdownMenuItem>
-          <Link
-            href={CURRENT_SEGMENT_ROUTE + `/edit/${dataId}`}
-            className="w-full"
-          >
-            Edit
-          </Link>
-        </DropdownMenuItem>
+        {user?.role === "Admin" || user?.role === "Customer Service" ? (
+          <DropdownMenuItem>
+            <Link
+              href={CURRENT_SEGMENT_ROUTE + `/edit/${dataId}`}
+              className="w-full"
+            >
+              Edit
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
 
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Link href="" className="w-full">
-                Delete
-              </Link>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Delete data</DialogTitle>
-                <DialogDescription>
-                  Are you sure to delete this data?
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter className="mt-4">
-                <Button type="reset" variant="outline">
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  onClick={() => handleDelete(dataId)}
-                  variant="destructive"
-                >
-                  Delete
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </DropdownMenuItem>
+        {user?.role === "Admin" || user?.role === "Customer Service" ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Link href="" className="w-full">
+                    Delete
+                  </Link>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Delete data</DialogTitle>
+                    <DialogDescription>
+                      Are you sure to delete this data?
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter className="mt-4">
+                    <Button type="reset" variant="outline">
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      onClick={() => handleDelete(dataId)}
+                      variant="destructive"
+                    >
+                      Delete
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </DropdownMenuItem>
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

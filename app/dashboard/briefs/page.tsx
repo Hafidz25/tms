@@ -244,26 +244,24 @@ const Page = () => {
       });
   }, []);
 
+  const newBriefs =
+    userExist?.role === "Admin"
+      ? briefs
+      : userExist?.role === "Customer Service"
+      ? briefs.filter((data) => data.authorId === userExist.id)
+      : briefs.filter((data) =>
+          data.assign.find(({ id }) => id === userExist?.id)
+        );
+
   return load && loadSession ? (
-    userExist?.role === "Admin" ? (
-      <DashboardPanel>
-        <BriefsTable data={briefs} />
-      </DashboardPanel>
-    ) : userExist?.role === "Customer Service" ? (
-      <DashboardPanel>
-        <BriefsTable
-          data={briefs.filter((data) => data.authorId === userExist.id)}
-        />
-      </DashboardPanel>
-    ) : (
-      <DashboardPanel>
-        <BriefsTable
-          data={briefs.filter((data) =>
-            data.assign.find(({ id }) => id === userExist?.id)
-          )}
-        />
-      </DashboardPanel>
-    )
+    <DashboardPanel>
+      <BriefsTable
+        data={newBriefs}
+        meta={{
+          user: userExist,
+        }}
+      />
+    </DashboardPanel>
   ) : (
     <div className="flex justify-center items-center h-screen">
       <div className="flex items-center gap-2">
