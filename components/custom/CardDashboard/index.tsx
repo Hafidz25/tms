@@ -10,63 +10,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PackageCheck, BriefcaseBusiness, Headset, Users } from "lucide-react";
+import { User } from "@/types/user";
+import { Brief } from "@/types/briefs";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
+interface CardProps {
+  users: User[];
+  briefs: Brief[];
+  userExist: User;
 }
 
-interface Brief {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  deadline: {
-    from: string;
-    to: string;
-  };
-  assign: [
-    {
-      id: string;
-      name: string;
-      email: string;
-      role: string;
-    }
-  ];
-  feedback: [];
-  createdAt: string;
-}
-
-const CardDashboard = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [briefs, setBriefs] = useState<Brief[]>([]);
-  const [userExist, setUserExist] = useState<User>();
-  const [load, setLoad] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/users")
-      .then((response) => response.json())
-      .then((data) => {
-        setUsers(data.data);
-        setLoad(true);
-      });
-    fetch("/api/briefs")
-      .then((response) => response.json())
-      .then((data) => {
-        setBriefs(data.data);
-        setLoad(true);
-      });
-    fetch(`/api/auth/session`)
-      .then((response) => response.json())
-      .then((data) => {
-        setUserExist(data.user);
-        setLoad(true);
-      });
-  }, []);
-
-  return load ? (
+const CardDashboard = ({ users, briefs, userExist }: CardProps) => {
+  return (
     <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
       <Card x-chunk="dashboard-01-chunk-0">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -137,7 +91,6 @@ const CardDashboard = () => {
         </CardContent>
       </Card>
     </div>
-  ) : null;
+  );
 };
-
 export default CardDashboard;

@@ -38,28 +38,17 @@ interface BriefMonth {
   brief: number;
 }
 
-const BriefChart = () => {
-  const [briefs, setBriefs] = useState<Brief[]>([]);
+interface ChartProps {
+  users: User[];
+  briefs: Brief[];
+}
+
+const BriefChart = ({ users, briefs }: ChartProps) => {
   const [briefUser, setBriefUser] = useState<Brief[]>([]);
   const [briefMonthTotal, setBriefMonthTotal] = useState<Brief[]>([]);
   const [briefMonthDone, setBriefMonthDone] = useState<Brief[]>([]);
   const [briefMonth, setBriefMonth] = useState<BriefMonth[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
   const [select, setSelect] = useState<string>("");
-  // console.log(briefMonth);
-
-  useEffect(() => {
-    fetch("/api/briefs")
-      .then((response) => response.json())
-      .then((data) => {
-        setBriefs(data.data);
-      });
-    fetch("/api/users")
-      .then((response) => response.json())
-      .then((data) => {
-        setUsers(data.data);
-      });
-  }, []);
 
   const month = [
     {
