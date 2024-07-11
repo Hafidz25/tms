@@ -81,6 +81,9 @@ export function DataTableToolbar<TData>({
   const [briefs, setBriefs] = useState<Brief[]>([]);
   const [users, setUsers] = useState<User[]>([]);
 
+  const user = table.options.meta?.user;
+  // console.log(user?.role);
+
   useEffect(() => {
     fetch("/api/briefs")
       .then((response) => response.json())
@@ -272,89 +275,93 @@ export function DataTableToolbar<TData>({
         )}
       </div>
 
-      <div className="flex items-center gap-2">
-        {users.length ? (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button size="sm" className="h-8 gap-1" variant="outline">
-                <FileDown className="w-4 h-4" />
-                Export
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Export data brief</DialogTitle>
-              </DialogHeader>
-              <form
-                onSubmit={handleSubmit(handleExport)}
-                className="grid gap-4 py-4"
-              >
-                <Controller
-                  control={control}
-                  name="userId"
-                  render={({ field }) => (
-                    <Select onValueChange={(value) => field.onChange(value)}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select user" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {users
-                          .filter((data) => data.role === "Team Member")
-                          .map((data) => (
-                            <SelectItem value={data.id}>{data.name}</SelectItem>
+      {user?.role === "Admin" || user?.role === "Customer Service" ? (
+        <div className="flex items-center gap-2">
+          {users.length ? (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="sm" className="h-8 gap-1" variant="outline">
+                  <FileDown className="w-4 h-4" />
+                  Export
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Export data brief</DialogTitle>
+                </DialogHeader>
+                <form
+                  onSubmit={handleSubmit(handleExport)}
+                  className="grid gap-4 py-4"
+                >
+                  <Controller
+                    control={control}
+                    name="userId"
+                    render={({ field }) => (
+                      <Select onValueChange={(value) => field.onChange(value)}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select user" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {users
+                            .filter((data) => data.role === "Team Member")
+                            .map((data) => (
+                              <SelectItem value={data.id}>
+                                {data.name}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="month"
+                    render={({ field }) => (
+                      <Select onValueChange={(value) => field.onChange(value)}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select month" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {month.map((data) => (
+                            <SelectItem value={data.value}>
+                              {data.label}
+                            </SelectItem>
                           ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="month"
-                  render={({ field }) => (
-                    <Select onValueChange={(value) => field.onChange(value)}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select month" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {month.map((data) => (
-                          <SelectItem value={data.value}>
-                            {data.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                <Button type="submit">Export</Button>
-              </form>
-            </DialogContent>
-          </Dialog>
-        ) : null}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  <Button type="submit">Export</Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          ) : null}
 
-        <Link href="/dashboard/briefs/create">
-          <Button
-            size="sm"
-            className="h-8 gap-1"
-            onClick={() => setIsLoading(true)}
-            disabled={isLoading}
-            variant="default"
-          >
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <SpokeSpinner size="sm" />
-                  Loading...
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <PlusCircle className="w-4 h-4" />
-                  Add Brief
-                </div>
-              )}
-            </span>
-          </Button>
-        </Link>
-      </div>
+          <Link href="/dashboard/briefs/create">
+            <Button
+              size="sm"
+              className="h-8 gap-1"
+              onClick={() => setIsLoading(true)}
+              disabled={isLoading}
+              variant="default"
+            >
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <SpokeSpinner size="sm" />
+                    Loading...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <PlusCircle className="w-4 h-4" />
+                    Add Brief
+                  </div>
+                )}
+              </span>
+            </Button>
+          </Link>
+        </div>
+      ) : null}
     </div>
   );
 }
