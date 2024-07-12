@@ -103,12 +103,50 @@ const BriefChart = ({ users, briefs }: ChartProps) => {
 
   const filterBriefUser = (userId: string) => {
     // console.log(userId);
-    setBriefUser(
-      briefs.filter((data) => data.assign.find(({ id }) => id === userId))
+    const briefUserData = briefs.filter((data) =>
+      data.assign.find(({ id }) => id === userId)
     );
+    setBriefUser(briefUserData);
     setSelect(userId);
 
-    // filterBriefMonth(getMonth(new Date()).toString());
+    const filterMonth = briefUserData.filter(
+      (brief) =>
+        getMonth(new Date(brief.createdAt)).toString() ===
+          getMonth(Date()).toString() && brief.status === "Done"
+    );
+
+    setBriefMonthDone(filterMonth);
+    setBriefMonthTotal(
+      briefUserData.filter(
+        (brief) =>
+          getMonth(new Date(brief.createdAt)).toString() ===
+          getMonth(Date()).toString()
+      )
+    );
+
+    const getDateBrief = filterMonth.map((data) => {
+      return {
+        date: getDate(new Date(data.createdAt)),
+      };
+    });
+
+    const week1 = getDateBrief.filter(
+      (data) => data.date > 0 && data.date <= 7
+    ).length;
+    const week2 = getDateBrief.filter(
+      (data) => data.date > 7 && data.date <= 14
+    ).length;
+    const week3 = getDateBrief.filter(
+      (data) => data.date > 14 && data.date <= 21
+    ).length;
+    const week4 = getDateBrief.filter((data) => data.date > 21).length;
+
+    setBriefMonth([
+      { week: "Week 1", brief: week1 },
+      { week: "Week 2", brief: week2 },
+      { week: "Week 3", brief: week3 },
+      { week: "Week 4", brief: week4 },
+    ]);
   };
 
   const filterBriefMonth = (month: string) => {
@@ -171,7 +209,10 @@ const BriefChart = ({ users, briefs }: ChartProps) => {
           <div className="flex flex-wrap items-center gap-3">
             <Select
               disabled={briefUser.length ? true : false}
-              onValueChange={(value) => filterBriefUser(value)}
+              onValueChange={(value) => {
+                filterBriefUser(value);
+                // filterBriefMonth(getMonth(Date()).toString());
+              }}
               value={select}
             >
               <SelectTrigger className="w-[120px]">
@@ -186,7 +227,10 @@ const BriefChart = ({ users, briefs }: ChartProps) => {
               </SelectContent>
             </Select>
             {briefUser.length ? (
-              <Select onValueChange={(value) => filterBriefMonth(value)}>
+              <Select
+                onValueChange={(value) => filterBriefMonth(value)}
+                defaultValue={getMonth(Date()).toString()}
+              >
                 <SelectTrigger className="w-[120px]">
                   <SelectValue placeholder="Month" />
                 </SelectTrigger>
