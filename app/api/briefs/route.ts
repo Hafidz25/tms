@@ -36,9 +36,20 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      const author = await db.user.findUnique({
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          briefs: true,
+        },
+        where: { id: authorId },
+      });
+
       const newBriefNotif = await db.briefNotification.create({
         data: {
-          message: `New brief ${newBrief.title.italics()} just added`,
+          message: `${author?.name.italics()} just added a new brief ${newBrief.title.italics()}`,
           briefId: newBrief.id,
           assign: { connect: assign },
         },
