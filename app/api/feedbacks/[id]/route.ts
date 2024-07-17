@@ -54,7 +54,8 @@ export async function PATCH(
 
   if (
     session?.user.role === "Admin" ||
-    session?.user.role === "Customer Service"
+    session?.user.role === "Customer Service" ||
+    session?.user.role === "Team Member"
   ) {
     const body = await req.json();
     const { content, briefId, userId, isEdited, status } = body;

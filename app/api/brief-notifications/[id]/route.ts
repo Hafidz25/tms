@@ -17,35 +17,33 @@ export async function DELETE(
 ) {
   const session = await getServerSession(authOption);
 
-  const briefNotif = await db.briefNotification.delete({
-    where: { id: params.id },
-  });
+  if (
+    session?.user.role === "Admin" ||
+    session?.user.role === "Customer Service" ||
+    session?.user.role === "Team Member"
+  ) {
+    const briefNotif = await db.briefNotification.delete({
+      where: { id: params.id },
+    });
 
-  return NextResponse.json(
-    {
-      success: true,
-      message: "Delete brief notification successfully",
-      data: briefNotif,
-    },
-    {
-      status: 200,
-    }
-  );
-
-  // if (
-  //   session?.user.role === "Admin" ||
-  //   session?.user.role === "Customer Service" ||
-  //   session?.user.role === "Team Member"
-  // ) {
-
-  // } else {
-  //   return NextResponse.json(
-  //     { error: "You dont have access" },
-  //     {
-  //       status: 403,
-  //     }
-  //   );
-  // }
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Delete brief notification successfully",
+        data: briefNotif,
+      },
+      {
+        status: 200,
+      }
+    );
+  } else {
+    return NextResponse.json(
+      { error: "You dont have access" },
+      {
+        status: 403,
+      }
+    );
+  }
 }
 
 export async function PATCH(
@@ -54,39 +52,37 @@ export async function PATCH(
 ) {
   const session = await getServerSession(authOption);
 
-  const body = await req.json();
-  const { read } = body;
+  if (
+    session?.user.role === "Admin" ||
+    session?.user.role === "Customer Service" ||
+    session?.user.role === "Team Member"
+  ) {
+    const body = await req.json();
+    const { read } = body;
 
-  const briefNotif = await db.briefNotification.update({
-    where: { id: params.id },
-    data: {
-      read: read,
-    },
-  });
+    const briefNotif = await db.briefNotification.update({
+      where: { id: params.id },
+      data: {
+        read: read,
+      },
+    });
 
-  return NextResponse.json(
-    {
-      success: true,
-      message: "Brief norification update successfully",
-      data: briefNotif,
-    },
-    {
-      status: 200,
-    }
-  );
-
-  // if (
-  //   session?.user.role === "Admin" ||
-  //   session?.user.role === "Customer Service" ||
-  //   session?.user.role === "Team Member"
-  // ) {
-
-  // } else {
-  //   return NextResponse.json(
-  //     { error: "You dont have access" },
-  //     {
-  //       status: 403,
-  //     }
-  //   );
-  // }
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Brief norification update successfully",
+        data: briefNotif,
+      },
+      {
+        status: 200,
+      }
+    );
+  } else {
+    return NextResponse.json(
+      { error: "You dont have access" },
+      {
+        status: 403,
+      }
+    );
+  }
 }

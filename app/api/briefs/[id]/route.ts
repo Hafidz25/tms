@@ -105,56 +105,54 @@ export async function GET(
 ) {
   const session = await getServerSession(authOption);
 
-  try {
-    //get all posts
-    const briefs = await db.brief.findUnique({
-      select: {
-        id: true,
-        title: true,
-        deadline: true,
-        content: true,
-        status: true,
-        assign: true,
-        authorId: true,
-        feedback: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      where: { id: params.id },
-    });
+  if (
+    session?.user.role === "Admin" ||
+    session?.user.role === "Customer Service" ||
+    session?.user.role === "Team Member"
+  ) {
+    try {
+      //get all posts
+      const briefs = await db.brief.findUnique({
+        select: {
+          id: true,
+          title: true,
+          deadline: true,
+          content: true,
+          status: true,
+          assign: true,
+          authorId: true,
+          feedback: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        where: { id: params.id },
+      });
 
-    //return response JSON
+      //return response JSON
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Data Briefs",
+          data: briefs,
+        },
+        {
+          status: 200,
+        }
+      );
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Internal Server Error", message: error },
+        {
+          status: 500,
+        }
+      );
+    }
+  } else {
     return NextResponse.json(
+      { error: "You dont have access" },
       {
-        success: true,
-        message: "Data Briefs",
-        data: briefs,
-      },
-      {
-        status: 200,
-      }
-    );
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Internal Server Error", message: error },
-      {
-        status: 500,
+        status: 403,
       }
     );
   }
-
-  // if (
-  //   session?.user.role === "Admin" ||
-  //   session?.user.role === "Customer Service" ||
-  //   session?.user.role === "Team Member"
-  // ) {
-
-  // } else {
-  //   return NextResponse.json(
-  //     { error: "You dont have access" },
-  //     {
-  //       status: 403,
-  //     }
-  //   );
-  // }
 }
