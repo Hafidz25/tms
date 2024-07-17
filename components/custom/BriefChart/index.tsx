@@ -40,10 +40,11 @@ interface BriefMonth {
 
 interface ChartProps {
   users: User[];
+  userExist: User;
   briefs: Brief[];
 }
 
-const BriefChart = ({ users, briefs }: ChartProps) => {
+const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
   const [briefUser, setBriefUser] = useState<Brief[]>([]);
   const [briefMonthTotal, setBriefMonthTotal] = useState<Brief[]>([]);
   const [briefMonthDone, setBriefMonthDone] = useState<Brief[]>([]);
@@ -100,6 +101,12 @@ const BriefChart = ({ users, briefs }: ChartProps) => {
       label: "Dec",
     },
   ];
+
+  useEffect(() => {
+    if (userExist.role === "Team Member") {
+      filterBriefUser(userExist.id);
+    }
+  }, []);
 
   const filterBriefUser = (userId: string) => {
     // console.log(userId);
@@ -211,8 +218,8 @@ const BriefChart = ({ users, briefs }: ChartProps) => {
               disabled={briefUser.length ? true : false}
               onValueChange={(value) => {
                 filterBriefUser(value);
-                // filterBriefMonth(getMonth(Date()).toString());
               }}
+              defaultValue="clxwp751h0007gxqmk3hi6pt5"
               value={select}
             >
               <SelectTrigger className="w-[120px]">
@@ -241,7 +248,7 @@ const BriefChart = ({ users, briefs }: ChartProps) => {
                 </SelectContent>
               </Select>
             ) : null}
-            {briefMonth.length ? (
+            {briefMonth.length && userExist.role !== "Team Member" ? (
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger>

@@ -38,7 +38,7 @@ export default async function Page() {
       {load ? (
         <>
           <CardDashboard users={users} briefs={briefs} userExist={userExist} />
-          <BriefChart briefs={briefs} users={users} />
+          <BriefChart briefs={briefs} users={users} userExist={userExist} />
         </>
       ) : null}
     </div>
