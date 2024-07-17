@@ -258,7 +258,9 @@ const BriefChart = ({ users, briefs }: ChartProps) => {
             ) : null}
           </div>
         </div>
-        {briefMonthDone.length && briefMonthTotal.length ? (
+        {briefMonthDone.length ||
+        briefMonthTotal.length ||
+        briefMonth.length ? (
           <div className="flex gap-4 items-center">
             <Badge
               variant="outline"
