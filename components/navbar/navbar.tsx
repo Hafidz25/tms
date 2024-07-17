@@ -267,12 +267,8 @@ function Navbar({ user }: any) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ read: true }),
       });
-      // console.log(response);
+
       if (response.status === 200) {
-        // toast({
-        //   title: "Success",
-        //   description: "Notification read successfully.",
-        // });
         await fetch(`/api/brief-notifications`)
           .then((response) => response.json())
           .then((data) => {
@@ -282,8 +278,6 @@ function Navbar({ user }: any) {
         briefId
           ? Router.push(`/dashboard/briefs/${briefId}`)
           : Router.refresh();
-        // Router.refresh();
-        // location.reload();
       }
       return response;
     } catch (error) {
@@ -294,8 +288,6 @@ function Navbar({ user }: any) {
       });
     }
   };
-
-  // console.log(briefNotif);
 
   return (
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-8 z-50">
@@ -363,59 +355,10 @@ function Navbar({ user }: any) {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="all">
-                      <ScrollArea className="h-96 rounded-md">
-                        <div className="flex flex-col gap-2">
-                          {briefNotif.map((data) => (
-                            <Card
-                              className={
-                                data.read === false
-                                  ? "bg-slate-50 cursor-pointer"
-                                  : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
-                              }
-                              key={data.id}
-                              onClick={() => updateNotif(data.id, data.briefId)}
-                            >
-                              <CardHeader className="p-4">
-                                <CardDescription>
-                                  <div className="flex gap-4 items-start w-full">
-                                    <div className="bg-slate-100 p-4 rounded-md">
-                                      <Package2 className="h-6 w-6" />
-                                    </div>
-                                    <div className="w-full">
-                                      <div
-                                        className="text-black text-md"
-                                        dangerouslySetInnerHTML={{
-                                          __html: data.message,
-                                        }}
-                                      >
-                                        {/* {data.message} */}
-                                        {/* {data.assign
-                                        .map((user) => user.name)
-                                        .join(", ")} */}
-                                      </div>
-                                      <span className="text-xs font-normal">
-                                        {formatDistanceToNow(data.createdAt)}
-                                      </span>
-                                    </div>
-                                    {data.read === false ? (
-                                      <div className="flex justify-end">
-                                        <Badge>New</Badge>
-                                      </div>
-                                    ) : null}
-                                  </div>
-                                </CardDescription>
-                              </CardHeader>
-                            </Card>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </TabsContent>
-                    <TabsContent value="unread">
-                      <ScrollArea className="h-96 rounded-md">
-                        <div className="flex flex-col gap-2">
-                          {briefNotif
-                            .filter((data) => data.read === false)
-                            .map((data) => (
+                      <ScrollArea className="max-h-96 rounded-md">
+                        {briefNotif.length ? (
+                          <div className="flex flex-col gap-2">
+                            {briefNotif.map((data) => (
                               <Card
                                 className={
                                   data.read === false
@@ -442,8 +385,8 @@ function Navbar({ user }: any) {
                                         >
                                           {/* {data.message} */}
                                           {/* {data.assign
-                                          .map((user) => user.name)
-                                          .join(", ")} */}
+                                        .map((user) => user.name)
+                                        .join(", ")} */}
                                         </div>
                                         <span className="text-xs font-normal">
                                           {formatDistanceToNow(data.createdAt)}
@@ -459,7 +402,73 @@ function Navbar({ user }: any) {
                                 </CardHeader>
                               </Card>
                             ))}
-                        </div>
+                          </div>
+                        ) : (
+                          <div className="flex justify-center items-center font-medium my-4 text-slate-400">
+                            No result
+                          </div>
+                        )}
+                      </ScrollArea>
+                    </TabsContent>
+                    <TabsContent value="unread">
+                      <ScrollArea className="max-h-96 rounded-md">
+                        {briefNotif.filter((data) => data.read === false)
+                          .length ? (
+                          <div className="flex flex-col gap-2">
+                            {briefNotif
+                              .filter((data) => data.read === false)
+                              .map((data) => (
+                                <Card
+                                  className={
+                                    data.read === false
+                                      ? "bg-slate-50 cursor-pointer"
+                                      : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
+                                  }
+                                  key={data.id}
+                                  onClick={() =>
+                                    updateNotif(data.id, data.briefId)
+                                  }
+                                >
+                                  <CardHeader className="p-4">
+                                    <CardDescription>
+                                      <div className="flex gap-4 items-start w-full">
+                                        <div className="bg-slate-100 p-4 rounded-md">
+                                          <Package2 className="h-6 w-6" />
+                                        </div>
+                                        <div className="w-full">
+                                          <div
+                                            className="text-black text-md"
+                                            dangerouslySetInnerHTML={{
+                                              __html: data.message,
+                                            }}
+                                          >
+                                            {/* {data.message} */}
+                                            {/* {data.assign
+                                          .map((user) => user.name)
+                                          .join(", ")} */}
+                                          </div>
+                                          <span className="text-xs font-normal">
+                                            {formatDistanceToNow(
+                                              data.createdAt
+                                            )}
+                                          </span>
+                                        </div>
+                                        {data.read === false ? (
+                                          <div className="flex justify-end">
+                                            <Badge>New</Badge>
+                                          </div>
+                                        ) : null}
+                                      </div>
+                                    </CardDescription>
+                                  </CardHeader>
+                                </Card>
+                              ))}
+                          </div>
+                        ) : (
+                          <div className="flex justify-center items-center font-medium my-4 text-slate-400">
+                            No result
+                          </div>
+                        )}
                       </ScrollArea>
                     </TabsContent>
                   </Tabs>
@@ -514,115 +523,139 @@ function Navbar({ user }: any) {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="all">
-                      <ScrollArea className="h-96 rounded-md">
-                        <div className="flex flex-col gap-2">
-                          {briefNotif
-                            .filter((data) =>
-                              data.assign.find(({ id }) => id === user?.user.id)
-                            )
-                            .map((data) => (
-                              <Card
-                                className={
-                                  data.read === false
-                                    ? "bg-slate-50 cursor-pointer"
-                                    : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
-                                }
-                                key={data.id}
-                                onClick={() =>
-                                  updateNotif(data.id, data.briefId)
-                                }
-                              >
-                                <CardHeader className="p-4">
-                                  <CardDescription>
-                                    <div className="flex gap-4 items-start w-full">
-                                      <div className="bg-slate-100 p-4 rounded-md">
-                                        <Package2 className="h-6 w-6" />
-                                      </div>
-                                      <div className="w-full">
-                                        <div
-                                          className="text-black text-md"
-                                          dangerouslySetInnerHTML={{
-                                            __html: data.message,
-                                          }}
-                                        >
-                                          {/* {data.message} */}
-                                          {/* {data.assign
-                                        .map((user) => user.name)
-                                        .join(", ")} */}
-                                        </div>
-                                        <span className="text-xs font-normal">
-                                          {formatDistanceToNow(data.createdAt)}
-                                        </span>
-                                      </div>
-                                      {data.read === false ? (
-                                        <div className="flex justify-end">
-                                          <Badge>New</Badge>
-                                        </div>
-                                      ) : null}
-                                    </div>
-                                  </CardDescription>
-                                </CardHeader>
-                              </Card>
-                            ))}
-                        </div>
-                      </ScrollArea>
-                    </TabsContent>
-                    <TabsContent value="unread">
-                      <ScrollArea className="h-96 rounded-md">
-                        <div className="flex flex-col gap-2">
-                          {briefNotif
-                            .filter(
-                              (data) =>
-                                data.read === false &&
+                      <ScrollArea className="max-h-96 rounded-md">
+                        {briefNotif.filter((data) =>
+                          data.assign.find(({ id }) => id === user?.user.id)
+                        ).length ? (
+                          <div className="flex flex-col gap-2">
+                            {briefNotif
+                              .filter((data) =>
                                 data.assign.find(
                                   ({ id }) => id === user?.user.id
                                 )
-                            )
-                            .map((data) => (
-                              <Card
-                                className={
-                                  data.read === false
-                                    ? "bg-slate-50 cursor-pointer"
-                                    : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
-                                }
-                                key={data.id}
-                                onClick={() =>
-                                  updateNotif(data.id, data.briefId)
-                                }
-                              >
-                                <CardHeader className="p-4">
-                                  <CardDescription>
-                                    <div className="flex gap-4 items-start w-full">
-                                      <div className="bg-slate-100 p-4 rounded-md">
-                                        <Package2 className="h-6 w-6" />
+                              )
+                              .map((data) => (
+                                <Card
+                                  className={
+                                    data.read === false
+                                      ? "bg-slate-50 cursor-pointer"
+                                      : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
+                                  }
+                                  key={data.id}
+                                  onClick={() =>
+                                    updateNotif(data.id, data.briefId)
+                                  }
+                                >
+                                  <CardHeader className="p-4">
+                                    <CardDescription>
+                                      <div className="flex gap-4 items-start w-full">
+                                        <div className="bg-slate-100 p-4 rounded-md">
+                                          <Package2 className="h-6 w-6" />
+                                        </div>
+                                        <div className="w-full">
+                                          <div
+                                            className="text-black text-md"
+                                            dangerouslySetInnerHTML={{
+                                              __html: data.message,
+                                            }}
+                                          >
+                                            {/* {data.message} */}
+                                            {/* {data.assign
+                                        .map((user) => user.name)
+                                        .join(", ")} */}
+                                          </div>
+                                          <span className="text-xs font-normal">
+                                            {formatDistanceToNow(
+                                              data.createdAt
+                                            )}
+                                          </span>
+                                        </div>
+                                        {data.read === false ? (
+                                          <div className="flex justify-end">
+                                            <Badge>New</Badge>
+                                          </div>
+                                        ) : null}
                                       </div>
-                                      <div className="w-full">
-                                        <div
-                                          className="text-black text-md"
-                                          dangerouslySetInnerHTML={{
-                                            __html: data.message,
-                                          }}
-                                        >
-                                          {/* {data.message} */}
-                                          {/* {data.assign
+                                    </CardDescription>
+                                  </CardHeader>
+                                </Card>
+                              ))}
+                          </div>
+                        ) : (
+                          <div className="flex justify-center items-center font-medium my-4 text-slate-400">
+                            No result
+                          </div>
+                        )}
+                      </ScrollArea>
+                    </TabsContent>
+                    <TabsContent value="unread">
+                      <ScrollArea className="max-h-96 rounded-md">
+                        {briefNotif.filter(
+                          (data) =>
+                            data.read === false &&
+                            data.assign.find(({ id }) => id === user?.user.id)
+                        ).length ? (
+                          <div className="flex flex-col gap-2">
+                            {briefNotif
+                              .filter(
+                                (data) =>
+                                  data.read === false &&
+                                  data.assign.find(
+                                    ({ id }) => id === user?.user.id
+                                  )
+                              )
+                              .map((data) => (
+                                <Card
+                                  className={
+                                    data.read === false
+                                      ? "bg-slate-50 cursor-pointer"
+                                      : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
+                                  }
+                                  key={data.id}
+                                  onClick={() =>
+                                    updateNotif(data.id, data.briefId)
+                                  }
+                                >
+                                  <CardHeader className="p-4">
+                                    <CardDescription>
+                                      <div className="flex gap-4 items-start w-full">
+                                        <div className="bg-slate-100 p-4 rounded-md">
+                                          <Package2 className="h-6 w-6" />
+                                        </div>
+                                        <div className="w-full">
+                                          <div
+                                            className="text-black text-md"
+                                            dangerouslySetInnerHTML={{
+                                              __html: data.message,
+                                            }}
+                                          >
+                                            {/* {data.message} */}
+                                            {/* {data.assign
                                           .map((user) => user.name)
                                           .join(", ")} */}
+                                          </div>
+                                          <span className="text-xs font-normal">
+                                            {formatDistanceToNow(
+                                              data.createdAt
+                                            )}
+                                          </span>
                                         </div>
-                                        <span className="text-xs font-normal">
-                                          {formatDistanceToNow(data.createdAt)}
-                                        </span>
+                                        {data.read === false ? (
+                                          <div className="flex justify-end">
+                                            <Badge>New</Badge>
+                                          </div>
+                                        ) : null}
                                       </div>
-                                      {data.read === false ? (
-                                        <div className="flex justify-end">
-                                          <Badge>New</Badge>
-                                        </div>
-                                      ) : null}
-                                    </div>
-                                  </CardDescription>
-                                </CardHeader>
-                              </Card>
-                            ))}
-                        </div>
+                                    </CardDescription>
+                                  </CardHeader>
+                                </Card>
+                              ))}
+                          </div>
+                        ) : (
+                          <div className="flex justify-center items-center font-medium my-4 text-slate-400">
+                            No result
+                          </div>
+                        )}
                       </ScrollArea>
                     </TabsContent>
                   </Tabs>
