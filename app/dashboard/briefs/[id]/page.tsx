@@ -2,15 +2,21 @@
 
 import { useState, Fragment, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { addDays } from "date-fns";
-import { DateRange } from "react-day-picker";
-import { userList } from "@/data/user";
 import {
   Calendar,
   Users,
   CircleFadingPlus,
   PenTool,
   SendHorizonal,
+  Timer,
+  SearchX,
+  Clock,
+  CircleCheck,
+  FileSearch,
+  MessageSquareDiff,
+  ChevronLeft,
+  CornerRightDown,
+  Search,
 } from "lucide-react";
 
 import { DevTool } from "@hookform/devtools";
@@ -21,7 +27,6 @@ import { toast } from "sonner";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { ChevronLeft, CornerRightDown } from "lucide-react";
 import { PlateEditor } from "@/components/plate-ui/plate-editor";
 import { PlateEditorPreview } from "@/components/plate-ui/plate-editor-preview";
 import { Button } from "@/components/ui/button";
@@ -300,38 +305,92 @@ export default async function DetailBrief({
                   {userExist?.role === "Admin" ||
                   userExist?.role === "Customer Service" ? (
                     <SelectContent>
-                      <SelectItem value="Assigned">Assigned</SelectItem>
-                      <SelectItem value="In Review">In Review</SelectItem>
-                      <SelectItem value="Waiting for Client">
-                        Waiting for Client
+                      <SelectItem value="Assigned">
+                        <div className="flex items-center gap-2">
+                          <MessageSquareDiff className="w-3.5 h-3.5" />
+                          Assigned
+                        </div>
                       </SelectItem>
-                      <SelectItem value="Correction">Correction</SelectItem>
+                      <SelectItem value="In Review">
+                        <div className="flex items-center gap-2">
+                          <FileSearch className="w-3.5 h-3.5" />
+                          In Review
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Waiting for Client">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-3.5 h-3.5" />
+                          Waiting for Client
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Correction">
+                        <div className="flex items-center gap-2">
+                          <SearchX className="w-3.5 h-3.5" />
+                          Correction
+                        </div>
+                      </SelectItem>
                       <SelectItem value="In Progress" disabled>
-                        In Progress
+                        <div className="flex items-center gap-2">
+                          <Timer className="w-3.5 h-3.5" />
+                          In Progress
+                        </div>
                       </SelectItem>
                       <SelectItem value="Need Review" disabled>
-                        Need Review
+                        <div className="flex items-center gap-2">
+                          <Search className="w-3.5 h-3.5" />
+                          Need Review
+                        </div>
                       </SelectItem>
-                      <SelectItem value="Done">Done</SelectItem>
+                      <SelectItem value="Done">
+                        <div className="flex items-center gap-2">
+                          <CircleCheck className="w-3.5 h-3.5" />
+                          Done
+                        </div>
+                      </SelectItem>
                     </SelectContent>
                   ) : (
                     <SelectContent>
                       <SelectItem value="Assigned" disabled>
-                        Assigned
+                        <div className="flex items-center gap-2">
+                          <MessageSquareDiff className="w-3.5 h-3.5" />
+                          Assigned
+                        </div>
                       </SelectItem>
                       <SelectItem value="In Review" disabled>
-                        In Review
+                        <div className="flex items-center gap-2">
+                          <FileSearch className="w-3.5 h-3.5" />
+                          In Review
+                        </div>
                       </SelectItem>
                       <SelectItem value="Waiting for Client" disabled>
-                        Waiting for Client
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-3.5 h-3.5" />
+                          Waiting for Client
+                        </div>
                       </SelectItem>
                       <SelectItem value="Correction" disabled>
-                        Correction
+                        <div className="flex items-center gap-2">
+                          <SearchX className="w-3.5 h-3.5" />
+                          Correction
+                        </div>
                       </SelectItem>
-                      <SelectItem value="In Progress">In Progress</SelectItem>
-                      <SelectItem value="Need Review">Need Review</SelectItem>
+                      <SelectItem value="In Progress">
+                        <div className="flex items-center gap-2">
+                          <Timer className="w-3.5 h-3.5" />
+                          In Progress
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Need Review">
+                        <div className="flex items-center gap-2">
+                          <Search className="w-3.5 h-3.5" />
+                          Need Review
+                        </div>
+                      </SelectItem>
                       <SelectItem value="Done" disabled>
-                        Done
+                        <div className="flex items-center gap-2">
+                          <CircleCheck className="w-3.5 h-3.5" />
+                          Done
+                        </div>
                       </SelectItem>
                     </SelectContent>
                   )}

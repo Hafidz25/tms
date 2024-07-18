@@ -9,6 +9,16 @@ import { BriefsStatus } from "@/types/briefs";
 import { DataTableColumnHeader } from "./data-table-column-header"; // idk man
 import { DataTableRowActions } from "./data-table-row-actions";
 
+import {
+  Timer,
+  SearchX,
+  Clock,
+  CircleCheck,
+  FileSearch,
+  MessageSquareDiff,
+  Search,
+} from "lucide-react";
+
 interface Brief {
   id: string;
   title: string;
@@ -18,6 +28,25 @@ interface Brief {
 }
 
 const FORMAT_DATE = "LLL dd, y";
+
+const iconStatus = (status: BriefsStatus) => {
+  switch (status) {
+    case "Assigned":
+      return <MessageSquareDiff className="w-3.5 h-3.5" />;
+    case "In Review":
+      return <FileSearch className="w-3.5 h-3.5" />;
+    case "Waiting for Client":
+      return <Clock className="w-3.5 h-3.5" />;
+    case "Correction":
+      return <SearchX className="w-3.5 h-3.5" />;
+    case "In Progress":
+      return <Timer className="w-3.5 h-3.5" />;
+    case "Need Review":
+      return <Search className="w-3.5 h-3.5" />;
+    case "Done":
+      return <CircleCheck className="w-3.5 h-3.5" />;
+  }
+};
 
 function DeadlineFormat({ date }: { date: DateRange | undefined }) {
   if (!date) return "-";
@@ -71,7 +100,10 @@ export const columns: ColumnDef<Brief>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex w-[180px] items-center">
-        <Badge variant="outline">{row.getValue("status")}</Badge>
+        <Badge variant="outline" className="flex items-center gap-2">
+          {iconStatus(row.getValue("status"))}
+          {row.getValue("status")}
+        </Badge>
       </div>
     ),
     filterFn: (row, id, value) => {
