@@ -25,6 +25,7 @@ import {
   LogOut,
   Settings,
   User,
+  SearchX,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -355,7 +356,7 @@ function Navbar({ user }: any) {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="all">
-                      <ScrollArea className="max-h-96 rounded-md">
+                      <ScrollArea className="h-96 rounded-md">
                         {briefNotif.length ? (
                           <div className="flex flex-col gap-2">
                             {briefNotif.map((data) => (
@@ -404,14 +405,15 @@ function Navbar({ user }: any) {
                             ))}
                           </div>
                         ) : (
-                          <div className="flex justify-center items-center font-medium my-4 text-slate-400">
+                          <div className="flex flex-col justify-center h-96 items-center font-medium text-slate-400 gap-2">
+                            <SearchX className="h-12 w-12" />
                             No result
                           </div>
                         )}
                       </ScrollArea>
                     </TabsContent>
                     <TabsContent value="unread">
-                      <ScrollArea className="max-h-96 rounded-md">
+                      <ScrollArea className="h-96 rounded-md">
                         {briefNotif.filter((data) => data.read === false)
                           .length ? (
                           <div className="flex flex-col gap-2">
@@ -465,7 +467,8 @@ function Navbar({ user }: any) {
                               ))}
                           </div>
                         ) : (
-                          <div className="flex justify-center items-center font-medium my-4 text-slate-400">
+                          <div className="flex flex-col justify-center h-96 items-center font-medium text-slate-400 gap-2">
+                            <SearchX className="h-12 w-12" />
                             No result
                           </div>
                         )}
@@ -523,7 +526,7 @@ function Navbar({ user }: any) {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="all">
-                      <ScrollArea className="max-h-96 rounded-md">
+                      <ScrollArea className="h-96 rounded-md">
                         {briefNotif.filter((data) =>
                           data.assign.find(({ id }) => id === user?.user.id)
                         ).length ? (
@@ -582,14 +585,15 @@ function Navbar({ user }: any) {
                               ))}
                           </div>
                         ) : (
-                          <div className="flex justify-center items-center font-medium my-4 text-slate-400">
+                          <div className="flex flex-col justify-center h-96 items-center font-medium text-slate-400 gap-2">
+                            <SearchX className="h-12 w-12" />
                             No result
                           </div>
                         )}
                       </ScrollArea>
                     </TabsContent>
                     <TabsContent value="unread">
-                      <ScrollArea className="max-h-96 rounded-md">
+                      <ScrollArea className="h-96 rounded-md">
                         {briefNotif.filter(
                           (data) =>
                             data.read === false &&
@@ -652,7 +656,8 @@ function Navbar({ user }: any) {
                               ))}
                           </div>
                         ) : (
-                          <div className="flex justify-center items-center font-medium my-4 text-slate-400">
+                          <div className="flex flex-col justify-center h-96 items-center font-medium text-slate-400 gap-2">
+                            <SearchX className="h-12 w-12" />
                             No result
                           </div>
                         )}
