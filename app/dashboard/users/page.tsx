@@ -2,8 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 import Link from "next/link";
-import { MoreHorizontal, PlusCircle } from "lucide-react";
-import { userList } from "@/data/user";
+import { MoreHorizontal, PlusCircle, Trash2 } from "lucide-react";
 
 import { DashboardPanel } from "@/components/layouts/dashboard-panel";
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ShareDialog from "@/components/custom/ShareDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -130,7 +128,8 @@ function DropdownMenuActions({ data }: any) {
         <DropdownMenuItem>
           <Dialog>
             <DialogTrigger asChild>
-              <Link href="" className="w-full">
+              <Link href="" className="w-full flex items-center gap-2">
+                <Trash2 className="w-3.5 h-3.5" />
                 Delete
               </Link>
             </DialogTrigger>
@@ -157,16 +156,6 @@ function DropdownMenuActions({ data }: any) {
             </DialogContent>
           </Dialog>
         </DropdownMenuItem>
-        {/* <DropdownMenuItem>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Link href="" className="w-full">
-                Share
-              </Link>
-            </DialogTrigger>
-            <ShareDialog email={data.email} />
-          </Dialog>
-        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -211,10 +200,7 @@ function UsersPage() {
               className="h-8 gap-1"
               onClick={() => setIsLoading(true)}
               disabled={isLoading}
-              variant="expandIcon"
-              Icon={PlusCircle}
-              iconStyle="h-4 w-4"
-              iconPlacement="left"
+              variant="default"
             >
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                 {isLoading ? (
@@ -223,7 +209,10 @@ function UsersPage() {
                     Loading...
                   </div>
                 ) : (
-                  "Add User"
+                  <div className="flex items-center gap-2">
+                    <PlusCircle className="w-4 h-4" />
+                    Add Brief
+                  </div>
                 )}
               </span>
             </Button>

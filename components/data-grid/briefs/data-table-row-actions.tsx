@@ -1,5 +1,5 @@
 "use client";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, Eye, Pencil, Trash2 } from "lucide-react";
 import { CellContext, Row } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
@@ -89,7 +89,10 @@ export function DataTableRowActions<TData>({
                 Loading...
               </div>
             ) : (
-              "Detail"
+              <div className="flex items-center gap-2">
+                <Eye className="w-3.5 h-3.5" />
+                Detail
+              </div>
             )}
           </Link>
         </DropdownMenuItem>
@@ -98,8 +101,9 @@ export function DataTableRowActions<TData>({
           <DropdownMenuItem>
             <Link
               href={CURRENT_SEGMENT_ROUTE + `/edit/${dataId}`}
-              className="w-full"
+              className="w-full flex items-center gap-2"
             >
+              <Pencil className="w-3.5 h-3.5" />
               Edit
             </Link>
           </DropdownMenuItem>
@@ -111,7 +115,8 @@ export function DataTableRowActions<TData>({
             <DropdownMenuItem>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Link href="" className="w-full">
+                  <Link href="" className="w-full flex items-center gap-2">
+                    <Trash2 className="w-3.5 h-3.5" />
                     Delete
                   </Link>
                 </DialogTrigger>
