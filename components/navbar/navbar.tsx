@@ -216,7 +216,6 @@ interface User {
 
 // perlu refactor
 function Navbar({ user }: any) {
-  // const [briefNotif, setBriefNotif] = useState<BriefNotification[]>([]);
   const [load, setLoad] = useState(false);
   const { toast } = useToast();
   const Router = useRouter();
@@ -230,18 +229,6 @@ function Navbar({ user }: any) {
     BriefNotification[],
     Error
   >("/api/brief-notifications", fetcher);
-
-  // useEffect(() => {
-  //   const fetchNotif = async () => {
-  //     await fetch(`/api/brief-notifications`)
-  //       .then((response) => response.json())
-  //       .then((data) => {
-  //         setBriefNotif(data.data);
-  //         setLoad(true);
-  //       });
-  //   };
-  //   fetchNotif();
-  // }, []);
 
   const updateNotif = async (dataId: string, briefId: string) => {
     try {
