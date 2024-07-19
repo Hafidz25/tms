@@ -19,12 +19,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Roles, User } from "@/types/user";
+import { useRouter } from "next/navigation";
 import { Brief } from "@/types/briefs";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useState } from "react";
 import { SpokeSpinner } from "@/components/ui/spinner";
+import useSWR, { useSWRConfig } from "swr";
 
 const CURRENT_SEGMENT_ROUTE = "/dashboard/briefs";
 
@@ -38,6 +39,8 @@ export function DataTableRowActions<TData>({
   row,
 }: CellContext<TData, unknown>) {
   const [isLoading, setIsLoading] = useState(false);
+  const { mutate } = useSWRConfig();
+  const Router = useRouter();
 
   const user = table.options.meta?.user;
   const rawData = row.original as Brief;
@@ -53,8 +56,8 @@ export function DataTableRowActions<TData>({
 
       if (response.status === 200) {
         toast.success("Brief deleted successfully.");
-        // Router.refresh();
-        location.reload();
+        Router.refresh();
+        mutate("/api/briefs");
       } else if (response.status === 403) {
         toast.warning("You dont have access.");
       }

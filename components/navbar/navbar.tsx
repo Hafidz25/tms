@@ -61,6 +61,7 @@ import { signOut } from "next-auth/react";
 
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
+import useSWR, { useSWRConfig } from "swr";
 
 interface NavProp extends LinkProps {
   id?: string;
@@ -215,51 +216,32 @@ interface User {
 
 // perlu refactor
 function Navbar({ user }: any) {
-  const [briefNotif, setBriefNotif] = useState<BriefNotification[]>([]);
+  // const [briefNotif, setBriefNotif] = useState<BriefNotification[]>([]);
   const [load, setLoad] = useState(false);
   const { toast } = useToast();
   const Router = useRouter();
 
-  useEffect(() => {
-    const fetchNotif = async () => {
-      await fetch(`/api/brief-notifications`)
-        .then((response) => response.json())
-        .then((data) => {
-          setBriefNotif(data.data);
-          setLoad(true);
-        });
-    };
+  const fetcher = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.data);
 
-    // const fetchNotif = async () => {
-    //   const { data: BriefNotification, error } = await supabase
-    //     .from("BriefNotification")
-    //     .select("*, _BriefNotificationToUser(*, User(*))")
-    //     .order("createdAt", { ascending: false });
-    //   if (error) {
-    //     console.error("Error fetching posts:", error);
-    //   } else {
-    //     setBriefNotif(BriefNotification);
-    //     setLoad(true);
-    //   }
-    // };
-    fetchNotif();
+  const { data: briefNotif, error: usersError } = useSWR<
+    BriefNotification[],
+    Error
+  >("/api/brief-notifications", fetcher);
 
-    // const subscription = supabase
-    //   .channel("brief-notif-insert-channel")
-    //   .on(
-    //     "postgres_changes",
-    //     { event: "INSERT", schema: "public", table: "BriefNotification" },
-    //     (payload) => {
-    //       console.log("Change received!", payload);
-    //       setBriefNotif([...briefNotif, payload.new as BriefNotification]);
-    //     }
-    //   )
-    //   .subscribe();
-
-    // return () => {
-    //   supabase.removeChannel(subscription);
-    // };
-  }, []);
+  // useEffect(() => {
+  //   const fetchNotif = async () => {
+  //     await fetch(`/api/brief-notifications`)
+  //       .then((response) => response.json())
+  //       .then((data) => {
+  //         setBriefNotif(data.data);
+  //         setLoad(true);
+  //       });
+  //   };
+  //   fetchNotif();
+  // }, []);
 
   const updateNotif = async (dataId: string, briefId: string) => {
     try {
@@ -270,12 +252,6 @@ function Navbar({ user }: any) {
       });
 
       if (response.status === 200) {
-        await fetch(`/api/brief-notifications`)
-          .then((response) => response.json())
-          .then((data) => {
-            setBriefNotif(data.data);
-            setLoad(true);
-          });
         briefId
           ? Router.push(`/dashboard/briefs/${briefId}`)
           : Router.refresh();
@@ -317,7 +293,7 @@ function Navbar({ user }: any) {
       </Sheet>
 
       <div className="md:ml-auto flex gap-2 md:w-auto w-full justify-end">
-        {load ? (
+        {briefNotif ? (
           user?.user.role === "Admin" ||
           user?.user.role === "Customer Service" ? (
             <DropdownMenu>

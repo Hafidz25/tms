@@ -44,6 +44,7 @@ import { useRouter } from "next/navigation";
 import { SpokeSpinner } from "@/components/ui/spinner";
 import { PlateEditorFeedback } from "@/components/plate-ui/plate-editor-feedback";
 import { PlateEditorFeedbackEdit } from "@/components/plate-ui/plate-editor-feedback-edit";
+import useSWR, { useSWRConfig } from "swr";
 
 const Feedback = ({
   feedbackId,
@@ -63,11 +64,16 @@ const Feedback = ({
   replyId,
   status,
   parentStatus,
+  authorId,
 }: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
   const { control, register, handleSubmit } = useForm();
-  const messageParse = message ? JSON.parse(message) : null;
+  const [modalReply, setModalReply] = useState(false);
+  const [modalEdit, setModalEdit] = useState(false);
+  const [modalDelete, setModalDelete] = useState(false);
+  // const messageParse = message ? JSON.parse(message) : null;
+  const { mutate } = useSWRConfig();
 
   const handleDelete = async (feedbackId: string) => {
     setIsLoading(true);
@@ -80,8 +86,10 @@ const Feedback = ({
       if (response.status === 200) {
         setIsLoading(false);
         toast.success("Feedback deleted successfully.");
-        // Router.refresh();
-        location.reload();
+        setModalDelete(false);
+        mutate(`/api/briefs/${briefId}`);
+        mutate("/api/brief-notifications");
+        Router.refresh();
       } else if (response.status === 403) {
         setIsLoading(false);
         toast.warning("You dont have access.");
@@ -99,29 +107,35 @@ const Feedback = ({
   const handleUpdateStatus = async (feedbackId: string, status: string) => {
     setIsLoading(true);
     const newStatus = status === "Not Approved" ? "Approved" : "Not Approved";
-    try {
-      const response = await fetch(`/api/feedbacks/${feedbackId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
 
-      if (response.status === 200) {
-        setIsLoading(false);
-        toast.success("Feedback status updated successfully.");
-        // Router.refresh();
-        location.reload();
-      } else if (response.status === 403) {
-        setIsLoading(false);
-        toast.warning("You dont have access.");
-      } else {
+    if (userExist.id === authorId || userExist.role === "Admin") {
+      try {
+        const response = await fetch(`/api/feedbacks/${feedbackId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        });
+
+        if (response.status === 200) {
+          setIsLoading(false);
+          toast.success("Feedback status updated successfully.");
+          mutate(`/api/briefs/${briefId}`);
+          mutate("/api/brief-notifications");
+          Router.refresh();
+        } else if (response.status === 403) {
+          setIsLoading(false);
+          toast.warning("You dont have access.");
+        } else {
+          setIsLoading(false);
+          toast.error("Uh oh! Something went wrong.");
+        }
+        return response;
+      } catch (error) {
         setIsLoading(false);
         toast.error("Uh oh! Something went wrong.");
       }
-      return response;
-    } catch (error) {
-      setIsLoading(false);
-      toast.error("Uh oh! Something went wrong.");
+    } else {
+      toast.warning("You dont have access.");
     }
   };
 
@@ -145,8 +159,11 @@ const Feedback = ({
       if (response.status === 200) {
         setIsLoading(false);
         toast.success("Feedback updated successfully.");
-        // Router.push(`/dashboard/briefs/${feedbackId}`);
+        mutate(`/api/briefs/${briefId}`);
+        mutate("/api/brief-notifications");
+        setModalEdit(false);
         location.reload();
+        Router.refresh();
       } else {
         setIsLoading(false);
         toast.error("Uh oh! Something went wrong.");
@@ -190,8 +207,10 @@ const Feedback = ({
             assign: assignBrief,
           }),
         });
-        // Router.push(`/dashboard/briefs/${feedbackId}`);
-        location.reload();
+        mutate(`/api/briefs/${briefId}`);
+        mutate("/api/brief-notifications");
+        setModalReply(false);
+        Router.refresh();
       } else {
         setIsLoading(false);
         toast.error("Uh oh! Something went wrong.");
@@ -228,7 +247,7 @@ const Feedback = ({
         <div className="flex items-center gap-3">
           {
             // @ts-ignore
-            <PlateEditorFeedback initialValue={messageParse} readOnly />
+            <PlateEditorFeedback initialValue={message} readOnly />
           }
           {isEdited ? (
             <span className="text-xs text-slate-600 italic">edited</span>
@@ -241,7 +260,7 @@ const Feedback = ({
         (userExist.id === userId[0] &&
           status === "Default" &&
           parentStatus === "Not Approved") ? (
-          <Dialog>
+          <Dialog open={modalEdit} onOpenChange={setModalEdit}>
             <DialogTrigger asChild>
               <Link
                 href=""
@@ -274,7 +293,7 @@ const Feedback = ({
                     render={({ field }) => (
                       <PlateEditorFeedbackEdit
                         // @ts-ignore
-                        initialValue={messageParse ? messageParse : null}
+                        initialValue={message}
                         onChange={(editorValue: any) => {
                           field.onChange(editorValue);
                         }}
@@ -311,7 +330,7 @@ const Feedback = ({
         (userExist.id !== userId[0] &&
           status === "Default" &&
           parentStatus === "Not Approved") ? (
-          <Dialog>
+          <Dialog open={modalReply} onOpenChange={setModalReply}>
             <DialogTrigger asChild>
               <Link
                 href=""
@@ -380,7 +399,7 @@ const Feedback = ({
         (userExist.id === userId[0] &&
           status === "Default" &&
           parentStatus === "Not Approved") ? (
-          <AlertDialog>
+          <AlertDialog open={modalDelete} onOpenChange={setModalDelete}>
             <AlertDialogTrigger asChild>
               <Link
                 href=""

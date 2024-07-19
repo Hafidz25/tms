@@ -55,7 +55,7 @@ import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns";
 import { SpokeSpinner } from "@/components/ui/spinner";
 import generator from "generate-password";
-// import { getSession } from "next-auth/react";
+import useSWR, { useSWRConfig } from "swr";
 
 interface User {
   id: string;
@@ -104,55 +104,45 @@ export default async function DetailBrief({
 }: {
   params: { id: string };
 }) {
-  const { control, register, handleSubmit, watch } = useForm();
-  const [users, setUsers] = useState<User[]>([]);
-  const [briefs, setBriefs] = useState<Brief>();
-  const [userExist, setUserExist] = useState<User>();
-  const [loadUser, setLoadUser] = useState(false);
-  const [loadBrief, setLoadBrief] = useState(false);
-  const [loadExist, setLoadExist] = useState(false);
+  const { control, register, handleSubmit, watch, resetField } = useForm();
   const [isLoading, setIsLoading] = useState(false);
+  const [content, setContent] = useState(null);
+  const { mutate } = useSWRConfig();
 
   const [title, setTitle] = useState(null);
   const FORMAT_DATE = "dd LLL, y";
   const Router = useRouter();
 
-  // const session = await getSession();
-  // console.log(briefs);
-
-  useEffect(() => {
-    fetch("/api/users")
-      .then((response) => response.json())
-      .then((data) => {
-        setUsers(data.data);
-        setLoadUser(true);
-      });
-    fetch(`/api/briefs/${params.id}`)
-      .then((response) => response.json())
+  const fetcher = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.data);
+  const fetcherBrief = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
       .then((result) => {
         const newContent = JSON.parse(result.data.content);
         const mappedData = { ...result.data, content: newContent };
-        setBriefs(mappedData);
         setTitle(mappedData.title);
-        setLoadBrief(true);
+        return mappedData;
       });
-    fetch(`/api/auth/session`)
-      .then((response) => response.json())
-      .then((data) => {
-        setUserExist(data.user);
-        setLoadExist(true);
-      });
-  }, []);
+  const fetcherUserExists = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.user);
 
-  const userChipList = users
-    .filter((user) => user.role !== "Admin" && user.role !== "Customer Service")
-    .map((user) => {
-      const { id, name: text } = user;
-      return {
-        id,
-        text,
-      };
-    });
+  const { data: users, error: usersError } = useSWR<User[], Error>(
+    "/api/users",
+    fetcher
+  );
+  const { data: briefs, error: briefsError } = useSWR<Brief, Error>(
+    `/api/briefs/${params.id}`,
+    fetcherBrief
+  );
+  const { data: userExist, error: userExistError } = useSWR<User, Error>(
+    "/api/auth/session",
+    fetcherUserExists
+  );
 
   const handleSubmitFeedback = async (data: any) => {
     setIsLoading(true);
@@ -181,6 +171,9 @@ export default async function DetailBrief({
       if (response.status === 201) {
         setIsLoading(false);
         toast.success("Feedback created successfully.");
+        mutate(`/api/briefs/${params.id}`);
+        mutate("/api/brief-notifications");
+        setContent(null);
         const responseNotif = await fetch(`/api/brief-notifications`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -190,8 +183,7 @@ export default async function DetailBrief({
             assign: briefs?.assign,
           }),
         });
-        // Router.push("/dashboard/briefs");
-        location.reload();
+        Router.refresh();
       } else {
         setIsLoading(false);
         toast.error("Uh oh! Something went wrong.");
@@ -216,21 +208,23 @@ export default async function DetailBrief({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: status, assign: assign }),
       });
-      const responseNotif = await fetch(`/api/brief-notifications`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: `Status brief ${briefTitle.italics()} just updated to ${status.italics()}`,
-          briefId: dataId,
-          assign: assign,
-        }),
-      });
+
       // console.log(response);
       if (response.status === 200) {
         setIsLoading(false);
         toast.success("Brief updated successfully.");
         Router.refresh();
-        location.reload();
+        mutate(`/api/briefs/${params.id}`);
+        mutate("/api/brief-notifications");
+        const responseNotif = await fetch(`/api/brief-notifications`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: `Status brief ${briefTitle.italics()} just updated to ${status.italics()}`,
+            briefId: dataId,
+            assign: assign,
+          }),
+        });
       } else {
         setIsLoading(false);
         toast.error("Uh oh! Something went wrong.");
@@ -242,9 +236,13 @@ export default async function DetailBrief({
     }
   };
 
-  // console.log(briefs);
+  const feedbacks = briefs?.feedback.map((data) => {
+    const newContent = JSON.parse(data.content);
+    const mappedData = { ...data, content: newContent };
+    return mappedData;
+  });
 
-  return loadUser && loadBrief && loadExist ? (
+  return briefs && users && userExist ? (
     <Fragment>
       <title>
         {title
@@ -276,7 +274,7 @@ export default async function DetailBrief({
                 Created by
               </div>
               {users
-                .filter((user) => user.id === briefs?.authorId)
+                ?.filter((user) => user.id === briefs?.authorId)
                 .map((user) => user.name)}
               <div>
                 at {briefs?.createdAt && format(briefs?.createdAt, FORMAT_DATE)}
@@ -445,11 +443,6 @@ export default async function DetailBrief({
                 className="grid w-full gap-2"
                 onSubmit={handleSubmit(handleSubmitFeedback)}
               >
-                {/* <Textarea
-                placeholder="Type your message here."
-                {...register("content")}
-              /> */}
-
                 <div className="border rounded-lg">
                   <Controller
                     control={control}
@@ -488,134 +481,140 @@ export default async function DetailBrief({
               </form>
             </CardContent>
             <CardContent>
-              <div className="flex flex-col gap-3">
-                {briefs?.feedback
-                  .sort(function compare(a, b) {
-                    var dateA = new Date(a.createdAt);
-                    var dateB = new Date(b.createdAt);
-                    // @ts-ignore
-                    return dateA - dateB;
-                  })
-                  .filter((data) => data.isReply === false)
-                  .map((data) => (
-                    <div
-                      className={
-                        data.status === "Not Approved"
-                          ? "p-6 border border-slate-200 rounded-lg"
-                          : "p-6 border border-slate-900 rounded-lg"
-                      }
-                    >
-                      <Feedback
-                        key={data.id}
-                        feedbackId={data.id}
-                        user={users
-                          .filter((user) => user.id === data.userId)
-                          .map((user) => user.name)}
-                        userSent={users
-                          .filter((user) => user.id === data.userSentId)
-                          .map((user) => user.name)}
-                        role={users
-                          .filter((user) => user.id === data.userId)
-                          .map((user) => user.role)}
-                        message={data.content}
-                        time={formatDistanceToNow(data.createdAt)}
-                        userExist={userExist}
-                        userId={users
-                          .filter((user) => user.id === data.userId)
-                          .map((user) => user.id)}
-                        userSentId={data.userSentId}
-                        briefId={briefs?.id}
-                        briefTitle={briefs?.title}
-                        assignBrief={briefs?.assign}
-                        isReply={data.isReply}
-                        isEdited={data.isEdited}
-                        replyId={data.replyId}
-                        status={data.status}
-                      />
-                      {briefs.feedback.filter(
-                        (dataReply) =>
-                          dataReply.isReply === true &&
-                          dataReply.replyId === data.replyId
-                      ).length ? (
-                        <Collapsible>
-                          <CollapsibleTrigger>
-                            <div className="text-xs font-semibold text-slate-500 hover:text-slate-950 transition duration-300 flex gap-1 items-end">
-                              Comments (
-                              {
-                                briefs.feedback.filter(
-                                  (dataReply) =>
-                                    dataReply.isReply === true &&
-                                    dataReply.replyId === data.replyId
-                                ).length
-                              }
-                              )
-                              <CornerRightDown className="w-3 h-3" />
-                            </div>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent>
-                            <div className="pl-6 border-l-4  border-l-slate-100">
-                              {briefs.feedback
-                                .sort(function compare(a, b) {
-                                  var dateA = new Date(a.createdAt);
-                                  var dateB = new Date(b.createdAt);
-                                  // @ts-ignore
-                                  return dateA - dateB;
-                                })
-                                .filter(
-                                  (dataReply) =>
-                                    dataReply.isReply === true &&
-                                    dataReply.replyId === data.replyId
+              {feedbacks ? (
+                <div className="flex flex-col gap-3">
+                  {feedbacks
+                    .sort(function compare(a, b) {
+                      var dateA = new Date(a.createdAt);
+                      var dateB = new Date(b.createdAt);
+                      // @ts-ignore
+                      return dateA - dateB;
+                    })
+                    .filter((data) => data.isReply === false)
+                    .map((data) => (
+                      <div
+                        className={
+                          data.status === "Not Approved"
+                            ? "p-6 border border-slate-200 rounded-lg"
+                            : "p-6 border border-slate-900 rounded-lg"
+                        }
+                      >
+                        <Feedback
+                          key={data.id}
+                          feedbackId={data.id}
+                          authorId={briefs.authorId}
+                          user={users
+                            ?.filter((user) => user.id === data.userId)
+                            .map((user) => user.name)}
+                          userSent={users
+                            ?.filter((user) => user.id === data.userSentId)
+                            .map((user) => user.name)}
+                          role={users
+                            ?.filter((user) => user.id === data.userId)
+                            .map((user) => user.role)}
+                          message={data.content}
+                          time={formatDistanceToNow(data.createdAt)}
+                          userExist={userExist}
+                          userId={users
+                            ?.filter((user) => user.id === data.userId)
+                            .map((user) => user.id)}
+                          userSentId={data.userSentId}
+                          briefId={briefs?.id}
+                          briefTitle={briefs?.title}
+                          assignBrief={briefs?.assign}
+                          isReply={data.isReply}
+                          isEdited={data.isEdited}
+                          replyId={data.replyId}
+                          status={data.status}
+                        />
+                        {feedbacks.filter(
+                          (dataReply) =>
+                            dataReply.isReply === true &&
+                            dataReply.replyId === data.replyId
+                        ).length ? (
+                          <Collapsible>
+                            <CollapsibleTrigger>
+                              <div className="text-xs font-semibold text-slate-500 hover:text-slate-950 transition duration-300 flex gap-1 items-end">
+                                Comments (
+                                {
+                                  feedbacks.filter(
+                                    (dataReply) =>
+                                      dataReply.isReply === true &&
+                                      dataReply.replyId === data.replyId
+                                  ).length
+                                }
                                 )
-                                .map((dataReply) => (
-                                  <>
-                                    <Feedback
-                                      key={dataReply.id}
-                                      feedbackId={dataReply.id}
-                                      user={users
-                                        .filter(
-                                          (user) => user.id === dataReply.userId
-                                        )
-                                        .map((user) => user.name)}
-                                      userSent={users
-                                        .filter(
-                                          (user) =>
-                                            user.id === dataReply.userSentId
-                                        )
-                                        .map((user) => user.name)}
-                                      role={users
-                                        .filter(
-                                          (user) => user.id === dataReply.userId
-                                        )
-                                        .map((user) => user.role)}
-                                      message={dataReply.content}
-                                      time={formatDistanceToNow(
-                                        dataReply.createdAt
-                                      )}
-                                      userExist={userExist}
-                                      userId={users
-                                        .filter(
-                                          (user) => user.id === dataReply.userId
-                                        )
-                                        .map((user) => user.id)}
-                                      userSentId={dataReply.userSentId}
-                                      briefId={briefs?.id}
-                                      briefTitle={briefs?.title}
-                                      assignBrief={briefs?.assign}
-                                      isReply={dataReply.isReply}
-                                      isEdited={dataReply.isEdited}
-                                      replyId={data.replyId}
-                                      status={dataReply.status}
-                                      parentStatus={data.status}
-                                    />
-                                  </>
-                                ))}
-                            </div>
-                          </CollapsibleContent>
-                        </Collapsible>
-                      ) : null}
-                    </div>
-                  ))}
-              </div>
+                                <CornerRightDown className="w-3 h-3" />
+                              </div>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <div className="pl-6 border-l-4  border-l-slate-100">
+                                {feedbacks
+                                  .sort(function compare(a, b) {
+                                    var dateA = new Date(a.createdAt);
+                                    var dateB = new Date(b.createdAt);
+                                    // @ts-ignore
+                                    return dateA - dateB;
+                                  })
+                                  .filter(
+                                    (dataReply) =>
+                                      dataReply.isReply === true &&
+                                      dataReply.replyId === data.replyId
+                                  )
+                                  .map((dataReply) => (
+                                    <>
+                                      <Feedback
+                                        key={dataReply.id}
+                                        feedbackId={dataReply.id}
+                                        user={users
+                                          ?.filter(
+                                            (user) =>
+                                              user.id === dataReply.userId
+                                          )
+                                          .map((user) => user.name)}
+                                        userSent={users
+                                          ?.filter(
+                                            (user) =>
+                                              user.id === dataReply.userSentId
+                                          )
+                                          .map((user) => user.name)}
+                                        role={users
+                                          ?.filter(
+                                            (user) =>
+                                              user.id === dataReply.userId
+                                          )
+                                          .map((user) => user.role)}
+                                        message={dataReply.content}
+                                        time={formatDistanceToNow(
+                                          dataReply.createdAt
+                                        )}
+                                        userExist={userExist}
+                                        userId={users
+                                          ?.filter(
+                                            (user) =>
+                                              user.id === dataReply.userId
+                                          )
+                                          .map((user) => user.id)}
+                                        userSentId={dataReply.userSentId}
+                                        briefId={briefs?.id}
+                                        briefTitle={briefs?.title}
+                                        assignBrief={briefs?.assign}
+                                        isReply={dataReply.isReply}
+                                        isEdited={dataReply.isEdited}
+                                        replyId={data.replyId}
+                                        status={dataReply.status}
+                                        parentStatus={data.status}
+                                      />
+                                    </>
+                                  ))}
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        ) : null}
+                      </div>
+                    ))}
+                </div>
+              ) : null}
             </CardContent>
           </DndProvider>
         </Card>

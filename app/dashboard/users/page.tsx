@@ -41,6 +41,7 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { SpokeSpinner } from "@/components/ui/spinner";
+import useSWR, { useSWRConfig } from "swr";
 
 const TAB_LIST = ["All", "Admin", "Customer Service", "Team Member"];
 const TABLE_CONTENT = ["Name", "Email", "Role", "Action"];
@@ -48,6 +49,7 @@ const TABLE_CONTENT_ROLE = ["Admin", "Customer Service", "Team Member"];
 
 function SelectRole({ data }: any) {
   const Router = useRouter();
+  const { mutate } = useSWRConfig();
 
   const updateRole = async (
     dataId: string,
@@ -64,6 +66,7 @@ function SelectRole({ data }: any) {
       // console.log(response);
       if (response.status === 200) {
         toast.success("User updated successfully.");
+        mutate("/api/users");
         Router.refresh();
       }
       return response;
@@ -96,6 +99,7 @@ function SelectRole({ data }: any) {
 
 function DropdownMenuActions({ data }: any) {
   const Router = useRouter();
+  const { mutate } = useSWRConfig();
 
   const handleDelete = async (dataId: string) => {
     try {
@@ -106,8 +110,8 @@ function DropdownMenuActions({ data }: any) {
       // console.log(response);
       if (response.status === 200) {
         toast.success("User deleted successfully.");
-        // Router.refresh();
-        location.reload();
+        Router.refresh();
+        mutate("/api/users");
       }
       return response;
     } catch (error) {
@@ -169,20 +173,15 @@ interface User {
 }
 
 function UsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [load, setLoad] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/users")
-      .then((response) => response.json())
-      .then((data) => {
-        setUsers(data.data);
-        setLoad(true);
-      });
-  }, []);
+  const fetcher = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.data);
+  const { data: users, error } = useSWR<User[], Error>("/api/users", fetcher);
 
-  return load ? (
+  return users ? (
     <DashboardPanel>
       <Tabs defaultValue={TAB_LIST[0]}>
         <div className="flex gap-2 items-center sm:justify-between justify-start flex-wrap">

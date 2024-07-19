@@ -20,6 +20,7 @@ import { Chips } from "@/components/ui/chips";
 import { Divider } from "@/components/ui/divider";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { SpokeSpinner } from "@/components/ui/spinner";
+import useSWR, { useSWRConfig } from "swr";
 import {
   Tooltip,
   TooltipContent,
@@ -36,31 +37,33 @@ interface User {
 
 export default function CreateBrief() {
   const { control, register, handleSubmit } = useForm();
-  const [users, setUsers] = useState<User[]>([]);
-  const [userExist, setUserExist] = useState<User>();
-  const [loadExist, setLoadExist] = useState(false);
-  const [load, setLoad] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const Router = useRouter();
+  const { mutate } = useSWRConfig();
 
-  useEffect(() => {
-    fetch("/api/users")
-      .then((response) => response.json())
-      .then((data) => {
-        setUsers(data.data);
-        setLoad(true);
-      });
-    fetch(`/api/auth/session`)
-      .then((response) => response.json())
-      .then((data) => {
-        setUserExist(data.user);
-        setLoadExist(true);
-      });
-  }, []);
+  const fetcher = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.data);
+  const fetcherUserExists = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.user);
+
+  const { data: users, error: usersError } = useSWR<User[], Error>(
+    "/api/users",
+    fetcher
+  );
+  const { data: userExist, error: userExistError } = useSWR<User, Error>(
+    "/api/auth/session",
+    fetcherUserExists
+  );
 
   const userChipList = users
-    .filter((user) => user.role !== "Admin" && user.role !== "Customer Service")
+    ?.filter(
+      (user) => user.role !== "Admin" && user.role !== "Customer Service"
+    )
     .map((user) => {
       const { id, name: text } = user;
       return {
@@ -91,6 +94,7 @@ export default function CreateBrief() {
         if (response.status === 201) {
           setIsLoading(false);
           toast.success("Public brief created successfully.");
+          mutate("/api/brief-notifications");
           Router.push("/dashboard/briefs");
         } else {
           setIsLoading(false);
@@ -134,7 +138,7 @@ export default function CreateBrief() {
     }
   };
 
-  return loadExist ? (
+  return userExist ? (
     <Fragment>
       <div className="min-h-screen w-full flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <form
@@ -192,7 +196,7 @@ export default function CreateBrief() {
 
               <div className="hidden sm:block sm:w-1 h-1 sm:h-10 sm:border-r sm:border-t-0 border-t border-slate-300"></div>
 
-              {load ? (
+              {userChipList ? (
                 <Controller
                   control={control}
                   name="Assign"

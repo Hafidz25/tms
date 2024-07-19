@@ -5,6 +5,7 @@ import { DashboardPanel } from "@/components/layouts/dashboard-panel";
 import { User } from "@/types/user";
 import { SpokeSpinner } from "@/components/ui/spinner";
 import { BriefsTable } from "@/components/data-grid/briefs";
+import useSWR, { useSWRConfig } from "swr";
 
 interface Brief {
   id: string;
@@ -29,37 +30,34 @@ interface Brief {
 }
 
 const Page = () => {
-  const [briefs, setBriefs] = useState<Brief[]>([]);
-  const [load, setLoad] = useState(false);
-  const [userExist, setUserExist] = useState<User>();
-  const [loadSession, setLoadSession] = useState(false);
-  const Router = useRouter();
+  const fetcher = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.data);
+  const fetcherUserExists = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.user);
 
-  useEffect(() => {
-    fetch("/api/briefs")
-      .then((response) => response.json())
-      .then((data) => {
-        setBriefs(data.data);
-        setLoad(true);
-      });
-    fetch(`/api/auth/session`)
-      .then((response) => response.json())
-      .then((data) => {
-        setUserExist(data.user);
-        setLoadSession(true);
-      });
-  }, []);
+  const { data: briefs, error: briefsError } = useSWR<Brief[], Error>(
+    "/api/briefs",
+    fetcher
+  );
+  const { data: userExist, error: userExistError } = useSWR<User, Error>(
+    "/api/auth/session",
+    fetcherUserExists
+  );
 
   const newBriefs =
     userExist?.role === "Admin"
       ? briefs
       : userExist?.role === "Customer Service"
-      ? briefs.filter((data) => data.authorId === userExist.id)
-      : briefs.filter((data) =>
+      ? briefs?.filter((data) => data.authorId === userExist.id)
+      : briefs?.filter((data) =>
           data.assign.find(({ id }) => id === userExist?.id)
         );
 
-  return load && loadSession ? (
+  return newBriefs && userExist ? (
     <DashboardPanel>
       <BriefsTable
         data={newBriefs}
