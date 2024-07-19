@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
-import { BriefsStatus } from "@/types/briefs";
 import { User } from "@/types/user";
 import { SpokeSpinner } from "@/components/ui/spinner";
 import {
@@ -30,6 +29,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import useSWR, { useSWRConfig } from "swr";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -78,24 +78,23 @@ export function DataTableToolbar<TData>({
   const isFiltered = table.getState().columnFilters.length > 0;
   const [isLoading, setIsLoading] = useState(false);
   const { control, register, handleSubmit } = useForm();
-  const [briefs, setBriefs] = useState<Brief[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
 
   const user = table.options.meta?.user;
   // console.log(user?.role);
 
-  useEffect(() => {
-    fetch("/api/briefs")
-      .then((response) => response.json())
-      .then((data) => {
-        setBriefs(data.data);
-      });
-    fetch("/api/users")
-      .then((response) => response.json())
-      .then((data) => {
-        setUsers(data.data);
-      });
-  }, []);
+  const fetcher = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.data);
+
+  const { data: users, error: usersError } = useSWR<User[], Error>(
+    "/api/users",
+    fetcher
+  );
+  const { data: briefs, error: briefsError } = useSWR<Brief[], Error>(
+    "/api/briefs",
+    fetcher
+  );
 
   const month = [
     {
@@ -151,17 +150,17 @@ export function DataTableToolbar<TData>({
   const handleExport = useCallback(
     (data: any) => {
       // console.log(data);
-      const briefUser = briefs.filter((user) =>
+      const briefUser = briefs?.filter((user) =>
         user.assign.find(({ id }) => id === data.userId)
       );
-      const briefUserbyMonth = briefUser.filter(
+      const briefUserbyMonth = briefUser?.filter(
         (user) => getMonth(new Date(user.createdAt)).toString() === data.month
       );
-      const dataBrief = briefUserbyMonth.map((user) => {
+      const dataBrief = briefUserbyMonth?.map((user) => {
         return {
           Title: user.title,
           Author: users
-            .filter((e) => e.id === user.authorId)
+            ?.filter((e) => e.id === user.authorId)
             .map((e) => e.name)[0],
           Status: user.status,
           Deadline: `${format(user.deadline.from, FORMAT_DATE)} - ${format(
@@ -177,7 +176,7 @@ export function DataTableToolbar<TData>({
       const wb = XLSX.utils.book_new();
 
       // Ubah data menjadi worksheet
-      const ws = XLSX.utils.json_to_sheet(dataBrief);
+      const ws = XLSX.utils.json_to_sheet(dataBrief ?? []);
 
       // Set format kolom
       const wscols = [
@@ -196,6 +195,7 @@ export function DataTableToolbar<TData>({
       ws["!rows"] = wsrows;
 
       // Set gaya sel
+      // @ts-ignore
       for (let R = 0; R < dataBrief.length + 1; ++R) {
         for (let C = 0; C < 6; ++C) {
           const cellAddress = XLSX.utils.encode_cell({ c: C, r: R });
@@ -233,7 +233,7 @@ export function DataTableToolbar<TData>({
         wb,
         `${
           users
-            .filter((user) => user.id === data.userId)
+            ?.filter((user) => user.id === data.userId)
             .map((user) => user.name)[0]
         } - ${
           month.filter((m) => m.value === data.month).map((m) => m.label)[0]
@@ -277,7 +277,7 @@ export function DataTableToolbar<TData>({
 
       {user?.role === "Admin" || user?.role === "Customer Service" ? (
         <div className="flex items-center gap-2">
-          {users.length ? (
+          {users?.length ? (
             <Dialog>
               <DialogTrigger asChild>
                 <Button size="sm" className="h-8 gap-1" variant="outline">
