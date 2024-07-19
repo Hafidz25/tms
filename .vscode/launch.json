@@ -37,6 +37,19 @@
       "args": ["run", "${relativeFile}", "--disable-console-intercept"],
       "smartStep": true,
       "console": "internalConsole"
+    },
+
+    {
+      "name": "tsx",
+      "type": "node",
+      "request": "launch",
+
+      "program": "${file}",
+      "runtimeExecutable": "tsx",
+      "skipFiles": [
+        "<node_internals>/**",
+        "${workspaceFolder}/node_modules/**"
+      ]
     }
   ]
 }
