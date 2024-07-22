@@ -184,6 +184,7 @@ export default async function DetailBrief({
           }),
         });
         Router.refresh();
+        location.reload();
       } else {
         setIsLoading(false);
         toast.error("Uh oh! Something went wrong.");
