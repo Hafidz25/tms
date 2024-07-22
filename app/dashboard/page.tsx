@@ -1,11 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import BriefChart from "@/components/custom/BriefChart";
 import CardDashboard from "@/components/custom/CardDashboard";
 import { User } from "@/types/user";
 import { Brief } from "@/types/briefs";
-import useSWR, { useSWRConfig } from "swr";
+import useSWR from "swr";
 import { SpokeSpinner } from "@/components/ui/spinner";
 
 export default async function Page() {

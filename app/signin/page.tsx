@@ -18,28 +18,23 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { signIn } from "next-auth/react";
 import { SpokeSpinner } from "@/components/ui/spinner";
+import useSWR from "swr";
 
 const Page = () => {
-  const [auth, setAuth] = useState(null);
-  const [authLoad, setAuthLoad] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { control, register, handleSubmit, getValues } = useForm();
   const Router = useRouter();
 
-  useEffect(() => {
-    fetch("/api")
-      .then((response) => response.json())
-      .then((data) => {
-        setAuth(data.authenticated);
-        setAuthLoad(true);
+  const fetcher = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.authenticated) {
+          Router.push("/dashboard");
+          toast.success("You have successfully logged in.");
+        }
       });
-  }, []);
-
-  if (authLoad) {
-    if (auth) {
-      Router.push("/dashboard");
-    }
-  }
+  const { data: auth, error: usersError } = useSWR("/api", fetcher);
 
   const submitData = async (data: any) => {
     setIsLoading(true);

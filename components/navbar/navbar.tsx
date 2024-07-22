@@ -30,7 +30,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -217,7 +217,6 @@ interface User {
 // perlu refactor
 function Navbar({ user }: any) {
   const [load, setLoad] = useState(false);
-  const { toast } = useToast();
   const Router = useRouter();
 
   const fetcher = (url: string) =>
@@ -245,11 +244,7 @@ function Navbar({ user }: any) {
       }
       return response;
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 
