@@ -32,9 +32,19 @@ const DateRangePicker = forwardRef(
     }: DateRangePickerProps,
     ref
   ) => {
-    const [date, setDate] = useState<DateRange | undefined>({
-      from: undefined,
-      to: undefined,
+    const [date, setDate] = useState<DateRange | undefined>(() => {
+      if (setValue && setValue.from && setValue.to) {
+        return {
+          from: parseISO(setValue.from),
+          to: parseISO(setValue.to),
+        };
+      } else {
+        return {
+          from: undefined,
+          to: undefined,
+        };
+      }
+      return undefined;
     });
 
     return (
@@ -49,13 +59,7 @@ const DateRangePicker = forwardRef(
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {setValue ? (
-              <>
-                {setValue.from && format(parseISO(setValue.from), "LLL dd, y")}{" "}
-                -{" "}
-                {setValue.to ? format(parseISO(setValue.to), "LLL dd, y") : ""}
-              </>
-            ) : date?.from ? (
+            {date?.from ? (
               date.to ? (
                 <>
                   {format(date.from, "LLL dd, y")} -{" "}
@@ -87,14 +91,7 @@ const DateRangePicker = forwardRef(
             {...props}
             initialFocus
             defaultMonth={date?.from}
-            selected={
-              setValue
-                ? {
-                    from: setValue.from ? parseISO(setValue.from) : undefined,
-                    to: setValue.to ? parseISO(setValue.to) : undefined,
-                  }
-                : date
-            }
+            selected={date}
             mode="range"
             onSelect={(range) => {
               setDate(range);

@@ -43,7 +43,9 @@ function Chips({
     list: ChipItemProps[];
   }>({
     selected: !!defaultChipItems?.length ? [...defaultChipItems] : null,
-    list: [...chipItems],
+    list: !!defaultChipItems?.length
+      ? [...chipItems.filter((user) => user.id !== defaultChipItems[0].id)]
+      : [...chipItems],
   });
 
   const handleUnselect = (chipId: string) => {

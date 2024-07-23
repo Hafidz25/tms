@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import useSWR from "swr";
 
 interface User {
   id: string;
@@ -52,18 +53,21 @@ interface Brief {
 }
 
 export default function EditBrief({ params }: { params: { id: string } }) {
-  const { control, register, handleSubmit } = useForm();
-
-  const [users, setUsers] = useState<ChipItemProps[]>([]);
-  const [briefs, setBriefs] = useState(null);
-  const [loadBrief, setLoadBrief] = useState(false);
-  const [load, setLoad] = useState(false);
+  const { control, register, handleSubmit, setValue } = useForm();
   const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
 
-  useEffect(() => {
-    fetch("/api/users")
-      .then((response) => response.json())
+  const fetcherBrief = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((result) => {
+        const newContent = JSON.parse(result.data.content);
+        const mappedData = { ...result.data, content: newContent };
+        return mappedData;
+      });
+  const fetcher = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
       .then((data) => {
         const userChips = data.data
           .filter(
@@ -77,20 +81,17 @@ export default function EditBrief({ params }: { params: { id: string } }) {
               text,
             };
           });
-
-        setUsers(userChips);
-        setLoad(true);
+        return userChips;
       });
-    fetch(`/api/briefs/${params.id}`)
-      .then((response) => response.json())
-      .then((result) => {
-        const newContent = JSON.parse(result.data.content);
-        const mappedData = { ...result.data, content: newContent };
 
-        setBriefs(mappedData);
-        setLoadBrief(true);
-      });
-  }, []);
+  const { data: briefs, error: briefsError } = useSWR<Brief, Error>(
+    `/api/briefs/${params.id}`,
+    fetcherBrief
+  );
+  const { data: users, error: usersError } = useSWR<ChipItemProps[], Error>(
+    "/api/users",
+    fetcher
+  );
 
   // butuh refactor
   const defaultUserchips = !briefs
@@ -106,38 +107,41 @@ export default function EditBrief({ params }: { params: { id: string } }) {
 
   const handleSubmitBrief = async (data: any) => {
     setIsLoading(true);
-    console.log(data);
-    // try {
-    //   // console.log(body);
-    //   const response = await fetch("/api/briefs", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({
-    //       title: data.Judul,
-    //       deadline: data.Deadline,
-    //       content: JSON.stringify(data.Editor),
-    //       assign: data.Assign,
-    //     }),
-    //   });
-    //   // console.log(response);
-    //   if (response.status === 201) {
-    //     setIsLoading(false);
-    //     toast.success("Brief created successfully.");
-    //     Router.push("/dashboard/briefs");
-    //   } else {
-    //     setIsLoading(false);
-    //     toast.error("Uh oh! Something went wrong.");
-    //   }
-    //   return response;
-    // } catch (error) {
-    //   setIsLoading(false);
-    //   toast.error("Uh oh! Something went wrong.");
-    // }
+    // console.log(data);
+    try {
+      // console.log(body);
+      const response = await fetch(`/api/briefs/${params.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: data.Judul ? data.Judul : briefs?.title,
+          deadline: data.Deadline ? data.Deadline : briefs?.deadline,
+          content: JSON.stringify(data.Editor)
+            ? JSON.stringify(data.Editor)
+            : JSON.stringify(briefs?.content),
+          assign: data.Assign ? data.Assign : briefs?.assign,
+        }),
+      });
+      // console.log(response);
+      if (response.status === 200) {
+        setIsLoading(false);
+        toast.success("Brief updated successfully.");
+        // Router.push("/dashboard/briefs");
+        location.assign("/dashboard/briefs");
+      } else {
+        setIsLoading(false);
+        toast.error("Uh oh! Something went wrong.");
+      }
+      return response;
+    } catch (error) {
+      setIsLoading(false);
+      toast.error("Uh oh! Something went wrong.");
+    }
   };
 
   // console.log(briefs);
 
-  return loadBrief ? (
+  return briefs && users ? (
     <Fragment>
       <div className="min-h-screen w-full flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <form
@@ -162,7 +166,7 @@ export default function EditBrief({ params }: { params: { id: string } }) {
               className="w-full border-0 p-0 ring-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent placeholder:capitalize text-[40px] font-bold"
               placeholder="Judul Brief..."
               //@ts-ignore
-              value={briefs?.title}
+              defaultValue={briefs?.title}
               autoComplete="off"
               {...register("Judul")}
             />
@@ -173,6 +177,7 @@ export default function EditBrief({ params }: { params: { id: string } }) {
                 <Select //@ts-ignore
                   defaultValue={briefs?.status}
                   {...register("status")}
+                  onValueChange={(value) => setValue("status", value)}
                 >
                   <SelectTrigger id="status" aria-label="Select status">
                     <SelectValue placeholder="Select status" />
@@ -214,7 +219,7 @@ export default function EditBrief({ params }: { params: { id: string } }) {
 
               <div className="hidden sm:block sm:w-1 h-1 sm:h-10 sm:border-r sm:border-t-0 border-t border-slate-300"></div>
 
-              {load ? (
+              {users ? (
                 <div className="font-medium text-base flex gap-2 items-center w-full">
                   <Users className="w-6 h-6" />
                   <Controller
