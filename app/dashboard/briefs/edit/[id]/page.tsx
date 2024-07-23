@@ -127,7 +127,7 @@ export default function EditBrief({ params }: { params: { id: string } }) {
         setIsLoading(false);
         toast.success("Brief updated successfully.");
         // Router.push("/dashboard/briefs");
-        location.assign("/dashboard/briefs");
+        location.assign(`/dashboard/briefs/${params.id}`);
       } else {
         setIsLoading(false);
         toast.error("Uh oh! Something went wrong.");

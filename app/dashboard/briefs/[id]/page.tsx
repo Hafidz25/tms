@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   CornerRightDown,
   Search,
+  Pencil,
 } from "lucide-react";
 
 import { DevTool } from "@hookform/devtools";
@@ -254,12 +255,36 @@ export default async function DetailBrief({
         <form className="mx-auto grid max-w-[59rem] lg:min-w-[59rem] flex-1 auto-rows-max gap-4">
           <div className="flex items-center justify-between gap-4 mb-12">
             <Link
-              href=""
-              onClick={() => Router.back()}
+              href="/dashboard/briefs"
               className="w-8 h-8 rounded-lg border border-slate-300 grid place-items-center"
             >
               <ChevronLeft className="h-4 w-4" />
             </Link>
+            {userExist.id === briefs.authorId || userExist.role === "Admin" ? (
+              <Link href={`/dashboard/briefs/edit/${params.id}`}>
+                <Button
+                  size="sm"
+                  className="h-8 gap-1"
+                  onClick={() => setIsLoading(true)}
+                  disabled={isLoading}
+                  variant="default"
+                >
+                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <SpokeSpinner size="sm" />
+                        Loading...
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Pencil className="w-4 h-4" />
+                        Edit Brief
+                      </div>
+                    )}
+                  </span>
+                </Button>
+              </Link>
+            ) : null}
           </div>
 
           {/* <Divider className="my-10" /> */}
