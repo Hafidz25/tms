@@ -5,7 +5,7 @@ export type BriefsStatus =
   | "Assigned"
   | "In Review"
   | "In Progress"
-  | "Waiting Client Feedback"
+  | "Waiting for Client"
   | "Correction"
   | "Need Review"
   | "Done";

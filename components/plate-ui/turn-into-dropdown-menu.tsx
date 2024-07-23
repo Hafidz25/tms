@@ -14,8 +14,16 @@ import {
   useEditorRef,
   useEditorSelector,
 } from "@udecode/plate-common";
-import { ELEMENT_H1, ELEMENT_H2, ELEMENT_H3 } from "@udecode/plate-heading";
+import {
+  ELEMENT_H1,
+  ELEMENT_H2,
+  ELEMENT_H3,
+  ELEMENT_H4,
+  ELEMENT_H5,
+  ELEMENT_H6,
+} from "@udecode/plate-heading";
 import { ELEMENT_PARAGRAPH } from "@udecode/plate-paragraph";
+import { MARK_BG_COLOR, MARK_COLOR } from "@udecode/plate-font";
 
 import { Icons } from "@/components/plate-ui/icons";
 
@@ -56,11 +64,29 @@ const items = [
     value: ELEMENT_H3,
   },
   {
-    description: "Quote (⌘+⇧+.)",
-    icon: Icons.blockquote,
-    label: "Quote",
-    value: ELEMENT_BLOCKQUOTE,
+    description: "Heading 4",
+    icon: Icons.h4,
+    label: "Heading 4",
+    value: ELEMENT_H4,
   },
+  {
+    description: "Heading 5",
+    icon: Icons.h5,
+    label: "Heading 5",
+    value: ELEMENT_H5,
+  },
+  {
+    description: "Heading 6",
+    icon: Icons.h6,
+    label: "Heading 6",
+    value: ELEMENT_H6,
+  },
+  // {
+  //   description: "Quote (⌘+⇧+.)",
+  //   icon: Icons.blockquote,
+  //   label: "Quote",
+  //   value: ELEMENT_BLOCKQUOTE,
+  // },
   // {
   //   value: 'ul',
   //   label: 'Bulleted list',

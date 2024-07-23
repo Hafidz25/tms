@@ -4,7 +4,7 @@ import { cn } from "@udecode/cn";
 import "./globals.css";
 
 import { TooltipProvider } from "@/components/plate-ui/tooltip";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -39,7 +39,7 @@ export default function RootLayout({
         >
           {children}
         </TooltipProvider>
-        <Toaster />
+        <Toaster richColors />
       </body>
     </html>
   );

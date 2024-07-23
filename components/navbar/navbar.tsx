@@ -25,11 +25,12 @@ import {
   LogOut,
   Settings,
   User,
+  SearchX,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -60,8 +61,7 @@ import { signOut } from "next-auth/react";
 
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
-
-import { supabase } from "@/lib/supabaseClient";
+import useSWR, { useSWRConfig } from "swr";
 
 interface NavProp extends LinkProps {
   id?: string;
@@ -110,31 +110,14 @@ function NavbarBrand() {
 
 function NavbarMenu({ data }: any) {
   const pathname = usePathname();
-  // console.log(data);
+  // console.log(pathname);
 
   return (
     <Fragment>
       {data.role === "Admin" ? (
         <>
-          {NAVS.map((nav) => (
-            <Link
-              replace={nav.replace}
-              scroll={nav.scroll}
-              prefetch={nav.prefetch}
-              key={nav.id}
-              href={nav.href}
-              className={`${
-                pathname === nav.href ? "text-slate-800" : "text-slate-400"
-              } transition-colors hover:text-slate-800`}
-            >
-              {nav.location}
-            </Link>
-          ))}
-        </>
-      ) : (
-        <>
-          {NAVS.filter((data) => !data.location?.includes("Users")).map(
-            (nav) => (
+          {NAVS.map((nav) =>
+            pathname === "/dashboard" ? (
               <Link
                 replace={nav.replace}
                 scroll={nav.scroll}
@@ -143,6 +126,59 @@ function NavbarMenu({ data }: any) {
                 href={nav.href}
                 className={`${
                   pathname === nav.href ? "text-slate-800" : "text-slate-400"
+                } transition-colors hover:text-slate-800`}
+              >
+                {nav.location}
+              </Link>
+            ) : (
+              <Link
+                replace={nav.replace}
+                scroll={nav.scroll}
+                prefetch={nav.prefetch}
+                key={nav.id}
+                href={nav.href}
+                className={`${
+                  //@ts-ignore
+                  pathname.includes(nav.href) === true &&
+                  nav.href !== "/dashboard"
+                    ? "text-slate-800"
+                    : "text-slate-400"
+                } transition-colors hover:text-slate-800`}
+              >
+                {nav.location}
+              </Link>
+            )
+          )}
+        </>
+      ) : (
+        <>
+          {NAVS.filter((data) => !data.location?.includes("Users")).map((nav) =>
+            pathname === "/dashboard" ? (
+              <Link
+                replace={nav.replace}
+                scroll={nav.scroll}
+                prefetch={nav.prefetch}
+                key={nav.id}
+                href={nav.href}
+                className={`${
+                  pathname === nav.href ? "text-slate-800" : "text-slate-400"
+                } transition-colors hover:text-slate-800`}
+              >
+                {nav.location}
+              </Link>
+            ) : (
+              <Link
+                replace={nav.replace}
+                scroll={nav.scroll}
+                prefetch={nav.prefetch}
+                key={nav.id}
+                href={nav.href}
+                className={`${
+                  //@ts-ignore
+                  pathname.includes(nav.href) === true &&
+                  nav.href !== "/dashboard"
+                    ? "text-slate-800"
+                    : "text-slate-400"
                 } transition-colors hover:text-slate-800`}
               >
                 {nav.location}
@@ -180,51 +216,18 @@ interface User {
 
 // perlu refactor
 function Navbar({ user }: any) {
-  const [briefNotif, setBriefNotif] = useState<BriefNotification[]>([]);
   const [load, setLoad] = useState(false);
-  const { toast } = useToast();
   const Router = useRouter();
 
-  useEffect(() => {
-    const fetchNotif = async () => {
-      await fetch(`/api/brief-notifications`)
-        .then((response) => response.json())
-        .then((data) => {
-          setBriefNotif(data.data);
-          setLoad(true);
-        });
-    };
+  const fetcher = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.data);
 
-    // const fetchNotif = async () => {
-    //   const { data: BriefNotification, error } = await supabase
-    //     .from("BriefNotification")
-    //     .select("*, _BriefNotificationToUser(*, User(*))")
-    //     .order("createdAt", { ascending: false });
-    //   if (error) {
-    //     console.error("Error fetching posts:", error);
-    //   } else {
-    //     setBriefNotif(BriefNotification);
-    //     setLoad(true);
-    //   }
-    // };
-    fetchNotif();
-
-    // const subscription = supabase
-    //   .channel("brief-notif-insert-channel")
-    //   .on(
-    //     "postgres_changes",
-    //     { event: "INSERT", schema: "public", table: "BriefNotification" },
-    //     (payload) => {
-    //       console.log("Change received!", payload);
-    //       setBriefNotif([...briefNotif, payload.new as BriefNotification]);
-    //     }
-    //   )
-    //   .subscribe();
-
-    // return () => {
-    //   supabase.removeChannel(subscription);
-    // };
-  }, []);
+  const { data: briefNotif, error: usersError } = useSWR<
+    BriefNotification[],
+    Error
+  >("/api/brief-notifications", fetcher);
 
   const updateNotif = async (dataId: string, briefId: string) => {
     try {
@@ -233,36 +236,20 @@ function Navbar({ user }: any) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ read: true }),
       });
-      // console.log(response);
+
       if (response.status === 200) {
-        // toast({
-        //   title: "Success",
-        //   description: "Notification read successfully.",
-        // });
-        await fetch(`/api/brief-notifications`)
-          .then((response) => response.json())
-          .then((data) => {
-            setBriefNotif(data.data);
-            setLoad(true);
-          });
-        Router.push(`/dashboard/briefs/${briefId}`);
-        // Router.refresh();
-        // location.reload();
+        briefId
+          ? Router.push(`/dashboard/briefs/${briefId}`)
+          : Router.refresh();
       }
       return response;
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 
-  // console.log(briefNotif);
-
   return (
-    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-8">
+    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-8 z-50">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:w-full md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <NavbarBrand />
 
@@ -288,7 +275,7 @@ function Navbar({ user }: any) {
       </Sheet>
 
       <div className="md:ml-auto flex gap-2 md:w-auto w-full justify-end">
-        {load ? (
+        {briefNotif ? (
           user?.user.role === "Admin" ||
           user?.user.role === "Customer Service" ? (
             <DropdownMenu>
@@ -328,57 +315,13 @@ function Navbar({ user }: any) {
                     </TabsList>
                     <TabsContent value="all">
                       <ScrollArea className="h-96 rounded-md">
-                        <div className="flex flex-col gap-2">
-                          {briefNotif.map((data) => (
-                            <Card
-                              className={
-                                data.read === false
-                                  ? "bg-slate-50 cursor-pointer"
-                                  : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
-                              }
-                              key={data.id}
-                              onClick={() => updateNotif(data.id, data.briefId)}
-                            >
-                              <CardHeader className="p-4">
-                                <CardDescription>
-                                  <div className="flex gap-4 items-start w-full">
-                                    <div className="bg-slate-100 p-4 rounded-md">
-                                      <Package2 className="h-6 w-6" />
-                                    </div>
-                                    <div className="w-full">
-                                      <div className="text-black text-md">
-                                        {data.message}
-                                        {/* {data.assign
-                                        .map((user) => user.name)
-                                        .join(", ")} */}
-                                      </div>
-                                      <span className="text-xs font-normal">
-                                        {formatDistanceToNow(data.createdAt)}
-                                      </span>
-                                    </div>
-                                    {data.read === false ? (
-                                      <div className="flex justify-end">
-                                        <Badge>New</Badge>
-                                      </div>
-                                    ) : null}
-                                  </div>
-                                </CardDescription>
-                              </CardHeader>
-                            </Card>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </TabsContent>
-                    <TabsContent value="unread">
-                      <ScrollArea className="h-96 rounded-md">
-                        <div className="flex flex-col gap-2">
-                          {briefNotif
-                            .filter((data) => data.read === false)
-                            .map((data) => (
+                        {briefNotif.length ? (
+                          <div className="flex flex-col gap-2">
+                            {briefNotif.map((data) => (
                               <Card
                                 className={
                                   data.read === false
-                                    ? "bg-slate-50 cursor-pointer"
+                                    ? "bg-slate-50 cursor-pointer hover:bg-slate-100 transition duration-200"
                                     : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
                                 }
                                 key={data.id}
@@ -393,11 +336,16 @@ function Navbar({ user }: any) {
                                         <Package2 className="h-6 w-6" />
                                       </div>
                                       <div className="w-full">
-                                        <div className="text-black text-md">
-                                          {data.message}
+                                        <div
+                                          className="text-black text-md"
+                                          dangerouslySetInnerHTML={{
+                                            __html: data.message,
+                                          }}
+                                        >
+                                          {/* {data.message} */}
                                           {/* {data.assign
-                                          .map((user) => user.name)
-                                          .join(", ")} */}
+                                        .map((user) => user.name)
+                                        .join(", ")} */}
                                         </div>
                                         <span className="text-xs font-normal">
                                           {formatDistanceToNow(data.createdAt)}
@@ -413,7 +361,75 @@ function Navbar({ user }: any) {
                                 </CardHeader>
                               </Card>
                             ))}
-                        </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col justify-center h-96 items-center font-medium text-slate-400 gap-2">
+                            <SearchX className="h-12 w-12" />
+                            No result
+                          </div>
+                        )}
+                      </ScrollArea>
+                    </TabsContent>
+                    <TabsContent value="unread">
+                      <ScrollArea className="h-96 rounded-md">
+                        {briefNotif.filter((data) => data.read === false)
+                          .length ? (
+                          <div className="flex flex-col gap-2">
+                            {briefNotif
+                              .filter((data) => data.read === false)
+                              .map((data) => (
+                                <Card
+                                  className={
+                                    data.read === false
+                                      ? "bg-slate-50 cursor-pointer hover:bg-slate-100 transition duration-200  "
+                                      : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
+                                  }
+                                  key={data.id}
+                                  onClick={() =>
+                                    updateNotif(data.id, data.briefId)
+                                  }
+                                >
+                                  <CardHeader className="p-4">
+                                    <CardDescription>
+                                      <div className="flex gap-4 items-start w-full">
+                                        <div className="bg-slate-100 p-4 rounded-md">
+                                          <Package2 className="h-6 w-6" />
+                                        </div>
+                                        <div className="w-full">
+                                          <div
+                                            className="text-black text-md"
+                                            dangerouslySetInnerHTML={{
+                                              __html: data.message,
+                                            }}
+                                          >
+                                            {/* {data.message} */}
+                                            {/* {data.assign
+                                          .map((user) => user.name)
+                                          .join(", ")} */}
+                                          </div>
+                                          <span className="text-xs font-normal">
+                                            {formatDistanceToNow(
+                                              data.createdAt
+                                            )}
+                                          </span>
+                                        </div>
+                                        {data.read === false ? (
+                                          <div className="flex justify-end">
+                                            <Badge>New</Badge>
+                                          </div>
+                                        ) : null}
+                                      </div>
+                                    </CardDescription>
+                                  </CardHeader>
+                                </Card>
+                              ))}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col justify-center h-96 items-center font-medium text-slate-400 gap-2">
+                            <SearchX className="h-12 w-12" />
+                            No result
+                          </div>
+                        )}
                       </ScrollArea>
                     </TabsContent>
                   </Tabs>
@@ -469,104 +485,140 @@ function Navbar({ user }: any) {
                     </TabsList>
                     <TabsContent value="all">
                       <ScrollArea className="h-96 rounded-md">
-                        <div className="flex flex-col gap-2">
-                          {briefNotif
-                            .filter((data) =>
-                              data.assign.find(({ id }) => id === user?.user.id)
-                            )
-                            .map((data) => (
-                              <Card
-                                className={
-                                  data.read === false
-                                    ? "bg-slate-50 cursor-pointer"
-                                    : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
-                                }
-                                key={data.id}
-                                onClick={() =>
-                                  updateNotif(data.id, data.briefId)
-                                }
-                              >
-                                <CardHeader className="p-4">
-                                  <CardDescription>
-                                    <div className="flex gap-4 items-start w-full">
-                                      <div className="bg-slate-100 p-4 rounded-md">
-                                        <Package2 className="h-6 w-6" />
-                                      </div>
-                                      <div className="w-full">
-                                        <div className="text-black text-md">
-                                          {data.message}
-                                          {/* {data.assign
+                        {briefNotif.filter((data) =>
+                          data.assign.find(({ id }) => id === user?.user.id)
+                        ).length ? (
+                          <div className="flex flex-col gap-2">
+                            {briefNotif
+                              .filter((data) =>
+                                data.assign.find(
+                                  ({ id }) => id === user?.user.id
+                                )
+                              )
+                              .map((data) => (
+                                <Card
+                                  className={
+                                    data.read === false
+                                      ? "bg-slate-50 cursor-pointer"
+                                      : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
+                                  }
+                                  key={data.id}
+                                  onClick={() =>
+                                    updateNotif(data.id, data.briefId)
+                                  }
+                                >
+                                  <CardHeader className="p-4">
+                                    <CardDescription>
+                                      <div className="flex gap-4 items-start w-full">
+                                        <div className="bg-slate-100 p-4 rounded-md">
+                                          <Package2 className="h-6 w-6" />
+                                        </div>
+                                        <div className="w-full">
+                                          <div
+                                            className="text-black text-md"
+                                            dangerouslySetInnerHTML={{
+                                              __html: data.message,
+                                            }}
+                                          >
+                                            {/* {data.message} */}
+                                            {/* {data.assign
                                         .map((user) => user.name)
                                         .join(", ")} */}
+                                          </div>
+                                          <span className="text-xs font-normal">
+                                            {formatDistanceToNow(
+                                              data.createdAt
+                                            )}
+                                          </span>
                                         </div>
-                                        <span className="text-xs font-normal">
-                                          {formatDistanceToNow(data.createdAt)}
-                                        </span>
+                                        {data.read === false ? (
+                                          <div className="flex justify-end">
+                                            <Badge>New</Badge>
+                                          </div>
+                                        ) : null}
                                       </div>
-                                      {data.read === false ? (
-                                        <div className="flex justify-end">
-                                          <Badge>New</Badge>
-                                        </div>
-                                      ) : null}
-                                    </div>
-                                  </CardDescription>
-                                </CardHeader>
-                              </Card>
-                            ))}
-                        </div>
+                                    </CardDescription>
+                                  </CardHeader>
+                                </Card>
+                              ))}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col justify-center h-96 items-center font-medium text-slate-400 gap-2">
+                            <SearchX className="h-12 w-12" />
+                            No result
+                          </div>
+                        )}
                       </ScrollArea>
                     </TabsContent>
                     <TabsContent value="unread">
                       <ScrollArea className="h-96 rounded-md">
-                        <div className="flex flex-col gap-2">
-                          {briefNotif
-                            .filter(
-                              (data) =>
-                                data.read === false &&
-                                data.assign.find(
-                                  ({ id }) => id === user?.user.id
-                                )
-                            )
-                            .map((data) => (
-                              <Card
-                                className={
-                                  data.read === false
-                                    ? "bg-slate-50 cursor-pointer"
-                                    : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
-                                }
-                                key={data.id}
-                                onClick={() =>
-                                  updateNotif(data.id, data.briefId)
-                                }
-                              >
-                                <CardHeader className="p-4">
-                                  <CardDescription>
-                                    <div className="flex gap-4 items-start w-full">
-                                      <div className="bg-slate-100 p-4 rounded-md">
-                                        <Package2 className="h-6 w-6" />
-                                      </div>
-                                      <div className="w-full">
-                                        <div className="text-black text-md">
-                                          {data.message}
-                                          {/* {data.assign
+                        {briefNotif.filter(
+                          (data) =>
+                            data.read === false &&
+                            data.assign.find(({ id }) => id === user?.user.id)
+                        ).length ? (
+                          <div className="flex flex-col gap-2">
+                            {briefNotif
+                              .filter(
+                                (data) =>
+                                  data.read === false &&
+                                  data.assign.find(
+                                    ({ id }) => id === user?.user.id
+                                  )
+                              )
+                              .map((data) => (
+                                <Card
+                                  className={
+                                    data.read === false
+                                      ? "bg-slate-50 cursor-pointer"
+                                      : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
+                                  }
+                                  key={data.id}
+                                  onClick={() =>
+                                    updateNotif(data.id, data.briefId)
+                                  }
+                                >
+                                  <CardHeader className="p-4">
+                                    <CardDescription>
+                                      <div className="flex gap-4 items-start w-full">
+                                        <div className="bg-slate-100 p-4 rounded-md">
+                                          <Package2 className="h-6 w-6" />
+                                        </div>
+                                        <div className="w-full">
+                                          <div
+                                            className="text-black text-md"
+                                            dangerouslySetInnerHTML={{
+                                              __html: data.message,
+                                            }}
+                                          >
+                                            {/* {data.message} */}
+                                            {/* {data.assign
                                           .map((user) => user.name)
                                           .join(", ")} */}
+                                          </div>
+                                          <span className="text-xs font-normal">
+                                            {formatDistanceToNow(
+                                              data.createdAt
+                                            )}
+                                          </span>
                                         </div>
-                                        <span className="text-xs font-normal">
-                                          {formatDistanceToNow(data.createdAt)}
-                                        </span>
+                                        {data.read === false ? (
+                                          <div className="flex justify-end">
+                                            <Badge>New</Badge>
+                                          </div>
+                                        ) : null}
                                       </div>
-                                      {data.read === false ? (
-                                        <div className="flex justify-end">
-                                          <Badge>New</Badge>
-                                        </div>
-                                      ) : null}
-                                    </div>
-                                  </CardDescription>
-                                </CardHeader>
-                              </Card>
-                            ))}
-                        </div>
+                                    </CardDescription>
+                                  </CardHeader>
+                                </Card>
+                              ))}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col justify-center h-96 items-center font-medium text-slate-400 gap-2">
+                            <SearchX className="h-12 w-12" />
+                            No result
+                          </div>
+                        )}
                       </ScrollArea>
                     </TabsContent>
                   </Tabs>

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/command";
 import { Command as CommandPrimitive } from "cmdk";
 
-interface ChipItemProps {
+export interface ChipItemProps {
   id: string;
   text: string;
   [key: string]: any;
@@ -23,9 +23,17 @@ interface ChipsProps {
   /** digunakan untuk meneruskan nilai yang dipilih */
   onChange?: (value: ChipItemProps[]) => void;
   disable?: boolean;
+
+  // butuh refactor
+  defaultChipItems?: ChipItemProps[];
 }
 
-function Chips({ disable = false, chipItems, onChange }: ChipsProps) {
+function Chips({
+  disable = false,
+  chipItems,
+  onChange,
+  defaultChipItems,
+}: ChipsProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [open, setOpen] = useState(false);
@@ -34,8 +42,10 @@ function Chips({ disable = false, chipItems, onChange }: ChipsProps) {
     selected: ChipItemProps[] | null;
     list: ChipItemProps[];
   }>({
-    selected: null,
-    list: [...chipItems],
+    selected: !!defaultChipItems?.length ? [...defaultChipItems] : null,
+    list: !!defaultChipItems?.length
+      ? [...chipItems.filter((user) => user.id !== defaultChipItems[0].id)]
+      : [...chipItems],
   });
 
   const handleUnselect = (chipId: string) => {
@@ -71,7 +81,6 @@ function Chips({ disable = false, chipItems, onChange }: ChipsProps) {
     let nextSelected;
 
     setChips((c) => {
-
       if (!c.selected) {
         nextSelected = [nextValue];
       } else {

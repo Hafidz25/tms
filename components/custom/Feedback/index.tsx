@@ -1,10 +1,18 @@
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Reply, Trash2, Pencil } from "lucide-react";
+import {
+  Reply,
+  Trash2,
+  Pencil,
+  Save,
+  MessageCircleReply,
+  CircleAlert,
+  CircleCheck,
+} from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -14,8 +22,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,26 +39,41 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SpokeSpinner } from "@/components/ui/spinner";
+import { PlateEditorFeedback } from "@/components/plate-ui/plate-editor-feedback";
+import { PlateEditorFeedbackEdit } from "@/components/plate-ui/plate-editor-feedback-edit";
+import useSWR, { useSWRConfig } from "swr";
 
 const Feedback = ({
   feedbackId,
   user,
+  userSent,
   role,
-  tag,
   message,
   time,
   userExist,
   userId,
+  userSentId,
   briefId,
+  isReply,
+  isEdited,
+  briefTitle,
+  assignBrief,
+  replyId,
+  status,
+  parentStatus,
+  authorId,
 }: any) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
   const Router = useRouter();
   const { control, register, handleSubmit } = useForm();
+  const [modalReply, setModalReply] = useState(false);
+  const [modalEdit, setModalEdit] = useState(false);
+  const [modalDelete, setModalDelete] = useState(false);
+  // const messageParse = message ? JSON.parse(message) : null;
+  const { mutate } = useSWRConfig();
 
   const handleDelete = async (feedbackId: string) => {
     setIsLoading(true);
@@ -64,44 +85,67 @@ const Feedback = ({
 
       if (response.status === 200) {
         setIsLoading(false);
-        toast({
-          title: "Success",
-          description: "Feedback deleted successfully.",
-        });
-        // Router.refresh();
-        location.reload();
+        toast.success("Feedback deleted successfully.");
+        setModalDelete(false);
+        mutate(`/api/briefs/${briefId}`);
+        mutate("/api/brief-notifications");
+        Router.refresh();
       } else if (response.status === 403) {
         setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "You dont have access.",
-          variant: "destructive",
-        });
+        toast.warning("You dont have access.");
       } else {
         setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "Uh oh! Something went wrong.",
-          variant: "destructive",
-        });
+        toast.error("Uh oh! Something went wrong.");
       }
       return response;
     } catch (error) {
       setIsLoading(false);
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
+    }
+  };
+
+  const handleUpdateStatus = async (feedbackId: string, status: string) => {
+    setIsLoading(true);
+    const newStatus = status === "Not Approved" ? "Approved" : "Not Approved";
+
+    if (userExist.id === authorId || userExist.role === "Admin") {
+      try {
+        const response = await fetch(`/api/feedbacks/${feedbackId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        });
+
+        if (response.status === 200) {
+          setIsLoading(false);
+          toast.success("Feedback status updated successfully.");
+          mutate(`/api/briefs/${briefId}`);
+          mutate("/api/brief-notifications");
+          Router.refresh();
+        } else if (response.status === 403) {
+          setIsLoading(false);
+          toast.warning("You dont have access.");
+        } else {
+          setIsLoading(false);
+          toast.error("Uh oh! Something went wrong.");
+        }
+        return response;
+      } catch (error) {
+        setIsLoading(false);
+        toast.error("Uh oh! Something went wrong.");
+      }
+    } else {
+      toast.warning("You dont have access.");
     }
   };
 
   const handleEditFeedback = async (data: any) => {
     setIsLoading(true);
     const newData = {
-      ...data,
-      userId: userExist,
+      content: JSON.stringify(data.content),
+      userId: userExist.id,
       briefId: briefId,
+      isEdited: true,
     };
 
     // console.log(newData);
@@ -114,28 +158,67 @@ const Feedback = ({
       // console.log(response);
       if (response.status === 200) {
         setIsLoading(false);
-        toast({
-          title: "Success",
-          description: "Feedback updated successfully.",
-        });
-        // Router.push(`/dashboard/briefs/${feedbackId}`);
+        toast.success("Feedback updated successfully.");
+        mutate(`/api/briefs/${briefId}`);
+        mutate("/api/brief-notifications");
+        setModalEdit(false);
         location.reload();
+        Router.refresh();
       } else {
         setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "Uh oh! Something went wrong.",
-          variant: "destructive",
-        });
+        toast.error("Uh oh! Something went wrong.");
       }
       return response;
     } catch (error) {
       setIsLoading(false);
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
+      toast.error("Uh oh! Something went wrong.");
+    }
+  };
+
+  const handleReplyFeedback = async (data: any) => {
+    setIsLoading(true);
+    const newData = {
+      content: JSON.stringify(data.content),
+      userId: userExist.id,
+      briefId: briefId,
+      userSentId: userId[0],
+      isReply: true,
+      replyId: replyId,
+    };
+
+    // console.log(newData);
+    try {
+      const response = await fetch(`/api/feedbacks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newData),
       });
+
+      // console.log(response);
+      if (response.status === 201) {
+        setIsLoading(false);
+        toast.success("Reply feedback sent successfully.");
+        const responseNotif = await fetch(`/api/brief-notifications`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: `${userExist?.name.italics()} has reply feedback on ${briefTitle.italics()}`,
+            briefId: briefId,
+            assign: assignBrief,
+          }),
+        });
+        mutate(`/api/briefs/${briefId}`);
+        mutate("/api/brief-notifications");
+        setModalReply(false);
+        Router.refresh();
+      } else {
+        setIsLoading(false);
+        toast.error("Uh oh! Something went wrong.");
+      }
+      return response;
+    } catch (error) {
+      setIsLoading(false);
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 
@@ -144,21 +227,46 @@ const Feedback = ({
       <div className="flex gap-2 items-center">
         <div className="text-base font-semibold">{user}</div>
         <Badge variant="outline">{role}</Badge>
+        {status !== "Default" ? (
+          <Badge
+            variant={status === "Not Approved" ? "secondary" : "default"}
+            className="cursor-pointer flex gap-1 items-center"
+            onClick={() => handleUpdateStatus(feedbackId, status)}
+          >
+            {status === "Not Approved" ? (
+              <CircleAlert className="w-3.5 h-3.5" />
+            ) : (
+              <CircleCheck className="w-3.5 h-3.5" />
+            )}
+            {status}
+          </Badge>
+        ) : null}
       </div>
       <p className="text-sm">
-        {tag ? <Badge className="mr-2">@{tag}</Badge> : null}
-        {message}
+        {isReply ? <Badge className="mr-2">@{userSent}</Badge> : null}
+        <div className="flex items-center gap-3">
+          {
+            // @ts-ignore
+            <PlateEditorFeedback initialValue={message} readOnly />
+          }
+          {isEdited ? (
+            <span className="text-xs text-slate-600 italic">edited</span>
+          ) : null}
+        </div>
       </p>
       <div className="flex items-center gap-3">
         <span className="text-xs text-slate-600 me-3">{time} ago</span>
-        {userExist === userId[0] ? (
-          <Dialog>
+        {(userExist.id === userId[0] && status === "Not Approved") ||
+        (userExist.id === userId[0] &&
+          status === "Default" &&
+          parentStatus === "Not Approved") ? (
+          <Dialog open={modalEdit} onOpenChange={setModalEdit}>
             <DialogTrigger asChild>
               <Link
                 href=""
                 className="text-xs font-medium underline underline-offset-2 text-slate-600 hover:text-slate-900 transition duration-150"
               >
-                <TooltipProvider>
+                <TooltipProvider delayDuration={0}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Pencil className="w-4 h-4" />
@@ -170,7 +278,7 @@ const Feedback = ({
                 </TooltipProvider>
               </Link>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[50%]">
               <DialogHeader>
                 <DialogTitle>Edit feedback message</DialogTitle>
               </DialogHeader>
@@ -178,17 +286,31 @@ const Feedback = ({
                 className="grid w-full gap-2"
                 onSubmit={handleSubmit(handleEditFeedback)}
               >
-                <Textarea
-                  placeholder="Type your message here."
-                  {...register("content")}
-                  defaultValue={message}
-                />
-
-                {/* <div className="flex justify-start">
-                  <Button type="submit">Save changes</Button>
-                </div> */}
+                <div className="border rounded-lg">
+                  <Controller
+                    control={control}
+                    name="content"
+                    render={({ field }) => (
+                      <PlateEditorFeedbackEdit
+                        // @ts-ignore
+                        initialValue={message}
+                        onChange={(editorValue: any) => {
+                          field.onChange(editorValue);
+                        }}
+                      />
+                    )}
+                  />
+                </div>
                 <DialogFooter>
-                  <Button type="submit" size="sm" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={isLoading}
+                    variant="expandIcon"
+                    Icon={Save}
+                    iconStyle="h-4 w-4"
+                    iconPlacement="left"
+                  >
                     {isLoading ? (
                       <div className="flex items-center gap-2">
                         <SpokeSpinner size="sm" />
@@ -204,14 +326,86 @@ const Feedback = ({
           </Dialog>
         ) : null}
 
-        {userExist === userId[0] ? (
-          <AlertDialog>
+        {(userExist.id !== userId[0] && status === "Not Approved") ||
+        (userExist.id !== userId[0] &&
+          status === "Default" &&
+          parentStatus === "Not Approved") ? (
+          <Dialog open={modalReply} onOpenChange={setModalReply}>
+            <DialogTrigger asChild>
+              <Link
+                href=""
+                className="text-xs font-medium underline underline-offset-2 text-slate-600 hover:text-slate-900 transition duration-150"
+              >
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Reply className="w-4 h-4" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Reply</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </Link>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[50%]">
+              <DialogHeader>
+                <DialogTitle>Reply feedback message</DialogTitle>
+              </DialogHeader>
+              <form
+                className="grid w-full gap-2"
+                onSubmit={handleSubmit(handleReplyFeedback)}
+              >
+                <div className="border rounded-lg">
+                  <Controller
+                    control={control}
+                    name="content"
+                    render={({ field }) => (
+                      <PlateEditorFeedbackEdit
+                        // @ts-ignore
+                        onChange={(editorValue: any) => {
+                          field.onChange(editorValue);
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={isLoading}
+                    variant="expandIcon"
+                    Icon={MessageCircleReply}
+                    iconStyle="h-4 w-4"
+                    iconPlacement="left"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <SpokeSpinner size="sm" />
+                        Loading...
+                      </div>
+                    ) : (
+                      "Send reply"
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        ) : null}
+
+        {(userExist.id === userId[0] && status === "Not Approved") ||
+        (userExist.id === userId[0] &&
+          status === "Default" &&
+          parentStatus === "Not Approved") ? (
+          <AlertDialog open={modalDelete} onOpenChange={setModalDelete}>
             <AlertDialogTrigger asChild>
               <Link
                 href=""
                 className="text-xs font-medium underline underline-offset-2 text-red-600 hover:text-red-900 transition duration-150"
               >
-                <TooltipProvider>
+                <TooltipProvider delayDuration={0}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Trash2 className="w-4 h-4" />
@@ -227,8 +421,7 @@ const Feedback = ({
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete data</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure to delete data feedback &quot;{message}
-                  &quot;?
+                  Are you sure to delete this feedback?
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

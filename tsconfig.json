@@ -21,8 +21,16 @@
     ],
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+
+    "types": ["@testing-library/jest-dom"]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "./vitest.setup.ts"
+, "tailwind.config.ts", "vitest.config.mts"  ],
   "exclude": ["node_modules"]
 }

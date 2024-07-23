@@ -2,16 +2,17 @@
 
 import { useState, Fragment, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { addDays } from "date-fns";
-import { DateRange } from "react-day-picker";
-import { userList } from "@/data/user";
+
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { DevTool } from "@hookform/devtools";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, CircleHelp } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { PlateEditor } from "@/components/plate-ui/plate-editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,13 @@ import { Chips } from "@/components/ui/chips";
 import { Divider } from "@/components/ui/divider";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { SpokeSpinner } from "@/components/ui/spinner";
+import useSWR, { useSWRConfig } from "swr";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface User {
   id: string;
@@ -29,24 +37,33 @@ interface User {
 
 export default function CreateBrief() {
   const { control, register, handleSubmit } = useForm();
-  const [users, setUsers] = useState<User[]>([]);
-  const [load, setLoad] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const Router = useRouter();
-  const { toast } = useToast();
+  const { mutate } = useSWRConfig();
 
-  useEffect(() => {
-    fetch("/api/users")
-      .then((response) => response.json())
-      .then((data) => {
-        setUsers(data.data);
-        setLoad(true);
-      });
-  }, []);
+  const fetcher = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.data);
+  const fetcherUserExists = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.user);
+
+  const { data: users, error: usersError } = useSWR<User[], Error>(
+    "/api/users",
+    fetcher
+  );
+  const { data: userExist, error: userExistError } = useSWR<User, Error>(
+    "/api/auth/session",
+    fetcherUserExists
+  );
 
   const userChipList = users
-    .filter((user) => user.role !== "Admin" && user.role !== "Customer Service")
+    ?.filter(
+      (user) => user.role !== "Admin" && user.role !== "Customer Service"
+    )
     .map((user) => {
       const { id, name: text } = user;
       return {
@@ -58,46 +75,70 @@ export default function CreateBrief() {
   const handleSubmitBrief = async (data: any) => {
     setIsLoading(true);
     // console.log(data);
-    try {
-      // console.log(body);
-      const response = await fetch("/api/briefs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: data.Judul,
-          deadline: data.Deadline,
-          content: JSON.stringify(data.Editor),
-          assign: data.Assign,
-        }),
-      });
-      // console.log(response);
-      if (response.status === 201) {
-        setIsLoading(false);
-        toast({
-          title: "Success",
-          description: "User created successfully.",
+
+    if (data.Mode === false) {
+      try {
+        // console.log(body);
+        const response = await fetch("/api/briefs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: data.Judul,
+            deadline: data.Deadline,
+            content: JSON.stringify(data.Editor),
+            assign: data.Assign,
+            authorId: data.authorId,
+          }),
         });
-        Router.push("/dashboard/briefs");
-      } else {
+        // console.log(response);
+        if (response.status === 201) {
+          setIsLoading(false);
+          toast.success("Public brief created successfully.");
+          mutate("/api/brief-notifications");
+          Router.push("/dashboard/briefs");
+        } else {
+          setIsLoading(false);
+          toast.error("Uh oh! Something went wrong.");
+        }
+        return response;
+      } catch (error) {
         setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "Uh oh! Something went wrong.",
-          variant: "destructive",
-        });
+        toast.error("Uh oh! Something went wrong.");
       }
-      return response;
-    } catch (error) {
-      setIsLoading(false);
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+    } else {
+      try {
+        // console.log(body);
+        const response = await data.Assign.map((assign: any) => {
+          fetch("/api/briefs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: data.Judul,
+              deadline: data.Deadline,
+              content: JSON.stringify(data.Editor),
+              assign: assign,
+              authorId: data.authorId,
+            }),
+          }).then((response) => {
+            if (response.status === 201) {
+              setIsLoading(false);
+              toast.success("Private brief created successfully.");
+              Router.push("/dashboard/briefs");
+            } else {
+              setIsLoading(false);
+              toast.error("Uh oh! Something went wrong.");
+            }
+          });
+        });
+        return response;
+      } catch (error) {
+        setIsLoading(false);
+        toast.error("Uh oh! Something went wrong.");
+      }
     }
   };
 
-  return (
+  return userExist ? (
     <Fragment>
       <div className="min-h-screen w-full flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <form
@@ -120,16 +161,23 @@ export default function CreateBrief() {
             <Input
               type="text"
               className="w-full border-0 p-0 ring-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent placeholder:capitalize text-[40px] font-bold"
-              placeholder="Judul Brief..."
+              placeholder="Brief Title..."
               autoComplete="off"
               {...register("Judul")}
             />
 
-            <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 items-start sm:max-w-2xl">
+            <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 ">
               <input
                 type="hidden"
                 {...register("status", {
                   value: "Assigned",
+                })}
+              />
+              <input
+                type="hidden"
+                value={userExist?.id}
+                {...register("authorId", {
+                  value: userExist?.id,
                 })}
               />
 
@@ -148,7 +196,7 @@ export default function CreateBrief() {
 
               <div className="hidden sm:block sm:w-1 h-1 sm:h-10 sm:border-r sm:border-t-0 border-t border-slate-300"></div>
 
-              {load ? (
+              {userChipList ? (
                 <Controller
                   control={control}
                   name="Assign"
@@ -162,28 +210,70 @@ export default function CreateBrief() {
                   )}
                 />
               ) : null}
+
+              <div className="hidden sm:block sm:w-1 h-1 sm:h-10 sm:border-r sm:border-t-0 border-t border-slate-300"></div>
+
+              <Controller
+                name="Mode"
+                control={control}
+                defaultValue={false}
+                render={({ field }) => (
+                  <div className="flex items-center gap-3 w-full">
+                    <Checkbox
+                      id="terms"
+                      value={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                    <label
+                      htmlFor="terms"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex gap-1 items-center"
+                    >
+                      Single mode
+                      <TooltipProvider delayDuration={0}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <CircleHelp className="w-4 h-4" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              Brief akan dikirimkan ke masing-masing team member
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </label>
+                  </div>
+                )}
+              ></Controller>
             </div>
           </div>
 
           <Divider className="my-10" />
 
           <div className="border rounded-lg">
-            <Controller
-              control={control}
-              name="Editor"
-              render={({ field }) => (
-                <PlateEditor
-                  // @ts-ignore
-                  onChange={(editorValue: any) => {
-                    field.onChange(editorValue);
-                  }}
-                />
-              )}
-            />
+            <DndProvider backend={HTML5Backend}>
+              <Controller
+                control={control}
+                name="Editor"
+                render={({ field }) => (
+                  <PlateEditor
+                    // @ts-ignore
+                    onChange={(editorValue: any) => {
+                      field.onChange(editorValue);
+                    }}
+                  />
+                )}
+              />
+            </DndProvider>
           </div>
 
           <div className="flex items-center justify-start gap-2">
-            <Button type="submit" size="sm" disabled={isLoading}>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isLoading}
+              variant="gooeyLeft"
+            >
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <SpokeSpinner size="sm" />
@@ -196,8 +286,8 @@ export default function CreateBrief() {
           </div>
         </form>
       </div>
-
-      {/* <DevTool control={control} /> */}
+      {/* 
+      <DevTool control={control} /> */}
     </Fragment>
-  );
+  ) : null;
 }

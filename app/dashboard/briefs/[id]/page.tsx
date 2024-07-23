@@ -2,23 +2,36 @@
 
 import { useState, Fragment, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { addDays } from "date-fns";
-import { DateRange } from "react-day-picker";
-import { userList } from "@/data/user";
-import { Calendar, Users } from "lucide-react";
+import {
+  Calendar,
+  Users,
+  CircleFadingPlus,
+  PenTool,
+  SendHorizonal,
+  Timer,
+  SearchX,
+  Clock,
+  CircleCheck,
+  FileSearch,
+  MessageSquareDiff,
+  ChevronLeft,
+  CornerRightDown,
+  Search,
+  Pencil,
+} from "lucide-react";
 
 import { DevTool } from "@hookform/devtools";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
-import { ChevronLeft } from "lucide-react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+
 import { PlateEditor } from "@/components/plate-ui/plate-editor";
+import { PlateEditorPreview } from "@/components/plate-ui/plate-editor-preview";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Chips } from "@/components/ui/chips";
 import { Divider } from "@/components/ui/divider";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
 import {
   Select,
   SelectContent,
@@ -33,12 +46,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import Feedback from "@/components/custom/Feedback";
-import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns";
 import { SpokeSpinner } from "@/components/ui/spinner";
-// import { getSession } from "next-auth/react";
+import generator from "generate-password";
+import useSWR, { useSWRConfig } from "swr";
 
 interface User {
   id: string;
@@ -52,6 +70,7 @@ interface Brief {
   title: string;
   content: string;
   status: string;
+  authorId: string;
   deadline: {
     from: string;
     to: string;
@@ -73,71 +92,68 @@ interface Feedback {
   content: string;
   userId: string;
   briefId: string;
+  userSentId: string;
+  status: string;
+  isReply: boolean;
+  replyId: string;
+  isEdited: boolean;
   createdAt: string;
 }
 
-export default async function DetailBrief({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const { control, register, handleSubmit } = useForm();
-  const [users, setUsers] = useState<User[]>([]);
-  const [briefs, setBriefs] = useState<Brief>();
-  const [userExist, setUserExist] = useState<User>();
-  const [loadUser, setLoadUser] = useState(false);
-  const [loadBrief, setLoadBrief] = useState(false);
-  const [loadExist, setLoadExist] = useState(false);
+export default function DetailBrief({ params }: { params: { id: string } }) {
+  const { control, register, handleSubmit, watch, resetField } = useForm();
   const [isLoading, setIsLoading] = useState(false);
+  const [content, setContent] = useState(null);
+  const { mutate } = useSWRConfig();
 
   const [title, setTitle] = useState(null);
-
+  const FORMAT_DATE = "dd LLL, y";
   const Router = useRouter();
-  const { toast } = useToast();
 
-  // const session = await getSession();
-  // console.log(session);
-
-  useEffect(() => {
-    fetch("/api/users")
-      .then((response) => response.json())
-      .then((data) => {
-        setUsers(data.data);
-        setLoadUser(true);
-      });
-    fetch(`/api/briefs/${params.id}`)
-      .then((response) => response.json())
+  const fetcher = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.data);
+  const fetcherBrief = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
       .then((result) => {
         const newContent = JSON.parse(result.data.content);
         const mappedData = { ...result.data, content: newContent };
-        setBriefs(mappedData);
         setTitle(mappedData.title);
-        setLoadBrief(true);
+        return mappedData;
       });
-    fetch(`/api/auth/session`)
-      .then((response) => response.json())
-      .then((data) => {
-        setUserExist(data.user);
-        setLoadExist(true);
-      });
-  }, []);
+  const fetcherUserExists = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.user);
 
-  const userChipList = users
-    .filter((user) => user.role !== "Admin" && user.role !== "Customer Service")
-    .map((user) => {
-      const { id, name: text } = user;
-      return {
-        id,
-        text,
-      };
-    });
+  const { data: users, error: usersError } = useSWR<User[], Error>(
+    "/api/users",
+    fetcher
+  );
+  const { data: briefs, error: briefsError } = useSWR<Brief, Error>(
+    `/api/briefs/${params.id}`,
+    fetcherBrief
+  );
+  const { data: userExist, error: userExistError } = useSWR<User, Error>(
+    "/api/auth/session",
+    fetcherUserExists
+  );
 
   const handleSubmitFeedback = async (data: any) => {
     setIsLoading(true);
     const newData = {
-      ...data,
+      content: JSON.stringify(data.content),
       userId: userExist?.id,
       briefId: briefs?.id,
+      userSentId: data.userSentId,
+      isReply: false,
+      replyId: generator.generate({
+        length: 24,
+        numbers: true,
+      }),
+      status: "Not Approved",
     };
 
     // console.log(newData);
@@ -147,35 +163,42 @@ export default async function DetailBrief({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newData),
       });
+
       // console.log(response);
       if (response.status === 201) {
         setIsLoading(false);
-        toast({
-          title: "Success",
-          description: "Feedback created successfully.",
+        toast.success("Feedback created successfully.");
+        mutate(`/api/briefs/${params.id}`);
+        mutate("/api/brief-notifications");
+        setContent(null);
+        const responseNotif = await fetch(`/api/brief-notifications`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: `${userExist?.name.italics()} has sent feedback on ${briefs?.title.italics()}`,
+            briefId: briefs?.id,
+            assign: briefs?.assign,
+          }),
         });
-        // Router.push("/dashboard/briefs");
+        Router.refresh();
         location.reload();
       } else {
         setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "Uh oh! Something went wrong.",
-          variant: "destructive",
-        });
+        toast.error("Uh oh! Something went wrong.");
       }
       return response;
     } catch (error) {
       setIsLoading(false);
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 
-  const updateStatus = async (dataId: string, status: string, assign: any) => {
+  const updateStatus = async (
+    dataId: string,
+    status: string,
+    assign: any,
+    briefTitle: string
+  ) => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/briefs/${dataId}`, {
@@ -183,36 +206,41 @@ export default async function DetailBrief({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: status, assign: assign }),
       });
+
       // console.log(response);
       if (response.status === 200) {
         setIsLoading(false);
-        toast({
-          title: "Success",
-          description: "Brief updated successfully.",
-        });
+        toast.success("Brief updated successfully.");
         Router.refresh();
+        mutate(`/api/briefs/${params.id}`);
+        mutate("/api/brief-notifications");
+        const responseNotif = await fetch(`/api/brief-notifications`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: `Status brief ${briefTitle.italics()} just updated to ${status.italics()}`,
+            briefId: dataId,
+            assign: assign,
+          }),
+        });
       } else {
         setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "Uh oh! Something went wrong.",
-          variant: "destructive",
-        });
+        toast.error("Uh oh! Something went wrong.");
       }
       return response;
     } catch (error) {
       setIsLoading(false);
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 
-  // console.log(briefs);
+  const feedbacks = briefs?.feedback.map((data) => {
+    const newContent = JSON.parse(data.content);
+    const mappedData = { ...data, content: newContent };
+    return mappedData;
+  });
 
-  return loadUser && loadBrief && loadExist ? (
+  return briefs && users && userExist ? (
     <Fragment>
       <title>
         {title
@@ -223,12 +251,36 @@ export default async function DetailBrief({
         <form className="mx-auto grid max-w-[59rem] lg:min-w-[59rem] flex-1 auto-rows-max gap-4">
           <div className="flex items-center justify-between gap-4 mb-12">
             <Link
-              href=""
-              onClick={() => Router.back()}
+              href="/dashboard/briefs"
               className="w-8 h-8 rounded-lg border border-slate-300 grid place-items-center"
             >
               <ChevronLeft className="h-4 w-4" />
             </Link>
+            {userExist.id === briefs.authorId || userExist.role === "Admin" ? (
+              <Link href={`/dashboard/briefs/edit/${params.id}`}>
+                <Button
+                  size="sm"
+                  className="h-8 gap-1"
+                  onClick={() => setIsLoading(true)}
+                  disabled={isLoading}
+                  variant="default"
+                >
+                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <SpokeSpinner size="sm" />
+                        Loading...
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Pencil className="w-4 h-4" />
+                        Edit Brief
+                      </div>
+                    )}
+                  </span>
+                </Button>
+              </Link>
+            ) : null}
           </div>
 
           {/* <Divider className="my-10" /> */}
@@ -238,57 +290,132 @@ export default async function DetailBrief({
               {briefs?.title}
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 items-center sm:max-w-2xl">
-              <Select
-                defaultValue={briefs?.status}
-                onValueChange={(value) => {
-                  if (briefs) {
-                    updateStatus(briefs.id, value, briefs.assign);
-                  }
-                }}
-              >
-                <SelectTrigger id="status" aria-label="Select status">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                {userExist?.role === "Admin" ||
-                userExist?.role === "Customer Service" ? (
-                  <SelectContent>
-                    <SelectItem value="Assigned">Assigned</SelectItem>
-                    <SelectItem value="In Review">In Review</SelectItem>
-                    <SelectItem value="Waiting for Client">
-                      Waiting for Client
-                    </SelectItem>
-                    <SelectItem value="Correction">Correction</SelectItem>
-                    <SelectItem value="In Progress" disabled>
-                      In Progress
-                    </SelectItem>
-                    <SelectItem value="Need Review" disabled>
-                      Need Review
-                    </SelectItem>
-                    <SelectItem value="Done">Done</SelectItem>
-                  </SelectContent>
-                ) : (
-                  <SelectContent>
-                    <SelectItem value="Assigned" disabled>
-                      Assigned
-                    </SelectItem>
-                    <SelectItem value="In Review" disabled>
-                      In Review
-                    </SelectItem>
-                    <SelectItem value="Waiting for Client" disabled>
-                      Waiting for Client
-                    </SelectItem>
-                    <SelectItem value="Correction" disabled>
-                      Correction
-                    </SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Need Review">Need Review</SelectItem>
-                    <SelectItem value="Done" disabled>
-                      Done
-                    </SelectItem>
-                  </SelectContent>
-                )}
-              </Select>
+            <div className="flex gap-1 font-medium text-base items-center">
+              <div className="flex gap-2 items-center">
+                <PenTool className="w-5 h-5" />
+                Created by
+              </div>
+              {users
+                ?.filter((user) => user.id === briefs?.authorId)
+                .map((user) => user.name)}
+              <div>
+                at {briefs?.createdAt && format(briefs?.createdAt, FORMAT_DATE)}
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 items-center">
+              <div className="font-medium text-base flex gap-2 items-center w-full">
+                <CircleFadingPlus className="w-6 h-6" />
+                <Select
+                  defaultValue={briefs?.status}
+                  onValueChange={(value) => {
+                    if (briefs) {
+                      updateStatus(
+                        briefs.id,
+                        value,
+                        briefs.assign,
+                        briefs.title
+                      );
+                    }
+                  }}
+                >
+                  <SelectTrigger id="status" aria-label="Select status">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  {userExist?.role === "Admin" ||
+                  userExist?.role === "Customer Service" ? (
+                    <SelectContent>
+                      <SelectItem value="Assigned">
+                        <div className="flex items-center gap-2">
+                          <MessageSquareDiff className="w-3.5 h-3.5" />
+                          Assigned
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="In Review">
+                        <div className="flex items-center gap-2">
+                          <FileSearch className="w-3.5 h-3.5" />
+                          In Review
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Waiting for Client">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-3.5 h-3.5" />
+                          Waiting for Client
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Correction">
+                        <div className="flex items-center gap-2">
+                          <SearchX className="w-3.5 h-3.5" />
+                          Correction
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="In Progress" disabled>
+                        <div className="flex items-center gap-2">
+                          <Timer className="w-3.5 h-3.5" />
+                          In Progress
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Need Review" disabled>
+                        <div className="flex items-center gap-2">
+                          <Search className="w-3.5 h-3.5" />
+                          Need Review
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Done">
+                        <div className="flex items-center gap-2">
+                          <CircleCheck className="w-3.5 h-3.5" />
+                          Done
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  ) : (
+                    <SelectContent>
+                      <SelectItem value="Assigned" disabled>
+                        <div className="flex items-center gap-2">
+                          <MessageSquareDiff className="w-3.5 h-3.5" />
+                          Assigned
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="In Review" disabled>
+                        <div className="flex items-center gap-2">
+                          <FileSearch className="w-3.5 h-3.5" />
+                          In Review
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Waiting for Client" disabled>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-3.5 h-3.5" />
+                          Waiting for Client
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Correction" disabled>
+                        <div className="flex items-center gap-2">
+                          <SearchX className="w-3.5 h-3.5" />
+                          Correction
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="In Progress">
+                        <div className="flex items-center gap-2">
+                          <Timer className="w-3.5 h-3.5" />
+                          In Progress
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Need Review">
+                        <div className="flex items-center gap-2">
+                          <Search className="w-3.5 h-3.5" />
+                          Need Review
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Done" disabled>
+                        <div className="flex items-center gap-2">
+                          <CircleCheck className="w-3.5 h-3.5" />
+                          Done
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  )}
+                </Select>
+              </div>
 
               <div className="hidden sm:block sm:w-1 h-1 sm:h-10 sm:border-r sm:border-t-0 border-t border-slate-300"></div>
 
@@ -302,7 +429,10 @@ export default async function DetailBrief({
 
               <div className="font-medium text-base flex gap-2 items-center w-full">
                 <Users className="w-6 h-6" />
-                {briefs?.assign.map((user) => user.name).join(", ")}
+                {userExist?.role === "Admin" ||
+                userExist?.role === "Customer Service"
+                  ? briefs?.assign.map((user) => user.name).join(", ")
+                  : userExist?.name}
               </div>
             </div>
           </div>
@@ -312,7 +442,7 @@ export default async function DetailBrief({
           <div className="border rounded-lg">
             {
               // @ts-ignore
-              <PlateEditor initialValue={briefs.content} readOnly />
+              <PlateEditorPreview initialValue={briefs.content} readOnly />
             }
           </div>
         </form>
@@ -320,56 +450,196 @@ export default async function DetailBrief({
         <Card className="mx-auto max-w-[59rem] lg:min-w-[59rem]">
           <CardHeader>
             <CardTitle>
-              Feedback ({briefs?.feedback.map((data) => data).length})
+              Feedback (
+              {
+                briefs?.feedback
+                  .filter((data) => data.isReply === false)
+                  .map((data) => data).length
+              }
+              )
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-3">
-              {briefs?.feedback.map((data) => (
-                <Feedback
-                  key={data.id}
-                  feedbackId={data.id}
-                  user={users
-                    .filter((user) => user.id === data.userId)
-                    .map((user) => user.name)}
-                  role={users
-                    .filter((user) => user.id === data.userId)
-                    .map((user) => user.role)}
-                  message={data.content}
-                  time={formatDistanceToNow(data.createdAt)}
-                  userExist={userExist?.id}
-                  userId={users
-                    .filter((user) => user.id === data.userId)
-                    .map((user) => user.id)}
-                  briefId={briefs?.id}
-                />
-              ))}
-            </div>
-          </CardContent>
-          <CardContent>
-            <form
-              className="grid w-full gap-2"
-              onSubmit={handleSubmit(handleSubmitFeedback)}
-            >
-              <Textarea
-                placeholder="Type your message here."
-                {...register("content")}
-              />
+          <DndProvider backend={HTML5Backend}>
+            <CardContent>
+              <form
+                className="grid w-full gap-2"
+                onSubmit={handleSubmit(handleSubmitFeedback)}
+              >
+                <div className="border rounded-lg">
+                  <Controller
+                    control={control}
+                    name="content"
+                    render={({ field }) => (
+                      <PlateEditor
+                        // @ts-ignore
+                        onChange={(editorValue: any) => {
+                          field.onChange(editorValue);
+                        }}
+                      />
+                    )}
+                  />
+                </div>
 
-              <div className="flex justify-start">
-                <Button type="submit" size="sm" disabled={isLoading}>
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <SpokeSpinner size="sm" />
-                      Loading...
-                    </div>
-                  ) : (
-                    "Send message"
-                  )}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={isLoading}
+                    variant="expandIcon"
+                    Icon={SendHorizonal}
+                    iconStyle="h-4 w-4"
+                    iconPlacement="right"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <SpokeSpinner size="sm" />
+                        Loading...
+                      </div>
+                    ) : (
+                      "Send message"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+            <CardContent>
+              {feedbacks ? (
+                <div className="flex flex-col gap-3">
+                  {feedbacks
+                    .sort(function compare(a, b) {
+                      var dateA = new Date(a.createdAt);
+                      var dateB = new Date(b.createdAt);
+                      // @ts-ignore
+                      return dateA - dateB;
+                    })
+                    .filter((data) => data.isReply === false)
+                    .map((data, i) => (
+                      <div
+                        key={i}
+                        className={
+                          data.status === "Not Approved"
+                            ? "p-6 border border-slate-200 rounded-lg"
+                            : "p-6 border border-slate-900 rounded-lg"
+                        }
+                      >
+                        <Feedback
+                          key={data.id}
+                          feedbackId={data.id}
+                          authorId={briefs.authorId}
+                          user={users
+                            ?.filter((user) => user.id === data.userId)
+                            .map((user) => user.name)}
+                          userSent={users
+                            ?.filter((user) => user.id === data.userSentId)
+                            .map((user) => user.name)}
+                          role={users
+                            ?.filter((user) => user.id === data.userId)
+                            .map((user) => user.role)}
+                          message={data.content}
+                          time={formatDistanceToNow(data.createdAt)}
+                          userExist={userExist}
+                          userId={users
+                            ?.filter((user) => user.id === data.userId)
+                            .map((user) => user.id)}
+                          userSentId={data.userSentId}
+                          briefId={briefs?.id}
+                          briefTitle={briefs?.title}
+                          assignBrief={briefs?.assign}
+                          isReply={data.isReply}
+                          isEdited={data.isEdited}
+                          replyId={data.replyId}
+                          status={data.status}
+                        />
+                        {feedbacks.filter(
+                          (dataReply) =>
+                            dataReply.isReply === true &&
+                            dataReply.replyId === data.replyId
+                        ).length ? (
+                          <Collapsible>
+                            <CollapsibleTrigger>
+                              <div className="text-xs font-semibold text-slate-500 hover:text-slate-950 transition duration-300 flex gap-1 items-end">
+                                Comments (
+                                {
+                                  feedbacks.filter(
+                                    (dataReply) =>
+                                      dataReply.isReply === true &&
+                                      dataReply.replyId === data.replyId
+                                  ).length
+                                }
+                                )
+                                <CornerRightDown className="w-3 h-3" />
+                              </div>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <div className="pl-6 border-l-4  border-l-slate-100">
+                                {feedbacks
+                                  .sort(function compare(a, b) {
+                                    var dateA = new Date(a.createdAt);
+                                    var dateB = new Date(b.createdAt);
+                                    // @ts-ignore
+                                    return dateA - dateB;
+                                  })
+                                  .filter(
+                                    (dataReply) =>
+                                      dataReply.isReply === true &&
+                                      dataReply.replyId === data.replyId
+                                  )
+                                  .map((dataReply) => (
+                                    <>
+                                      <Feedback
+                                        key={dataReply.id}
+                                        feedbackId={dataReply.id}
+                                        user={users
+                                          ?.filter(
+                                            (user) =>
+                                              user.id === dataReply.userId
+                                          )
+                                          .map((user) => user.name)}
+                                        userSent={users
+                                          ?.filter(
+                                            (user) =>
+                                              user.id === dataReply.userSentId
+                                          )
+                                          .map((user) => user.name)}
+                                        role={users
+                                          ?.filter(
+                                            (user) =>
+                                              user.id === dataReply.userId
+                                          )
+                                          .map((user) => user.role)}
+                                        message={dataReply.content}
+                                        time={formatDistanceToNow(
+                                          dataReply.createdAt
+                                        )}
+                                        userExist={userExist}
+                                        userId={users
+                                          ?.filter(
+                                            (user) =>
+                                              user.id === dataReply.userId
+                                          )
+                                          .map((user) => user.id)}
+                                        userSentId={dataReply.userSentId}
+                                        briefId={briefs?.id}
+                                        briefTitle={briefs?.title}
+                                        assignBrief={briefs?.assign}
+                                        isReply={dataReply.isReply}
+                                        isEdited={dataReply.isEdited}
+                                        replyId={data.replyId}
+                                        status={dataReply.status}
+                                        parentStatus={data.status}
+                                      />
+                                    </>
+                                  ))}
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        ) : null}
+                      </div>
+                    ))}
+                </div>
+              ) : null}
+            </CardContent>
+          </DndProvider>
         </Card>
       </div>
 

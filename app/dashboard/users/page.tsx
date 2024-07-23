@@ -2,8 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 import Link from "next/link";
-import { MoreHorizontal, PlusCircle } from "lucide-react";
-import { userList } from "@/data/user";
+import { MoreHorizontal, PlusCircle, Trash2 } from "lucide-react";
 
 import { DashboardPanel } from "@/components/layouts/dashboard-panel";
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ShareDialog from "@/components/custom/ShareDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -40,17 +38,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { SpokeSpinner } from "@/components/ui/spinner";
+import useSWR, { useSWRConfig } from "swr";
 
 const TAB_LIST = ["All", "Admin", "Customer Service", "Team Member"];
 const TABLE_CONTENT = ["Name", "Email", "Role", "Action"];
 const TABLE_CONTENT_ROLE = ["Admin", "Customer Service", "Team Member"];
 
 function SelectRole({ data }: any) {
-  const { toast } = useToast();
   const Router = useRouter();
+  const { mutate } = useSWRConfig();
 
   const updateRole = async (
     dataId: string,
@@ -66,19 +65,13 @@ function SelectRole({ data }: any) {
       });
       // console.log(response);
       if (response.status === 200) {
-        toast({
-          title: "Success",
-          description: "User updated successfully.",
-        });
+        toast.success("User updated successfully.");
+        mutate("/api/users");
         Router.refresh();
       }
       return response;
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 
@@ -105,8 +98,8 @@ function SelectRole({ data }: any) {
 }
 
 function DropdownMenuActions({ data }: any) {
-  const { toast } = useToast();
   const Router = useRouter();
+  const { mutate } = useSWRConfig();
 
   const handleDelete = async (dataId: string) => {
     try {
@@ -116,20 +109,13 @@ function DropdownMenuActions({ data }: any) {
       });
       // console.log(response);
       if (response.status === 200) {
-        toast({
-          title: "Success",
-          description: "User deleted successfully.",
-        });
-        // Router.refresh();
-        location.reload();
+        toast.success("User deleted successfully.");
+        Router.refresh();
+        mutate("/api/users");
       }
       return response;
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Uh oh! Something went wrong.",
-        variant: "destructive",
-      });
+      toast.error("Uh oh! Something went wrong.");
     }
   };
 
@@ -146,7 +132,8 @@ function DropdownMenuActions({ data }: any) {
         <DropdownMenuItem>
           <Dialog>
             <DialogTrigger asChild>
-              <Link href="" className="w-full">
+              <Link href="" className="w-full flex items-center gap-2">
+                <Trash2 className="w-3.5 h-3.5" />
                 Delete
               </Link>
             </DialogTrigger>
@@ -173,16 +160,6 @@ function DropdownMenuActions({ data }: any) {
             </DialogContent>
           </Dialog>
         </DropdownMenuItem>
-        {/* <DropdownMenuItem>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Link href="" className="w-full">
-                Share
-              </Link>
-            </DialogTrigger>
-            <ShareDialog email={data.email} />
-          </Dialog>
-        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -196,20 +173,15 @@ interface User {
 }
 
 function UsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [load, setLoad] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/users")
-      .then((response) => response.json())
-      .then((data) => {
-        setUsers(data.data);
-        setLoad(true);
-      });
-  }, []);
+  const fetcher = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.data);
+  const { data: users, error } = useSWR<User[], Error>("/api/users", fetcher);
 
-  return load ? (
+  return users ? (
     <DashboardPanel>
       <Tabs defaultValue={TAB_LIST[0]}>
         <div className="flex gap-2 items-center sm:justify-between justify-start flex-wrap">
@@ -227,8 +199,8 @@ function UsersPage() {
               className="h-8 gap-1"
               onClick={() => setIsLoading(true)}
               disabled={isLoading}
+              variant="default"
             >
-              {isLoading ? null : <PlusCircle className="h-3.5 w-3.5" />}
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                 {isLoading ? (
                   <div className="flex items-center gap-2">
@@ -236,7 +208,10 @@ function UsersPage() {
                     Loading...
                   </div>
                 ) : (
-                  "Add User"
+                  <div className="flex items-center gap-2">
+                    <PlusCircle className="w-4 h-4" />
+                    Add Brief
+                  </div>
                 )}
               </span>
             </Button>
@@ -262,28 +237,8 @@ function UsersPage() {
 
                   {content === "All" ? (
                     <TableBody>
-                      {users.map((data, ui) => (
-                        <TableRow key={data.id}>
-                          <TableCell className="font-medium">
-                            {data.name}
-                          </TableCell>
-                          <TableCell>{data.email}</TableCell>
-
-                          <TableCell>
-                            <SelectRole data={data} />
-                          </TableCell>
-
-                          <TableCell>
-                            <DropdownMenuActions data={data} />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  ) : (
-                    <TableBody>
-                      {users
-                        .filter((data) => data.role === content)
-                        .map((data, ui) => (
+                      {users.length !== 0 ? (
+                        users.map((data, ui) => (
                           <TableRow key={data.id}>
                             <TableCell className="font-medium">
                               {data.name}
@@ -298,7 +253,48 @@ function UsersPage() {
                               <DropdownMenuActions data={data} />
                             </TableCell>
                           </TableRow>
-                        ))}
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={5}>
+                            <div className="flex justify-center my-4">
+                              No result
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  ) : (
+                    <TableBody>
+                      {users.filter((data) => data.role === content).length !==
+                      0 ? (
+                        users
+                          .filter((data) => data.role === content)
+                          .map((data, ui) => (
+                            <TableRow key={data.id}>
+                              <TableCell className="font-medium">
+                                {data.name}
+                              </TableCell>
+                              <TableCell>{data.email}</TableCell>
+
+                              <TableCell>
+                                <SelectRole data={data} />
+                              </TableCell>
+
+                              <TableCell>
+                                <DropdownMenuActions data={data} />
+                              </TableCell>
+                            </TableRow>
+                          ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={5}>
+                            <div className="flex justify-center my-4">
+                              No result
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
                     </TableBody>
                   )}
                 </Table>

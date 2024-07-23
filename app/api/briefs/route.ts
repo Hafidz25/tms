@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   ) {
     try {
       const body = await req.json();
-      const { title, deadline, content, status, assign } = body;
+      const { title, deadline, content, status, assign, authorId } = body;
 
       // Create data
       const newBrief = await db.brief.create({
@@ -32,12 +32,24 @@ export async function POST(req: NextRequest) {
           content: content,
           status: "Assigned",
           assign: { connect: assign },
+          authorId: authorId,
         },
+      });
+
+      const author = await db.user.findUnique({
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          briefs: true,
+        },
+        where: { id: authorId },
       });
 
       const newBriefNotif = await db.briefNotification.create({
         data: {
-          message: `New brief "${newBrief.title}" just added`,
+          message: `${author?.name.italics()} just added a new brief ${newBrief.title.italics()}`,
           briefId: newBrief.id,
           assign: { connect: assign },
         },
@@ -88,7 +100,17 @@ export async function GET() {
           content: true,
           status: true,
           assign: true,
-          feedback: true,
+          authorId: true,
+          feedback: {
+            select: {
+              id: true,
+              content: true,
+              briefId: true,
+              userId: true,
+              userSentId: true,
+              isReply: true,
+            },
+          },
           createdAt: true,
           updatedAt: true,
         },
