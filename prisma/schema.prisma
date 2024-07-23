@@ -35,7 +35,7 @@ model Brief {
   deadline        Json   // {to: DateTime, from: DateTime} - Butuh konfigurasi typed json
   content         String
   status          String
-  author          User?     @relation("author", fields: [authorId], references: [id]) // A feedback can have one brief
+  author          User?     @relation("author", fields: [authorId], references: [id], onDelete: Cascade) // A feedback can have one brief
   authorId        String?
   assign          User[]    @relation("assign")
   feedback        Feedback[]   // brief have many feedback
@@ -55,7 +55,7 @@ model Feedback {
   userId          String?
   userSent        User?     @relation("userSent", fields: [userSentId], references: [id]) // A feedback can have one brief
   userSentId      String?
-  brief           Brief?    @relation(fields: [briefId], references: [id]) // A feedback can have one brief
+  brief           Brief?    @relation(fields: [briefId], references: [id], onDelete: Cascade) // A feedback can have one brief
   briefId         String?
   createdAt       DateTime  @default(now())
 }
@@ -65,7 +65,7 @@ model BriefNotification {
   message         String
   read            Boolean @default(false)
   assign          User[]
-  brief           Brief?    @relation(fields: [briefId], references: [id])
+  brief           Brief?    @relation(fields: [briefId], references: [id], onDelete: Cascade)
   briefId         String?
   createdAt       DateTime  @default(now())
 }
