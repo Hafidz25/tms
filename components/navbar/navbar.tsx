@@ -321,7 +321,7 @@ function Navbar({ user }: any) {
                               <Card
                                 className={
                                   data.read === false
-                                    ? "bg-slate-50 cursor-pointer"
+                                    ? "bg-slate-50 cursor-pointer hover:bg-slate-100 transition duration-200"
                                     : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
                                 }
                                 key={data.id}
@@ -381,7 +381,7 @@ function Navbar({ user }: any) {
                                 <Card
                                   className={
                                     data.read === false
-                                      ? "bg-slate-50 cursor-pointer"
+                                      ? "bg-slate-50 cursor-pointer hover:bg-slate-100 transition duration-200  "
                                       : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
                                   }
                                   key={data.id}
