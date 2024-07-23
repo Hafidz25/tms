@@ -100,11 +100,7 @@ interface Feedback {
   createdAt: string;
 }
 
-export default async function DetailBrief({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function DetailBrief({ params }: { params: { id: string } }) {
   const { control, register, handleSubmit, watch, resetField } = useForm();
   const [isLoading, setIsLoading] = useState(false);
   const [content, setContent] = useState(null);
@@ -517,8 +513,9 @@ export default async function DetailBrief({
                       return dateA - dateB;
                     })
                     .filter((data) => data.isReply === false)
-                    .map((data) => (
+                    .map((data, i) => (
                       <div
+                        key={i}
                         className={
                           data.status === "Not Approved"
                             ? "p-6 border border-slate-200 rounded-lg"

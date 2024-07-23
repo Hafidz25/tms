@@ -103,10 +103,58 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
   ];
 
   useEffect(() => {
+    const filterBriefUser = (userId: string) => {
+      // console.log(userId);
+      const briefUserData = briefs.filter((data) =>
+        data.assign.find(({ id }) => id === userId)
+      );
+      setBriefUser(briefUserData);
+      setSelect(userId);
+
+      const filterMonth = briefUserData.filter(
+        (brief) =>
+          getMonth(new Date(brief.createdAt)).toString() ===
+            getMonth(Date()).toString() && brief.status === "Done"
+      );
+
+      setBriefMonthDone(filterMonth);
+      setBriefMonthTotal(
+        briefUserData.filter(
+          (brief) =>
+            getMonth(new Date(brief.createdAt)).toString() ===
+            getMonth(Date()).toString()
+        )
+      );
+
+      const getDateBrief = filterMonth.map((data) => {
+        return {
+          date: getDate(new Date(data.createdAt)),
+        };
+      });
+
+      const week1 = getDateBrief.filter(
+        (data) => data.date > 0 && data.date <= 7
+      ).length;
+      const week2 = getDateBrief.filter(
+        (data) => data.date > 7 && data.date <= 14
+      ).length;
+      const week3 = getDateBrief.filter(
+        (data) => data.date > 14 && data.date <= 21
+      ).length;
+      const week4 = getDateBrief.filter((data) => data.date > 21).length;
+
+      setBriefMonth([
+        { week: "Week 1", brief: week1 },
+        { week: "Week 2", brief: week2 },
+        { week: "Week 3", brief: week3 },
+        { week: "Week 4", brief: week4 },
+      ]);
+    };
+
     if (userExist.role === "Team Member") {
       filterBriefUser(userExist.id);
     }
-  }, []);
+  }, [userExist, briefs]);
 
   const filterBriefUser = (userId: string) => {
     // console.log(userId);
@@ -228,8 +276,10 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
               <SelectContent>
                 {users
                   .filter((user) => user.role === "Team Member")
-                  .map((user) => (
-                    <SelectItem value={user.id}>{user.name}</SelectItem>
+                  .map((user, i) => (
+                    <SelectItem key={i} value={user.id}>
+                      {user.name}
+                    </SelectItem>
                   ))}
               </SelectContent>
             </Select>
@@ -242,8 +292,10 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
                   <SelectValue placeholder="Month" />
                 </SelectTrigger>
                 <SelectContent>
-                  {month.map((m) => (
-                    <SelectItem value={m.value}>{m.label}</SelectItem>
+                  {month.map((m, i) => (
+                    <SelectItem key={i} value={m.value}>
+                      {m.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>

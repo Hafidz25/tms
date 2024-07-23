@@ -8,7 +8,7 @@ import { Brief } from "@/types/briefs";
 import useSWR from "swr";
 import { SpokeSpinner } from "@/components/ui/spinner";
 
-export default async function Page() {
+export default function Page() {
   const fetcher = (url: string) =>
     fetch(url)
       .then((res) => res.json())
@@ -38,12 +38,12 @@ export default async function Page() {
           <CardDashboard
             users={users ?? []}
             briefs={briefs ?? []}
-            userExist={userExist ?? null!}
+            userExist={userExist ?? null}
           />
           <BriefChart
             users={users ?? []}
             briefs={briefs ?? []}
-            userExist={userExist ?? null!}
+            userExist={userExist ?? null}
           />
         </>
       ) : (

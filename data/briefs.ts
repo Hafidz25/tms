@@ -7,7 +7,13 @@ import { CreateSeederProps } from "@/types/seeder";
 type AssignBrief = Pick<Brief, "assign">;
 type CreateBriefsProps = Partial<AssignBrief> & CreateSeederProps;
 
-const BRIEF_STATUS: BriefsStatus[] = ['Assigned', 'Correction', 'Done', 'In Review', 'Waiting Client Feedback'];
+const BRIEF_STATUS: BriefsStatus[] = [
+  "Assigned",
+  "Correction",
+  "Done",
+  "In Review",
+  "Waiting for Client",
+];
 
 export function createBriefs({
   amount = 1,

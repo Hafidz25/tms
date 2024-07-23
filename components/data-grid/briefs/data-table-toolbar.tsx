@@ -149,6 +149,56 @@ export function DataTableToolbar<TData>({
 
   const handleExport = useCallback(
     (data: any) => {
+      const month = [
+        {
+          value: "0",
+          label: "January",
+        },
+        {
+          value: "1",
+          label: "February",
+        },
+        {
+          value: "2",
+          label: "March",
+        },
+        {
+          value: "3",
+          label: "April",
+        },
+        {
+          value: "4",
+          label: "May",
+        },
+        {
+          value: "5",
+          label: "June",
+        },
+        {
+          value: "6",
+          label: "July",
+        },
+        {
+          value: "7",
+          label: "August",
+        },
+        {
+          value: "8",
+          label: "September",
+        },
+        {
+          value: "9",
+          label: "October",
+        },
+        {
+          value: "10",
+          label: "November",
+        },
+        {
+          value: "11",
+          label: "December",
+        },
+      ];
       // console.log(data);
       const briefUser = briefs?.filter((user) =>
         user.assign.find(({ id }) => id === data.userId)
@@ -240,7 +290,7 @@ export function DataTableToolbar<TData>({
         }.xlsx`
       );
     },
-    [briefs]
+    [briefs, users]
   );
 
   return (
@@ -304,8 +354,8 @@ export function DataTableToolbar<TData>({
                         <SelectContent>
                           {users
                             .filter((data) => data.role === "Team Member")
-                            .map((data) => (
-                              <SelectItem value={data.id}>
+                            .map((data, i) => (
+                              <SelectItem key={i} value={data.id}>
                                 {data.name}
                               </SelectItem>
                             ))}
@@ -322,8 +372,8 @@ export function DataTableToolbar<TData>({
                           <SelectValue placeholder="Select month" />
                         </SelectTrigger>
                         <SelectContent>
-                          {month.map((data) => (
-                            <SelectItem value={data.value}>
+                          {month.map((data, i) => (
+                            <SelectItem key={i} value={data.value}>
                               {data.label}
                             </SelectItem>
                           ))}
