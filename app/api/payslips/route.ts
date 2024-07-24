@@ -80,6 +80,7 @@ export async function GET() {
       //get all posts
       const payslips = await db.payslips.findMany({
         select: {
+          id: true,
           userId: true,
           period: true,
           regularFee: true,

@@ -18,15 +18,15 @@ export async function DELETE(
   const session = await getServerSession(authOption);
 
   if (session?.user.role === "Admin") {
-    const users = await db.user.delete({
+    const payslips = await db.payslips.delete({
       where: { id: params.id },
     });
 
     return NextResponse.json(
       {
         success: true,
-        message: "Delete user successfully",
-        data: users,
+        message: "Delete payslip successfully",
+        data: payslips,
       },
       {
         status: 200,
@@ -97,13 +97,17 @@ export async function GET(
   ) {
     try {
       //get all posts
-      const user = await db.user.findUnique({
+      const payslips = await db.payslips.findUnique({
         select: {
           id: true,
-          name: true,
-          email: true,
-          role: true,
-          briefs: true,
+          userId: true,
+          period: true,
+          regularFee: true,
+          presence: true,
+          transportFee: true,
+          thrFee: true,
+          otherFee: true,
+          totalFee: true,
         },
         where: { id: params.id },
       });
@@ -112,8 +116,8 @@ export async function GET(
       return NextResponse.json(
         {
           success: true,
-          message: "Data User",
-          data: user,
+          message: "Data Payslips",
+          data: payslips,
         },
         {
           status: 200,
