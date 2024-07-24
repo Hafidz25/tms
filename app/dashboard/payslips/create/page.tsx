@@ -23,12 +23,15 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import generator from "generate-password";
 import { SpokeSpinner } from "@/components/ui/spinner";
 import { MoneyInput } from "@/components/ui/money-input";
 import { toInteger, toNumber } from "lodash-es";
 import useSWR, { useSWRConfig } from "swr";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { PDFViewer } from "@react-pdf/renderer";
+import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
+import PayslipPdf from "@/components/custom/PayslipPdf";
+import { format } from "date-fns";
 
 interface User {
   id: string;
@@ -37,11 +40,32 @@ interface User {
   role: string;
 }
 
-const Page = () => {
+const styles = StyleSheet.create({
+  page: {
+    flexDirection: "row",
+    backgroundColor: "#ffffff",
+  },
+  section: {
+    margin: 10,
+    padding: 10,
+    flexGrow: 1,
+  },
+});
+
+const FORMAT_DATE = "dd LLLL y";
+
+const CreatePayslip = () => {
   const { control, register, handleSubmit, getValues, setValue } = useForm();
   const [isLoading, setIsLoading] = useState(false);
   const [transportFee, setTransportFee] = useState(0);
   const [totalFee, setTotalFee] = useState(0);
+  const [name, setName] = useState("");
+  const [periodFrom, setPeriodFrom] = useState("");
+  const [periodTo, setPeriodTo] = useState("");
+  const [fee, setFee] = useState("");
+  const [presence, setPresence] = useState("");
+  const [thr, setThr] = useState("");
+  const [other, setOther] = useState("");
   const Router = useRouter();
 
   const fetcher = (url: string) =>
@@ -61,6 +85,14 @@ const Page = () => {
         (getValues("thrFee") ? toNumber(getValues("thrFee")) : 0) +
         (getValues("otherFee") ? toNumber(getValues("otherFee")) : 0)
     );
+  };
+
+  const formatCurrency = (number: any) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(number);
   };
 
   const handleSubmitData = async (data: any) => {
@@ -110,10 +142,10 @@ const Page = () => {
   };
 
   return users ? (
-    <div className="min-h-screen w-full flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+    <div className="min-h-screen w-full flex justify-center gap-4 p-4 md:gap-4 md:p-8">
       <form
         onSubmit={handleSubmit(handleSubmitData)}
-        className="mx-auto grid max-w-[59rem] lg:min-w-[59rem] flex-1 auto-rows-max gap-4"
+        className="grid max-w-[36rem] flex-1 auto-rows-max gap-4"
       >
         <div className="flex items-center gap-4">
           <Link href="" onClick={() => Router.back()}>
@@ -139,6 +171,12 @@ const Page = () => {
                       <Select
                         onValueChange={(range) => {
                           field.onChange(range);
+                          setName(
+                            users
+                              .filter((user) => user.id === getValues("userId"))
+                              .map((user) => user.name)
+                              .join(", ")
+                          );
                         }}
                       >
                         <SelectTrigger className="">
@@ -167,6 +205,15 @@ const Page = () => {
                         mode="range"
                         onChange={(range) => {
                           field.onChange(range);
+                          // setPeriod(getValues("period"));
+                          setPeriodFrom(
+                            format(getValues("period").from, FORMAT_DATE)
+                          );
+                          setPeriodTo(
+                            getValues("period").to
+                              ? format(getValues("period").to, FORMAT_DATE)
+                              : ""
+                          );
                         }}
                       />
                     </div>
@@ -186,6 +233,7 @@ const Page = () => {
                         onValueChange={(value) => {
                           field.onChange(value);
                           countTotal();
+                          setFee(getValues("fee"));
                         }}
                       />
                     </div>
@@ -210,6 +258,7 @@ const Page = () => {
                           );
                           setTransportFee(getValues("presence") * 25000);
                           countTotal();
+                          setPresence(getValues("presence"));
                         }}
                       />
                     </div>
@@ -259,6 +308,7 @@ const Page = () => {
                         onValueChange={(value) => {
                           field.onChange(value);
                           countTotal();
+                          setThr(getValues("thrFee"));
                         }}
                       />
                     </div>
@@ -284,6 +334,7 @@ const Page = () => {
                         onValueChange={(value) => {
                           field.onChange(value);
                           countTotal();
+                          setOther(getValues("otherFee"));
                         }}
                       />
                     </div>
@@ -329,6 +380,24 @@ const Page = () => {
           </Button>
         </div>
       </form>
+      <PDFViewer className="w-[36rem]">
+        <Document>
+          <Page size="A4" style={styles.page}>
+            <View style={styles.section}>
+              <Text>Team Member: {name}</Text>
+              <Text>
+                Period: {periodFrom} - {periodTo}
+              </Text>
+              <Text>Fee: {formatCurrency(fee)}</Text>
+              <Text>Presence: {presence} day</Text>
+              <Text>Transport fee: {formatCurrency(transportFee)}</Text>
+              <Text>THR: {formatCurrency(thr)}</Text>
+              <Text>Other fee: {formatCurrency(other)}</Text>
+              <Text>Total fee: {formatCurrency(totalFee)}</Text>
+            </View>
+          </Page>
+        </Document>
+      </PDFViewer>
     </div>
   ) : (
     <div className="flex justify-center items-center h-screen">
@@ -340,4 +409,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default CreatePayslip;
