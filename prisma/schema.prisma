@@ -24,9 +24,23 @@ model User {
   briefsCreated        Brief[]   @relation("author") // user have many brief
   feedbacks            Feedback[]  @relation("user") // user have many feedback
   feedbackPrivate      Feedback[]  @relation("userSent") // user have many feedback
+  payslips             Payslips[]  @relation("payslip") // user have many payslips
   briefNotification    BriefNotification[]
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
+}
+
+model Payslips {
+  id              String    @id @default(cuid())
+  period          Json   // {to: DateTime, from: DateTime} - Butuh konfigurasi typed json
+  regularFee      Decimal   @db.Money
+  presence        Decimal
+  transportFee    Decimal   @db.Money
+  thrFee          Decimal   @db.Money
+  otherFee        Decimal   @db.Money
+  totalFee        Decimal   @db.Money
+  user            User?     @relation("payslip", fields: [userId], references: [id])
+  userId          String?
 }
 
 model Brief {
