@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 import Link from "next/link";
-import { MoreHorizontal, PlusCircle, Trash2 } from "lucide-react";
+import { Eye, MoreHorizontal, PlusCircle, Trash2 } from "lucide-react";
 
 import { DashboardPanel } from "@/components/layouts/dashboard-panel";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -39,20 +40,21 @@ import { format } from "date-fns";
 const TABLE_CONTENT = ["Name", "Period", "Presence", "Action"];
 
 function DropdownMenuActions({ data }: any) {
+  const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
   const { mutate } = useSWRConfig();
 
   const handleDelete = async (dataId: string) => {
     try {
-      const response = await fetch(`/api/users/${dataId}`, {
+      const response = await fetch(`/api/payslips/${dataId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
       // console.log(response);
       if (response.status === 200) {
-        toast.success("User deleted successfully.");
+        toast.success("Payslip deleted successfully.");
         Router.refresh();
-        mutate("/api/users");
+        mutate("/api/payslips");
       }
       return response;
     } catch (error) {
@@ -71,6 +73,26 @@ function DropdownMenuActions({ data }: any) {
 
       <DropdownMenuContent align="end">
         <DropdownMenuItem>
+          <Link
+            onClick={() => setIsLoading(true)}
+            href={`payslips/${data.id}`}
+            className="w-full"
+          >
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <SpokeSpinner size="xs" />
+                Loading...
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Eye className="w-3.5 h-3.5" />
+                Detail
+              </div>
+            )}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>
           <Dialog>
             <DialogTrigger asChild>
               <Link href="" className="w-full flex items-center gap-2">
@@ -82,8 +104,7 @@ function DropdownMenuActions({ data }: any) {
               <DialogHeader>
                 <DialogTitle>Delete data</DialogTitle>
                 <DialogDescription>
-                  Are you sure to delete data &quot;{data.name}
-                  &quot;?
+                  Are you sure to delete this data?
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter className="mt-4">
@@ -145,6 +166,8 @@ function PayslipsPage() {
     "/api/users",
     fetcher
   );
+
+  // console.log(payslips);
 
   return payslips && users ? (
     <DashboardPanel>

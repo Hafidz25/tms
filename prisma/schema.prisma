@@ -33,12 +33,12 @@ model User {
 model Payslips {
   id              String    @id @default(cuid())
   period          Json   // {to: DateTime, from: DateTime} - Butuh konfigurasi typed json
-  regularFee      Decimal   @db.Money
+  regularFee      Decimal  
   presence        Decimal
-  transportFee    Decimal   @db.Money
-  thrFee          Decimal   @db.Money
-  otherFee        Decimal   @db.Money
-  totalFee        Decimal   @db.Money
+  transportFee    Decimal  
+  thrFee          Decimal  
+  otherFee        Decimal   
+  totalFee        Decimal  
   user            User?     @relation("payslip", fields: [userId], references: [id])
   userId          String?
 }
