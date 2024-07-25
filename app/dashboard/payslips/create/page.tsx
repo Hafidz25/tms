@@ -422,7 +422,7 @@ const CreatePayslip = () => {
           </PDFDownloadLink>
         </div>
       </form>
-      <PDFViewer className="w-[36rem] rounded-lg">
+      <PDFViewer showToolbar={false} className="w-[36rem] rounded-lg">
         <PayslipPdf
           name={name}
           position={position}

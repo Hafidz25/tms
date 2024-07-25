@@ -156,6 +156,10 @@ const FORMAT_DATE = "dd LLL, y";
 function PayslipsPage() {
   const [isLoading, setIsLoading] = useState(false);
 
+  const fetcherUserExists = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => res.user);
   const fetcher = (url: string) =>
     fetch(url)
       .then((res) => res.json())
@@ -168,6 +172,10 @@ function PayslipsPage() {
     "/api/users",
     fetcher
   );
+  const { data: userExist, error: userExistError } = useSWR<User, Error>(
+    "/api/auth/session",
+    fetcherUserExists
+  );
 
   // console.log(payslips);
 
@@ -176,27 +184,29 @@ function PayslipsPage() {
       <div className="flex flex-col gap-2">
         <div className="flex gap-2 items-center justify-end flex-wrap">
           <Link href="/dashboard/payslips/create">
-            <Button
-              size="sm"
-              className="h-8 gap-1"
-              onClick={() => setIsLoading(true)}
-              disabled={isLoading}
-              variant="default"
-            >
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <SpokeSpinner size="sm" />
-                    Loading...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <PlusCircle className="w-4 h-4" />
-                    Add Payslip
-                  </div>
-                )}
-              </span>
-            </Button>
+            {userExist?.role === "Admin" ? (
+              <Button
+                size="sm"
+                className="h-8 gap-1"
+                onClick={() => setIsLoading(true)}
+                disabled={isLoading}
+                variant="default"
+              >
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <SpokeSpinner size="sm" />
+                      Loading...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <PlusCircle className="w-4 h-4" />
+                      Add Payslip
+                    </div>
+                  )}
+                </span>
+              </Button>
+            ) : null}
           </Link>
         </div>
         <Card>
@@ -214,29 +224,65 @@ function PayslipsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {payslips.length !== 0 ? (
-                  payslips.map((data, ui) => (
-                    <TableRow key={data.id}>
-                      <TableCell className="font-medium">
-                        {users
-                          ?.filter((user) => user.id === data.userId)
-                          .map((user) => user.name)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{data.position}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        {format(data.period.from, FORMAT_DATE)} -{" "}
-                        {format(data.period.to, FORMAT_DATE)}
-                      </TableCell>
+                {userExist?.role === "Admin" ? (
+                  payslips.length !== 0 ? (
+                    payslips.map((data, ui) => (
+                      <TableRow key={data.id}>
+                        <TableCell className="font-medium">
+                          {users
+                            ?.filter((user) => user.id === data.userId)
+                            .map((user) => user.name)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{data.position}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          {format(data.period.from, FORMAT_DATE)} -{" "}
+                          {format(data.period.to, FORMAT_DATE)}
+                        </TableCell>
 
-                      <TableCell>{data.presence} days</TableCell>
+                        <TableCell>{data.presence} days</TableCell>
 
-                      <TableCell>
-                        <DropdownMenuActions data={data} />
+                        <TableCell>
+                          <DropdownMenuActions data={data} />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5}>
+                        <div className="flex justify-center my-4">
+                          No result
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ))
+                  )
+                ) : payslips.filter((data) => data.userId === userExist?.id)
+                    .length !== 0 ? (
+                  payslips
+                    .filter((data) => data.userId === userExist?.id)
+                    .map((data, ui) => (
+                      <TableRow key={data.id}>
+                        <TableCell className="font-medium">
+                          {users
+                            ?.filter((user) => user.id === data.userId)
+                            .map((user) => user.name)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{data.position}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          {format(data.period.from, FORMAT_DATE)} -{" "}
+                          {format(data.period.to, FORMAT_DATE)}
+                        </TableCell>
+
+                        <TableCell>{data.presence} days</TableCell>
+
+                        <TableCell>
+                          <DropdownMenuActions data={data} />
+                        </TableCell>
+                      </TableRow>
+                    ))
                 ) : (
                   <TableRow>
                     <TableCell colSpan={5}>
