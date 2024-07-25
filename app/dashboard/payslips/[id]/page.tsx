@@ -28,7 +28,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { PDFViewer } from "@react-pdf/renderer";
+import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
 import PayslipPdf from "@/components/custom/PayslipPdf";
 import { format } from "date-fns";
 
@@ -290,6 +290,33 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
                 </div>
               </CardContent>
             </Card>
+          </div>
+          <div className="flex items-center justify-start gap-2">
+            <PDFDownloadLink
+              document={
+                <PayslipPdf
+                  name={users
+                    ?.filter((user) => user.id === payslips.userId)
+                    .map((user) => user.name)}
+                  position={payslips.position}
+                  periodTo={format(payslips.period.to, FORMAT_DATE)}
+                  periodFrom={format(payslips.period.from, FORMAT_DATE)}
+                  fee={payslips.regularFee}
+                  presence={payslips.presence}
+                  transportFee={payslips.transportFee}
+                  thr={payslips.thrFee}
+                  other={payslips.otherFee}
+                  totalFee={payslips.totalFee}
+                />
+              }
+              fileName={`${users
+                ?.filter((user) => user.id === payslips.userId)
+                .map((user) => user.name)} - Payslip`}
+            >
+              <Button type="button" size="sm" variant="shine">
+                Export PDF
+              </Button>
+            </PDFDownloadLink>
           </div>
         </form>
         <PDFViewer className="w-[36rem]">

@@ -93,7 +93,7 @@ const PayslipPdf = ({
   };
 
   return (
-    <Document>
+    <Document title={`${name} - Payslip`}>
       <Page size="FOLIO" style={styles.page}>
         <View style={styles.headingSection}>
           <Image src="/payslip/logo.png" style={styles.imgLogo} />

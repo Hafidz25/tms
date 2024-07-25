@@ -29,7 +29,14 @@ import { toInteger, toNumber } from "lodash-es";
 import useSWR, { useSWRConfig } from "swr";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { PDFViewer } from "@react-pdf/renderer";
-import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
+import {
+  Page,
+  Text,
+  View,
+  Document,
+  StyleSheet,
+  PDFDownloadLink,
+} from "@react-pdf/renderer";
 import PayslipPdf from "@/components/custom/PayslipPdf";
 import { format } from "date-fns";
 
@@ -392,6 +399,27 @@ const CreatePayslip = () => {
               "Create an user"
             )}
           </Button>
+          <PDFDownloadLink
+            document={
+              <PayslipPdf
+                name={name}
+                position={position}
+                periodTo={periodTo}
+                periodFrom={periodFrom}
+                fee={fee}
+                presence={presence}
+                transportFee={transportFee}
+                thr={thr}
+                other={other}
+                totalFee={totalFee}
+              />
+            }
+            fileName={`${name} - Payslip`}
+          >
+            <Button type="button" size="sm" variant="outline">
+              Export PDF
+            </Button>
+          </PDFDownloadLink>
         </div>
       </form>
       <PDFViewer className="w-[36rem]">
