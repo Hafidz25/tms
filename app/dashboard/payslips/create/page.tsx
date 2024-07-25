@@ -66,6 +66,7 @@ const CreatePayslip = () => {
   const [presence, setPresence] = useState("");
   const [thr, setThr] = useState("");
   const [other, setOther] = useState("");
+  const [position, setPosition] = useState("");
   const Router = useRouter();
 
   const fetcher = (url: string) =>
@@ -87,17 +88,10 @@ const CreatePayslip = () => {
     );
   };
 
-  const formatCurrency = (number: any) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(number);
-  };
-
   const handleSubmitData = async (data: any) => {
     const newData = {
       userId: data.userId,
+      position: data.position,
       period: data.period,
       fee: toNumber(data.fee),
       presence: data.presence ? toNumber(data.presence) : 0,
@@ -108,6 +102,7 @@ const CreatePayslip = () => {
 
     const totalData = {
       userId: newData.userId,
+      position: newData.position,
       period: newData.period,
       reqularFee: newData.fee,
       presence: newData.presence,
@@ -148,7 +143,7 @@ const CreatePayslip = () => {
         className="grid max-w-[36rem] flex-1 auto-rows-max gap-4"
       >
         <div className="flex items-center gap-4">
-          <Link href="" onClick={() => Router.back()}>
+          <Link href="/dashboard/payslips">
             <Button variant="outline" size="icon" className="h-7 w-7">
               <ChevronLeft className="h-4 w-4" />
               <span className="sr-only">Back</span>
@@ -192,6 +187,25 @@ const CreatePayslip = () => {
                             ))}
                         </SelectContent>
                       </Select>
+                    </div>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="position"
+                  render={({ field }) => (
+                    <div className="grid gap-3">
+                      <Label htmlFor="period">Position</Label>
+                      <Input
+                        id="position"
+                        type="text"
+                        placeholder="e.g Illustrator Designer"
+                        required
+                        onChange={(range) => {
+                          field.onChange(range);
+                          setPosition(getValues("position"));
+                        }}
+                      />
                     </div>
                   )}
                 />
@@ -381,22 +395,18 @@ const CreatePayslip = () => {
         </div>
       </form>
       <PDFViewer className="w-[36rem]">
-        <Document>
-          <Page size="A4" style={styles.page}>
-            <View style={styles.section}>
-              <Text>Team Member: {name}</Text>
-              <Text>
-                Period: {periodFrom} - {periodTo}
-              </Text>
-              <Text>Fee: {formatCurrency(fee)}</Text>
-              <Text>Presence: {presence} day</Text>
-              <Text>Transport fee: {formatCurrency(transportFee)}</Text>
-              <Text>THR: {formatCurrency(thr)}</Text>
-              <Text>Other fee: {formatCurrency(other)}</Text>
-              <Text>Total fee: {formatCurrency(totalFee)}</Text>
-            </View>
-          </Page>
-        </Document>
+        <PayslipPdf
+          name={name}
+          position={position}
+          periodTo={periodTo}
+          periodFrom={periodFrom}
+          fee={fee}
+          presence={presence}
+          transportFee={transportFee}
+          thr={thr}
+          other={other}
+          totalFee={totalFee}
+        />
       </PDFViewer>
     </div>
   ) : (

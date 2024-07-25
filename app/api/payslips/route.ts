@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
         thrFee,
         otherFee,
         totalFee,
+        position,
       } = body;
 
       // Create data
@@ -39,6 +40,7 @@ export async function POST(req: NextRequest) {
           thrFee: thrFee,
           otherFee: otherFee,
           totalFee: totalFee,
+          position: position,
         },
       });
 
@@ -89,6 +91,7 @@ export async function GET() {
           thrFee: true,
           otherFee: true,
           totalFee: true,
+          position: true,
         },
       });
 

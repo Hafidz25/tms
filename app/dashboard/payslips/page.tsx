@@ -36,8 +36,9 @@ import { useRouter } from "next/navigation";
 import { SpokeSpinner } from "@/components/ui/spinner";
 import useSWR, { useSWRConfig } from "swr";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
-const TABLE_CONTENT = ["Name", "Period", "Presence", "Action"];
+const TABLE_CONTENT = ["Name", "Position", "Period", "Presence", "Action"];
 
 function DropdownMenuActions({ data }: any) {
   const [isLoading, setIsLoading] = useState(false);
@@ -130,6 +131,7 @@ function DropdownMenuActions({ data }: any) {
 interface Payslip {
   id: string;
   userId: string;
+  position: string;
   period: {
     from: string;
     to: string;
@@ -219,6 +221,9 @@ function PayslipsPage() {
                         {users
                           ?.filter((user) => user.id === data.userId)
                           .map((user) => user.name)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{data.position}</Badge>
                       </TableCell>
                       <TableCell>
                         {format(data.period.from, FORMAT_DATE)} -{" "}

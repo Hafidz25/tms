@@ -108,6 +108,7 @@ export async function GET(
           thrFee: true,
           otherFee: true,
           totalFee: true,
+          position: true,
         },
         where: { id: params.id },
       });

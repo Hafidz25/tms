@@ -30,10 +30,14 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { PDFViewer } from "@react-pdf/renderer";
 import PayslipPdf from "@/components/custom/PayslipPdf";
+import { format } from "date-fns";
+
+const FORMAT_DATE = "dd LLLL y";
 
 interface Payslip {
   id: string;
   userId: string;
+  position: string;
   period: {
     from: string;
     to: string;
@@ -58,7 +62,7 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
   const { mutate } = useSWRConfig();
 
   const [title, setTitle] = useState(null);
-  const FORMAT_DATE = "dd LLL, y";
+  const FORMAT_DATE = "dd LLLL y";
   const Router = useRouter();
 
   const fetcher = (url: string) =>
@@ -83,10 +87,10 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
           ? `${title} - Task Management System`
           : "Detail Payslip - Task Management System"}
       </title>
-      <div className="min-h-screen w-full flex  gap-4 p-4 md:gap-4 md:p-8">
-        <form className="grid max-w-[59rem] flex-1 auto-rows-max gap-4">
+      <div className="min-h-screen w-full flex justify-center gap-4 p-4 md:gap-4 md:p-8">
+        <form className="grid max-w-[36rem] flex-1 auto-rows-max gap-4">
           <div className="flex items-center gap-4">
-            <Link href="" onClick={() => Router.back()}>
+            <Link href="/dashboard/payslips">
               <Button variant="outline" size="icon" className="h-7 w-7">
                 <ChevronLeft className="h-4 w-4" />
                 <span className="sr-only">Back</span>
@@ -132,6 +136,24 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
                     />
                     <Controller
                       control={control}
+                      name="position"
+                      render={({ field }) => (
+                        <div className="grid gap-3 w-full">
+                          <Label htmlFor="period">Position</Label>
+                          <Input
+                            id="position"
+                            type="text"
+                            placeholder="e.g Illustrator Designer"
+                            disabled
+                            value={payslips.position}
+                          />
+                        </div>
+                      )}
+                    />
+                  </div>
+                  <div className="flex gap-3 w-full">
+                    <Controller
+                      control={control}
                       name="period"
                       render={({ field }) => (
                         <div className="grid gap-3 w-full">
@@ -149,23 +171,23 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
                         </div>
                       )}
                     />
+                    <Controller
+                      control={control}
+                      name="fee"
+                      render={({ field }) => (
+                        <div className="grid gap-3 w-full">
+                          <Label htmlFor="fee">Fee</Label>
+                          <MoneyInput
+                            id="fee"
+                            currency={"Rp."}
+                            placeholder="Input Nominal"
+                            disabled
+                            value={payslips.regularFee}
+                          />
+                        </div>
+                      )}
+                    />
                   </div>
-                  <Controller
-                    control={control}
-                    name="fee"
-                    render={({ field }) => (
-                      <div className="grid gap-3">
-                        <Label htmlFor="fee">Fee</Label>
-                        <MoneyInput
-                          id="fee"
-                          currency={"Rp."}
-                          placeholder="Input Nominal"
-                          disabled
-                          value={payslips.regularFee}
-                        />
-                      </div>
-                    )}
-                  />
                   <div className="flex gap-3 w-full">
                     <Controller
                       control={control}
@@ -270,9 +292,22 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
             </Card>
           </div>
         </form>
-        {/* <PDFViewer className="h-100">
-          <PayslipPdf />
-        </PDFViewer> */}
+        <PDFViewer className="w-[36rem]">
+          <PayslipPdf
+            name={users
+              ?.filter((user) => user.id === payslips.userId)
+              .map((user) => user.name)}
+            position={payslips.position}
+            periodTo={format(payslips.period.to, FORMAT_DATE)}
+            periodFrom={format(payslips.period.from, FORMAT_DATE)}
+            fee={payslips.regularFee}
+            presence={payslips.presence}
+            transportFee={payslips.transportFee}
+            thr={payslips.thrFee}
+            other={payslips.otherFee}
+            totalFee={payslips.totalFee}
+          />
+        </PDFViewer>
       </div>
       {/* <DevTool control={control} /> */}
     </Fragment>
