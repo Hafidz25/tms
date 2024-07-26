@@ -27,7 +27,7 @@ import { useState } from "react";
 import { SpokeSpinner } from "@/components/ui/spinner";
 import useSWR, { useSWRConfig } from "swr";
 
-const CURRENT_SEGMENT_ROUTE = "/dashboard/briefs";
+const CURRENT_SEGMENT_ROUTE = "/dashboard/payslips";
 
 interface DropdownMenuActionsProps
   extends React.ComponentProps<typeof DropdownMenu> {
@@ -101,7 +101,7 @@ export function DataTableRowActions<TData>({
           </Link>
         </DropdownMenuItem>
 
-        {user?.role === "Admin" || user?.role === "Customer Service" ? (
+        {/* {user?.role === "Admin" || user?.role === "Customer Service" ? (
           <DropdownMenuItem>
             <Link
               onClick={() => setIsLoadingEdit(true)}
@@ -121,9 +121,9 @@ export function DataTableRowActions<TData>({
               )}
             </Link>
           </DropdownMenuItem>
-        ) : null}
+        ) : null} */}
 
-        {user?.role === "Admin" || user?.role === "Customer Service" ? (
+        {user?.role === "Admin" ? (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
