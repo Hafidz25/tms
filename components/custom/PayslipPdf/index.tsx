@@ -8,6 +8,7 @@ import {
   Image,
 } from "@react-pdf/renderer";
 import { format } from "date-fns";
+import { id } from "date-fns/locale";
 
 const FORMAT_DATE = "dd LLLL y";
 
@@ -93,6 +94,9 @@ const PayslipPdf = ({
     }).format(number);
   };
 
+  const newPeriodTo = format(periodTo, FORMAT_DATE, { locale: id });
+  const newPeriodFrom = format(periodFrom, FORMAT_DATE, { locale: id });
+
   return (
     <Document title={`${name} - Payslip`}>
       <Page size="FOLIO" style={styles.page}>
@@ -117,7 +121,7 @@ const PayslipPdf = ({
         <View style={styles.contentHeadingSection}>
           <Text style={styles.contentHeading}>SLIP GAJI KARYAWAN</Text>
           <Text style={styles.contentSubHeading}>
-            Periode {periodFrom} - {periodTo}
+            Periode {newPeriodFrom} - {newPeriodTo}
           </Text>
         </View>
         <View
@@ -529,7 +533,7 @@ const PayslipPdf = ({
           }}
         >
           <Text style={styles.tableText}>
-            Malang, {format(Date.now(), FORMAT_DATE)}
+            Malang, {format(Date.now(), FORMAT_DATE, { locale: id })}
           </Text>
           <Image src="/payslip/signature.jpg" style={{ width: 50 }} />
           <Text style={styles.tableText}>Robi Wahyudi</Text>
