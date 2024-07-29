@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
 const PayslipPdf = ({
   name,
   position,
+  level,
   periodTo,
   periodFrom,
   fee,
@@ -124,7 +125,7 @@ const PayslipPdf = ({
             display: "flex",
             justifyContent: "flex-start",
             gap: 6,
-            marginBottom: 36,
+            marginBottom: 28,
           }}
         >
           <Text style={styles.teamInfoText}>
@@ -132,6 +133,10 @@ const PayslipPdf = ({
           </Text>
           <Text style={styles.teamInfoText}>
             Jabatan &nbsp;&nbsp;&nbsp;: &nbsp;{position}
+          </Text>
+          <Text style={styles.teamInfoText}>
+            Level &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: &nbsp;
+            {level}
           </Text>
         </View>
         <View style={{ marginBottom: 12 }}>
@@ -288,7 +293,7 @@ const PayslipPdf = ({
                 paddingHorizontal: 12,
                 backgroundColor: "#ffe598",
                 height: 34,
-                borderBottom: 1,
+                borderBottom: 0.5,
               }}
             >
               <Text style={styles.tableText}>
@@ -451,7 +456,7 @@ const PayslipPdf = ({
             display: "flex",
             flexDirection: "column",
             gap: 6,
-            marginBottom: 42,
+            marginBottom: 28,
           }}
         >
           <Text style={styles.tableText}>Keterangan :</Text>

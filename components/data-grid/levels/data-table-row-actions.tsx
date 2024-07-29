@@ -27,7 +27,7 @@ import { useState } from "react";
 import { SpokeSpinner } from "@/components/ui/spinner";
 import useSWR, { useSWRConfig } from "swr";
 
-const CURRENT_SEGMENT_ROUTE = "/dashboard/payslips";
+const CURRENT_SEGMENT_ROUTE = "/dashboard/level-fee";
 
 interface DropdownMenuActionsProps
   extends React.ComponentProps<typeof DropdownMenu> {
@@ -50,15 +50,15 @@ export function DataTableRowActions<TData>({
 
   const handleDelete = async (dataId: string) => {
     try {
-      const response = await fetch(`/api/payslips/${dataId}`, {
+      const response = await fetch(`/api/level-fee/${dataId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
 
       if (response.status === 200) {
-        toast.success("Payslip deleted successfully.");
+        toast.success("Level deleted successfully.");
         Router.refresh();
-        mutate("/api/payslips");
+        mutate("/api/level-fee");
       } else if (response.status === 403) {
         toast.warning("You dont have access.");
       }
