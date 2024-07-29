@@ -94,6 +94,7 @@ const NAVS = [
   nav({ href: "/dashboard/users", location: "Users" }),
   nav({ href: "/dashboard/briefs", location: "Briefs" }),
   nav({ href: "/dashboard/payslips", location: "Payslips" }),
+  nav({ href: "/dashboard/level-fee", location: "Level" }),
 ];
 
 // perlu refactor
