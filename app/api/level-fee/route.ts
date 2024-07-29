@@ -17,39 +17,20 @@ export async function POST(req: NextRequest) {
   if (session?.user.role === "Admin") {
     try {
       const body = await req.json();
-      const {
-        userId,
-        reqularFee,
-        period,
-        presence,
-        transportFee,
-        thrFee,
-        otherFee,
-        totalFee,
-        position,
-        levelId,
-      } = body;
+      const { level, regularFee } = body;
 
       // Create data
-      const newPayslip = await db.payslips.create({
+      const newPayslip = await db.levelFee.create({
         data: {
-          userId: userId,
-          period: period,
-          regularFee: reqularFee,
-          presence: presence,
-          transportFee: transportFee,
-          thrFee: thrFee,
-          otherFee: otherFee,
-          totalFee: totalFee,
-          position: position,
-          levelId: levelId,
+          level: level,
+          regularFee: regularFee,
         },
       });
 
       return NextResponse.json(
         {
           payslip: newPayslip,
-          message: "Payslip created successfully",
+          message: "Level fee created successfully",
         },
         { status: 201 }
       );
@@ -82,19 +63,12 @@ export async function GET() {
   ) {
     try {
       //get all posts
-      const payslips = await db.payslips.findMany({
+      const payslips = await db.levelFee.findMany({
         select: {
           id: true,
-          userId: true,
-          levelId: true,
-          period: true,
+          level: true,
           regularFee: true,
-          presence: true,
-          transportFee: true,
-          thrFee: true,
-          otherFee: true,
-          totalFee: true,
-          position: true,
+          createdAt: true,
         },
       });
 
@@ -102,7 +76,7 @@ export async function GET() {
       return NextResponse.json(
         {
           success: true,
-          message: "List Data Payslips",
+          message: "List Data Level Fee",
           data: payslips,
         },
         {

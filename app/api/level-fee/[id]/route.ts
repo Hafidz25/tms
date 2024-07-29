@@ -18,14 +18,14 @@ export async function DELETE(
   const session = await getServerSession(authOption);
 
   if (session?.user.role === "Admin") {
-    const payslips = await db.payslips.delete({
+    const payslips = await db.levelFee.delete({
       where: { id: params.id },
     });
 
     return NextResponse.json(
       {
         success: true,
-        message: "Delete payslip successfully",
+        message: "Delete level fee successfully",
         data: payslips,
       },
       {
@@ -50,25 +50,23 @@ export async function PATCH(
 
   if (session?.user.role === "Admin") {
     const body = await req.json();
-    const { name, email, password, role } = body;
+    const { level, reqularFee } = body;
 
     // Hash password
     //   const hashedPassword = await hash(password, 10);
-    const users = await db.user.update({
+    const levelUpdate = await db.levelFee.update({
       where: { id: params.id },
       data: {
-        name: name,
-        email: email,
-        //   password: hashedPassword,
-        role: role,
+        level: level,
+        regularFee: reqularFee,
       },
     });
 
     return NextResponse.json(
       {
         success: true,
-        message: "User update successfully",
-        data: users,
+        message: "Level fee update successfully",
+        data: levelUpdate,
       },
       {
         status: 200,
@@ -97,19 +95,11 @@ export async function GET(
   ) {
     try {
       //get all posts
-      const payslips = await db.payslips.findUnique({
+      const payslips = await db.levelFee.findUnique({
         select: {
           id: true,
-          userId: true,
-          period: true,
+          level: true,
           regularFee: true,
-          presence: true,
-          transportFee: true,
-          thrFee: true,
-          otherFee: true,
-          totalFee: true,
-          position: true,
-          levelId: true,
         },
         where: { id: params.id },
       });
@@ -118,7 +108,7 @@ export async function GET(
       return NextResponse.json(
         {
           success: true,
-          message: "Data Payslips",
+          message: "Data Level Fee",
           data: payslips,
         },
         {
