@@ -139,10 +139,10 @@ const CreatePayslip = () => {
   };
 
   return users && levelFee ? (
-    <div className="min-h-screen w-full flex justify-center gap-4 p-4 md:gap-4 md:p-8">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row justify-center gap-4 p-4 md:gap-4 md:p-8">
       <form
         onSubmit={handleSubmit(handleSubmitData)}
-        className="grid max-w-[36rem] flex-1 auto-rows-max gap-4"
+        className="grid w-full lg:max-w-[36rem] flex-1 auto-rows-max gap-4"
       >
         <div className="flex items-center gap-4">
           <Link href="/dashboard/payslips">
@@ -159,7 +159,7 @@ const CreatePayslip = () => {
             </CardHeader>
             <CardContent>
               <div className="grid gap-6">
-                <div className="flex gap-3 w-full">
+                <div className="flex flex-col md:flex-row gap-3 w-full">
                   <Controller
                     control={control}
                     name="userId"
@@ -239,7 +239,7 @@ const CreatePayslip = () => {
                     </div>
                   )}
                 />
-                <div className="flex gap-3 w-full">
+                <div className="flex flex-col md:flex-row gap-3 w-full">
                   <Controller
                     control={control}
                     name="levelId"
@@ -311,7 +311,7 @@ const CreatePayslip = () => {
                     )}
                   />
                 </div>
-                <div className="flex gap-3 w-full">
+                <div className="flex flex-col md:flex-row gap-3 w-full">
                   <Controller
                     control={control}
                     name="presence"
@@ -362,7 +362,7 @@ const CreatePayslip = () => {
                     )}
                   />
                 </div>
-                <div className="flex gap-3 w-full">
+                <div className="flex flex-col md:flex-row gap-3 w-full">
                   <Controller
                     control={control}
                     name="thrFee"
@@ -478,7 +478,10 @@ const CreatePayslip = () => {
           </PDFDownloadLink>
         </div>
       </form>
-      <PDFViewer showToolbar={false} className="w-[36rem] rounded-lg">
+      <PDFViewer
+        showToolbar={false}
+        className="w-full lg:w-[30rem] xl:w-[36rem] h-[20rem] md:h-[36rem] xl:h-[54rem] rounded-lg"
+      >
         <PayslipPdf
           name={name}
           level={level}

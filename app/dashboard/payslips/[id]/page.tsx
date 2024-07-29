@@ -97,8 +97,8 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
           ? `${title} - Task Management System`
           : "Detail Payslip - Task Management System"}
       </title>
-      <div className="min-h-screen w-full flex justify-center gap-4 p-4 md:gap-4 md:p-8">
-        <form className="grid max-w-[36rem] flex-1 auto-rows-max gap-4">
+      <div className="min-h-screen w-full flex flex-col lg:flex-row justify-center gap-4 p-4 md:gap-4 md:p-8">
+        <form className="grid w-full lg:max-w-[36rem] flex-1 auto-rows-max gap-4">
           <div className="flex items-center gap-4">
             <Link href="/dashboard/payslips">
               <Button variant="outline" size="icon" className="h-7 w-7">
@@ -114,7 +114,7 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
               </CardHeader>
               <CardContent>
                 <div className="grid gap-6">
-                  <div className="flex gap-3 w-full">
+                  <div className="flex flex-col md:flex-row gap-3 w-full">
                     <Controller
                       control={control}
                       name="userId"
@@ -180,7 +180,7 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
                       </div>
                     )}
                   />
-                  <div className="flex gap-3 w-full">
+                  <div className="flex flex-col md:flex-row gap-3 w-full">
                     <Controller
                       control={control}
                       name="levelId"
@@ -217,7 +217,7 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
                       )}
                     />
                   </div>
-                  <div className="flex gap-3 w-full">
+                  <div className="flex flex-col md:flex-row gap-3 w-full">
                     <Controller
                       control={control}
                       name="presence"
@@ -257,7 +257,7 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
                       )}
                     />
                   </div>
-                  <div className="flex gap-3 w-full">
+                  <div className="flex flex-col md:flex-row gap-3 w-full">
                     <Controller
                       control={control}
                       name="thrFee"
@@ -352,7 +352,10 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
             </PDFDownloadLink>
           </div>
         </form>
-        <PDFViewer showToolbar={false} className="w-[36rem] h-100 rounded-lg">
+        <PDFViewer
+          showToolbar={false}
+          className="w-full lg:w-[30rem] xl:w-[36rem] h-[20rem] md:h-[36rem] xl:h-[54rem] rounded-lg"
+        >
           <PayslipPdf
             name={users
               ?.filter((user) => user.id === payslips.userId)

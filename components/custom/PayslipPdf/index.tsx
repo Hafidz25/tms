@@ -94,8 +94,12 @@ const PayslipPdf = ({
     }).format(number);
   };
 
-  const newPeriodTo = format(periodTo, FORMAT_DATE, { locale: id });
-  const newPeriodFrom = format(periodFrom, FORMAT_DATE, { locale: id });
+  const newPeriodTo = periodTo
+    ? format(periodTo, FORMAT_DATE, { locale: id })
+    : null;
+  const newPeriodFrom = periodFrom
+    ? format(periodFrom, FORMAT_DATE, { locale: id })
+    : null;
 
   return (
     <Document title={`${name} - Payslip`}>
