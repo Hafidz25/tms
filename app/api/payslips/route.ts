@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       const body = await req.json();
       const {
         userId,
-        reqularFee,
+        regularFee,
         period,
         presence,
         transportFee,
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
         data: {
           userId: userId,
           period: period,
-          regularFee: reqularFee,
+          regularFee: regularFee,
           presence: presence,
           transportFee: transportFee,
           thrFee: thrFee,

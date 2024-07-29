@@ -106,7 +106,7 @@ const CreatePayslip = () => {
       levelId: newData.levelId,
       position: newData.position,
       period: newData.period,
-      reqularFee: newData.fee,
+      regularFee: newData.fee,
       presence: newData.presence,
       transportFee: newData.transportFee,
       thrFee: newData.thrFee,

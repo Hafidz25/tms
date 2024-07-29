@@ -50,7 +50,7 @@ export async function PATCH(
 
   if (session?.user.role === "Admin") {
     const body = await req.json();
-    const { level, reqularFee } = body;
+    const { level, regularFee } = body;
 
     // Hash password
     //   const hashedPassword = await hash(password, 10);
@@ -58,7 +58,7 @@ export async function PATCH(
       where: { id: params.id },
       data: {
         level: level,
-        regularFee: reqularFee,
+        regularFee: regularFee,
       },
     });
 
