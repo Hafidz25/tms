@@ -352,7 +352,7 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
             </PDFDownloadLink>
           </div>
         </form>
-        <PDFViewer showToolbar={false} className="w-[36rem] rounded-lg">
+        <PDFViewer showToolbar={false} className="w-[36rem] h-100 rounded-lg">
           <PayslipPdf
             name={users
               ?.filter((user) => user.id === payslips.userId)

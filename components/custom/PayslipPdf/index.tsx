@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   headingText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 700,
     marginBottom: 12,
   },
@@ -54,21 +54,21 @@ const styles = StyleSheet.create({
     marginBottom: 36,
   },
   contentHeading: {
-    fontSize: 20,
+    fontSize: 18,
     textDecoration: "underline",
     textAlign: "center",
     fontWeight: "black",
     marginBottom: 8,
   },
   contentSubHeading: {
-    fontSize: 16,
+    fontSize: 14,
     textAlign: "center",
   },
   teamInfoText: {
-    fontSize: 14,
+    fontSize: 12,
   },
   tableText: {
-    fontSize: 14,
+    fontSize: 12,
   },
 });
 
@@ -140,7 +140,7 @@ const PayslipPdf = ({
           </Text>
         </View>
         <View style={{ marginBottom: 12 }}>
-          <Text style={{ fontSize: 16, marginBottom: 4 }}>PENGHASILAN</Text>
+          <Text style={{ fontSize: 14, marginBottom: 4 }}>PENGHASILAN</Text>
           {/* Table row 1 */}
           <View
             style={{
