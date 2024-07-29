@@ -22,7 +22,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Feedback from "@/components/custom/Feedback";
 import useSWR, { useSWRConfig } from "swr";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -37,6 +36,7 @@ const FORMAT_DATE = "dd LLLL y";
 interface Payslip {
   id: string;
   userId: string;
+  levelId: string;
   position: string;
   period: {
     from: string;
@@ -48,6 +48,12 @@ interface Payslip {
   thrFee: number;
   otherFee: number;
   totalFee: number;
+}
+
+interface LevelFee {
+  id: string;
+  level: number;
+  regularFee: number;
 }
 
 interface User {
@@ -77,10 +83,14 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
     "/api/users",
     fetcher
   );
+  const { data: levelFee, error: levelError } = useSWR<LevelFee[], Error>(
+    "/api/level-fee",
+    fetcher
+  );
 
   // console.log(payslips);
 
-  return payslips && users ? (
+  return payslips && users && levelFee ? (
     <Fragment>
       <title>
         {title
@@ -151,22 +161,41 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
                       )}
                     />
                   </div>
+                  <Controller
+                    control={control}
+                    name="period"
+                    render={({ field }) => (
+                      <div className="grid gap-3 w-full">
+                        <Label htmlFor="period">Period</Label>
+                        <DateRangePicker
+                          mode="range"
+                          setValue={{
+                            //@ts-ignore
+                            from: payslips.period.from,
+                            //@ts-ignore
+                            to: payslips.period.to,
+                          }}
+                          disabled
+                        />
+                      </div>
+                    )}
+                  />
                   <div className="flex gap-3 w-full">
                     <Controller
                       control={control}
-                      name="period"
+                      name="levelId"
                       render={({ field }) => (
                         <div className="grid gap-3 w-full">
-                          <Label htmlFor="period">Period</Label>
-                          <DateRangePicker
-                            mode="range"
-                            setValue={{
-                              //@ts-ignore
-                              from: payslips.period.from,
-                              //@ts-ignore
-                              to: payslips.period.to,
-                            }}
+                          <Label htmlFor="levelId">Level</Label>
+                          <Input
+                            id="levelId"
+                            type="text"
+                            placeholder="e.g Illustrator Designer"
                             disabled
+                            value={levelFee
+                              ?.filter((data) => data.id === payslips.levelId)
+                              .map((data) => data.level)
+                              .join("")}
                           />
                         </div>
                       )}
@@ -307,6 +336,10 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
                   thr={payslips.thrFee}
                   other={payslips.otherFee}
                   totalFee={payslips.totalFee}
+                  level={levelFee
+                    ?.filter((data) => data.id === payslips.levelId)
+                    .map((data) => data.level)
+                    .join("")}
                 />
               }
               fileName={`${users
@@ -333,6 +366,10 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
             thr={payslips.thrFee}
             other={payslips.otherFee}
             totalFee={payslips.totalFee}
+            level={levelFee
+              ?.filter((data) => data.id === payslips.levelId)
+              .map((data) => data.level)
+              .join("")}
           />
         </PDFViewer>
       </div>
