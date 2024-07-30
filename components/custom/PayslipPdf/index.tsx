@@ -6,11 +6,25 @@ import {
   Document,
   StyleSheet,
   Image,
+  Font,
 } from "@react-pdf/renderer";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
 const FORMAT_DATE = "dd LLLL y";
+
+Font.register({
+  family: "Open Sans",
+  fonts: [
+    {
+      src: "https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf",
+    },
+    {
+      src: "https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-700.ttf",
+      fontWeight: 700,
+    },
+  ],
+});
 
 const styles = StyleSheet.create({
   page: {
@@ -37,6 +51,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   headingText: {
+    fontFamily: "Open Sans",
     fontSize: 18,
     fontWeight: 700,
     marginBottom: 12,
@@ -58,8 +73,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textDecoration: "underline",
     textAlign: "center",
-    fontWeight: "black",
     marginBottom: 8,
+    fontFamily: "Open Sans",
+    fontWeight: 700,
   },
   contentSubHeading: {
     fontSize: 14,
@@ -148,7 +164,16 @@ const PayslipPdf = ({
           </Text>
         </View>
         <View style={{ marginBottom: 12 }}>
-          <Text style={{ fontSize: 14, marginBottom: 4 }}>PENGHASILAN</Text>
+          <Text
+            style={{
+              fontSize: 14,
+              marginBottom: 4,
+              fontFamily: "Open Sans",
+              fontWeight: 700,
+            }}
+          >
+            PENGHASILAN
+          </Text>
           {/* Table row 1 */}
           <View
             style={{
@@ -464,7 +489,7 @@ const PayslipPdf = ({
             display: "flex",
             flexDirection: "column",
             gap: 6,
-            marginBottom: 28,
+            marginBottom: 36,
           }}
         >
           <Text style={styles.tableText}>Keterangan :</Text>
