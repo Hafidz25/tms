@@ -138,7 +138,7 @@ export default function CreateBrief() {
     }
   };
 
-  return userExist ? (
+  return userExist && userChipList ? (
     <Fragment>
       <div className="min-h-screen w-full flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <form
@@ -289,5 +289,12 @@ export default function CreateBrief() {
       {/* 
       <DevTool control={control} /> */}
     </Fragment>
-  ) : null;
+  ) : (
+    <div className="flex justify-center items-center h-screen">
+      <div className="flex items-center gap-2">
+        <SpokeSpinner size="md" />
+        <span className="text-md font-medium text-slate-500">Loading...</span>
+      </div>
+    </div>
+  );
 }

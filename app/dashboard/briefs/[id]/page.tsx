@@ -645,5 +645,12 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
 
       {/* <DevTool control={control} /> */}
     </Fragment>
-  ) : null;
+  ) : (
+    <div className="flex justify-center items-center h-screen">
+      <div className="flex items-center gap-2">
+        <SpokeSpinner size="md" />
+        <span className="text-md font-medium text-slate-500">Loading...</span>
+      </div>
+    </div>
+  );
 }
