@@ -79,10 +79,15 @@ function PayslipsPage() {
 
     // console.log(mappedPayslip);
 
+    const newPayslip =
+      userExist?.role === "Admin" || userExist?.role === "Customer Service"
+        ? mappedPayslip
+        : mappedPayslip?.filter((data) => data.userId === userExist?.id);
+
     return mappedPayslip && userExist ? (
       <DashboardPanel>
         <PayslipsTable
-          data={mappedPayslip}
+          data={newPayslip}
           meta={{
             user: userExist,
             users: users,

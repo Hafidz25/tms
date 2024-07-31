@@ -154,7 +154,11 @@ function NavbarMenu({ data }: any) {
         </>
       ) : (
         <>
-          {NAVS.filter((data) => !data.location?.includes("Users")).map((nav) =>
+          {NAVS.filter(
+            (data) =>
+              !data.location?.includes("Users") &&
+              !data.location?.includes("Level")
+          ).map((nav) =>
             pathname === "/dashboard" ? (
               <Link
                 replace={nav.replace}
