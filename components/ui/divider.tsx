@@ -1,5 +1,13 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/ui/";
 
 export function Divider(props: React.HTMLAttributes<HTMLHRElement>) {
-  return <hr {...props} className={cn('overflow-visible border-l-0 border-b-0 border-solid border-slate-300 border-t inline-flex shrink w-full h-0', props.className)} />
+  return (
+    <hr
+      {...props}
+      className={cn(
+        "inline-flex h-0 w-full shrink overflow-visible border-b-0 border-l-0 border-t border-solid border-slate-300",
+        props.className,
+      )}
+    />
+  );
 }
