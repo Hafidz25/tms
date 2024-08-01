@@ -27,7 +27,7 @@ import { useState } from "react";
 import { SpokeSpinner } from "@/components/ui/spinner";
 import useSWR, { useSWRConfig } from "swr";
 
-const CURRENT_SEGMENT_ROUTE = "/dashboard/briefs";
+const CURRENT_SEGMENT_ROUTE = "/dashboard/payslips";
 
 interface DropdownMenuActionsProps
   extends React.ComponentProps<typeof DropdownMenu> {
@@ -50,15 +50,15 @@ export function DataTableRowActions<TData>({
 
   const handleDelete = async (dataId: string) => {
     try {
-      const response = await fetch(`/api/briefs/${dataId}`, {
+      const response = await fetch(`/api/payslips/${dataId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
 
       if (response.status === 200) {
-        toast.success("Brief deleted successfully.");
+        toast.success("Payslip deleted successfully.");
         Router.refresh();
-        mutate("/api/briefs");
+        mutate("/api/payslips");
       } else if (response.status === 403) {
         toast.warning("You dont have access.");
       }
@@ -101,7 +101,7 @@ export function DataTableRowActions<TData>({
           </Link>
         </DropdownMenuItem>
 
-        {user?.role === "Admin" || user?.role === "Customer Service" ? (
+        {/* {user?.role === "Admin" || user?.role === "Customer Service" ? (
           <DropdownMenuItem>
             <Link
               onClick={() => setIsLoadingEdit(true)}
@@ -121,9 +121,9 @@ export function DataTableRowActions<TData>({
               )}
             </Link>
           </DropdownMenuItem>
-        ) : null}
+        ) : null} */}
 
-        {user?.role === "Admin" || user?.role === "Customer Service" ? (
+        {user?.role === "Admin" ? (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem>

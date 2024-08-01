@@ -18,6 +18,27 @@ export default withAuth(
       return new NextResponse("You are not authorized!", {
         status: 403,
       });
+    } else if (
+      req.nextUrl.pathname === "/dashboard/payslips/create" &&
+      req.nextauth.token?.role !== "Admin"
+    ) {
+      return new NextResponse("You are not authorized!", {
+        status: 403,
+      });
+    } else if (
+      req.nextUrl.pathname === "/dashboard/level-fee/create" &&
+      req.nextauth.token?.role !== "Admin"
+    ) {
+      return new NextResponse("You are not authorized!", {
+        status: 403,
+      });
+    } else if (
+      req.nextUrl.pathname === "/dashboard/level-fee" &&
+      req.nextauth.token?.role !== "Admin"
+    ) {
+      return new NextResponse("You are not authorized!", {
+        status: 403,
+      });
     }
   },
   {

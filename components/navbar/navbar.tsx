@@ -93,6 +93,8 @@ const NAVS = [
   nav({ href: "/dashboard", location: "Home" }),
   nav({ href: "/dashboard/users", location: "Users" }),
   nav({ href: "/dashboard/briefs", location: "Briefs" }),
+  nav({ href: "/dashboard/payslips", location: "Payslips" }),
+  nav({ href: "/dashboard/level-fee", location: "Level" }),
 ];
 
 // perlu refactor
@@ -152,7 +154,11 @@ function NavbarMenu({ data }: any) {
         </>
       ) : (
         <>
-          {NAVS.filter((data) => !data.location?.includes("Users")).map((nav) =>
+          {NAVS.filter(
+            (data) =>
+              !data.location?.includes("Users") &&
+              !data.location?.includes("Level")
+          ).map((nav) =>
             pathname === "/dashboard" ? (
               <Link
                 replace={nav.replace}

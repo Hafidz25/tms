@@ -24,9 +24,37 @@ model User {
   briefsCreated        Brief[]   @relation("author") // user have many brief
   feedbacks            Feedback[]  @relation("user") // user have many feedback
   feedbackPrivate      Feedback[]  @relation("userSent") // user have many feedback
+  payslips             Payslips[]  @relation("payslip") // user have many payslips
   briefNotification    BriefNotification[]
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
+}
+
+model Payslips {
+  id              String    @id @default(cuid())
+  period          Json   // {to: DateTime, from: DateTime} - Butuh konfigurasi typed json
+  regularFee      Decimal  
+  presence        Decimal
+  transportFee    Decimal  
+  thrFee          Decimal  
+  otherFee        Decimal   
+  totalFee        Decimal  
+  user            User?     @relation("payslip", fields: [userId], references: [id], onDelete: Cascade)
+  userId          String?
+  position        String
+  level           LevelFee? @relation("payslipLevel", fields: [levelId], references: [id], onDelete: Cascade)          
+  levelId         String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model LevelFee {
+  id              String     @id @default(cuid())
+  level           String
+  regularFee      Decimal   
+  payslips        Payslips[] @relation("payslipLevel")
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 }
 
 model Brief {
@@ -35,7 +63,7 @@ model Brief {
   deadline        Json   // {to: DateTime, from: DateTime} - Butuh konfigurasi typed json
   content         String
   status          String
-  author          User?     @relation("author", fields: [authorId], references: [id]) // A feedback can have one brief
+  author          User?     @relation("author", fields: [authorId], references: [id], onDelete: Cascade) // A feedback can have one brief
   authorId        String?
   assign          User[]    @relation("assign")
   feedback        Feedback[]   // brief have many feedback
@@ -55,7 +83,7 @@ model Feedback {
   userId          String?
   userSent        User?     @relation("userSent", fields: [userSentId], references: [id]) // A feedback can have one brief
   userSentId      String?
-  brief           Brief?    @relation(fields: [briefId], references: [id]) // A feedback can have one brief
+  brief           Brief?    @relation(fields: [briefId], references: [id], onDelete: Cascade) // A feedback can have one brief
   briefId         String?
   createdAt       DateTime  @default(now())
 }
@@ -65,19 +93,7 @@ model BriefNotification {
   message         String
   read            Boolean @default(false)
   assign          User[]
-  brief           Brief?    @relation(fields: [briefId], references: [id])
+  brief           Brief?    @relation(fields: [briefId], references: [id], onDelete: Cascade)
   briefId         String?
   createdAt       DateTime  @default(now())
 }
-
-
-// model FeedbackNotification {
-//   id              String    @id @default(cuid())
-//   message         String
-//   read            Boolean @default(false)
-//   user            User?     @relation(fields: [userId], references: [id])
-//   userId          String?
-//   feedback        Feedback?    @relation(fields: [feedbackId], references: [id])
-//   feedbackId      String?
-//   createdAt       DateTime  @default(now())
-// }
