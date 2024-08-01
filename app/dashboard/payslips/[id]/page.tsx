@@ -30,6 +30,7 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
 import PayslipPdf from "@/components/custom/PayslipPdf";
 import { format } from "date-fns";
+import { id } from "date-fns/locale";
 
 const FORMAT_DATE = "dd LLLL y";
 
@@ -88,9 +89,13 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
     fetcher
   );
 
+  const formatMonth = payslips?.period.to
+    ? format(payslips?.period.to, "LLLL", { locale: id })
+    : "";
+
   // console.log(payslips);
 
-  return payslips && users && levelFee ? (
+  return payslips && users && levelFee && formatMonth ? (
     <Fragment>
       <title>
         {title
@@ -344,7 +349,7 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
               }
               fileName={`${users
                 ?.filter((user) => user.id === payslips.userId)
-                .map((user) => user.name)} - Payslip`}
+                .map((user) => user.name)} - Payslip ${formatMonth}`}
             >
               <Button type="button" size="sm" variant="shine">
                 Export PDF

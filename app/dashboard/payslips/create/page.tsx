@@ -32,6 +32,7 @@ import { PDFViewer } from "@react-pdf/renderer";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PayslipPdf from "@/components/custom/PayslipPdf";
 import { format } from "date-fns";
+import { id } from "date-fns/locale";
 
 interface User {
   id: string;
@@ -87,6 +88,9 @@ const CreatePayslip = () => {
         (getValues("otherFee") ? toNumber(getValues("otherFee")) : 0)
     );
   };
+
+  const formatMonth =
+    periodTo === "" ? null : format(periodTo, "LLLL", { locale: id });
 
   const handleSubmitData = async (data: any) => {
     const newData = {
@@ -470,7 +474,7 @@ const CreatePayslip = () => {
                 totalFee={totalFee}
               />
             }
-            fileName={`${name} - Payslip`}
+            fileName={`${name} - Payslip ${formatMonth}`}
           >
             <Button type="button" size="sm" variant="outline">
               Export PDF
