@@ -51,45 +51,58 @@ type AtLeastOne<
 
 type FacetingConfig<TData extends TableData> = AtLeastOne<
   Record<keyof TData, FacetedFilterOptionProps[]>
->;
+  >;
+
+export interface DataGridShadcnTemplateFeatureConfig<TData extends TableData> {
+  main: {
+    filter: {
+      /**
+       * Digunakan untuk menentukan Column
+       * yang akan diterapkan fitur filter search.
+       * Column Ini harus bertipe column {@link https://tanstack.com/table/latest/docs/guide/column-defs#column-def-types|`accessor`}. Sesuaikan dengan konfigurasi pada column def!
+       *
+       * @todo perbaiki type. gunakan teknik conditional type dari `ColumnDef`
+       */
+      searching: keyof TData;
+
+      /**
+       * Digunakan untuk menentukan Column
+       * yang akan diterapkan fitur filter faceting.
+       * Column Ini harus bertipe column {@link https://tanstack.com/table/latest/docs/guide/column-defs#column-def-types|`accessor`}. Sesuaikan dengan konfigurasi pada column def!
+       *
+       * Jika fitur digunakan,
+       * maka setidaknya harus memiliki satu property.
+       * Struktur konfigurasi
+       * ini sama dengan `{ columnName: FacetedFilterOption }`
+       */
+      faceting: FacetingConfig<TData>;
+    };
+
+    rowSelection: {
+      /**
+       * Callback untuk aksi yang akan dilakukan ketika
+       * proses penghapusan data dikonfirmasi.
+       */
+      onDelete: RowSelectionConfirmDeleteAction<TData>;
+    };
+  };
+
+  incremental: {
+    /**
+     * Digunakan untuk mengatur tampilan dan perilaku
+     * component penambahan data. Ini meliputi text dan link tombol
+     */
+    addData: {
+      text: string;
+      link: string;
+    };
+  };
+}
 
 interface Props<TData extends TableData, TValue> extends DataGridProps {
   data: TData[];
   columns: ColumnDef<TData, TValue>[];
-  featureConfig: {
-    main: {
-      filter: {
-        /**
-         * Digunakan untuk menentukan Column
-         * yang akan diterapkan fitur filter search.
-         * Column Ini harus bertipe column {@link https://tanstack.com/table/latest/docs/guide/column-defs#column-def-types|`accessor`}. Sesuaikan dengan konfigurasi pada column def!
-         *
-         * @todo perbaiki type. gunakan teknik conditional type dari `ColumnDef`
-         */
-        searching: keyof TData;
-
-        /**
-         * Digunakan untuk menentukan Column
-         * yang akan diterapkan fitur filter faceting.
-         * Column Ini harus bertipe column {@link https://tanstack.com/table/latest/docs/guide/column-defs#column-def-types|`accessor`}. Sesuaikan dengan konfigurasi pada column def!
-         *
-         * Jika fitur digunakan,
-         * maka setidaknya harus memiliki satu property.
-         * Struktur konfigurasi
-         * ini sama dengan `{ columnName: FacetedFilterOption }`
-         */
-        faceting: FacetingConfig<TData>;
-      };
-      
-      rowSelection: {
-        /**
-         * Callback untuk aksi yang akan dilakukan ketika
-         * proses penghapusan data dikonfirmasi.
-         */
-        onDelete: RowSelectionConfirmDeleteAction<TData>;
-      };
-    };
-  };
+  featureConfig: DataGridShadcnTemplateFeatureConfig<TData>;
 }
 
 export function DataGridTemplate<TData extends TableData, TValue>({
@@ -153,11 +166,11 @@ export function DataGridTemplate<TData extends TableData, TValue>({
             onChange={featureConfig.main.rowSelection.onDelete}
           />
 
-          <Link href="/dashboard/briefs/create">
+          <Link href={featureConfig.incremental.addData.link}>
             <Button size="sm" className="h-8 gap-1" variant={"default"}>
               <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Add Brief
+                {featureConfig.incremental.addData.text}
               </span>
             </Button>
           </Link>
