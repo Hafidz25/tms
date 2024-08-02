@@ -27,7 +27,7 @@ interface User {
   role: string;
 }
 
-const CreatePayslip = () => {
+const CreateLevel = () => {
   const { control, register, handleSubmit, getValues, setValue } = useForm();
   const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
@@ -144,4 +144,4 @@ const CreatePayslip = () => {
   );
 };
 
-export default CreatePayslip;
+export default CreateLevel;

@@ -64,7 +64,7 @@ interface User {
   role: string;
 }
 
-export default function DetailBrief({ params }: { params: { id: string } }) {
+export default function DetailPayslip({ params }: { params: { id: string } }) {
   const { control, register, handleSubmit, watch, resetField } = useForm();
   const { mutate } = useSWRConfig();
 

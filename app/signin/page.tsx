@@ -20,7 +20,7 @@ import { signIn } from "next-auth/react";
 import { SpokeSpinner } from "@/components/ui/spinner";
 import useSWR from "swr";
 
-const Page = () => {
+const SigninPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { control, register, handleSubmit, getValues } = useForm();
   const Router = useRouter();
@@ -140,4 +140,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default SigninPage;

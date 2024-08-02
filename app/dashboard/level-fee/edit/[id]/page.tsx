@@ -29,7 +29,7 @@ interface LevelFee {
   regularFee: number;
 }
 
-export default function DetailBrief({ params }: { params: { id: string } }) {
+export default function EditLevel({ params }: { params: { id: string } }) {
   const { control, register, handleSubmit, watch, resetField } = useForm();
 
   const [isLoading, setIsLoading] = useState(false);

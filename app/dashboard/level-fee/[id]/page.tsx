@@ -25,7 +25,7 @@ interface LevelFee {
   regularFee: number;
 }
 
-export default function DetailBrief({ params }: { params: { id: string } }) {
+export default function DetailLevel({ params }: { params: { id: string } }) {
   const { control, register, handleSubmit, watch, resetField } = useForm();
 
   const [title, setTitle] = useState(null);

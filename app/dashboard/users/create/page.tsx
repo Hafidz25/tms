@@ -26,7 +26,7 @@ import { useRouter } from "next/navigation";
 import generator from "generate-password";
 import { SpokeSpinner } from "@/components/ui/spinner";
 
-const Page = () => {
+const CreateUser = () => {
   const { control, register, handleSubmit, getValues, setValue } = useForm();
   const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
@@ -217,4 +217,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default CreateUser;

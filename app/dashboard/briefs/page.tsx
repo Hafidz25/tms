@@ -29,7 +29,7 @@ interface Brief {
   createdAt: string;
 }
 
-const Page = () => {
+const BriefPage = () => {
   const fetcher = (url: string) =>
     fetch(url)
       .then((res) => res.json())
@@ -76,4 +76,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default BriefPage;
