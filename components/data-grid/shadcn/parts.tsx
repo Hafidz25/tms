@@ -7,7 +7,7 @@ import {
   flexRender,
   Row,
 } from "@tanstack/react-table";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -20,7 +20,8 @@ import {
   ChevronsRight,
   Ellipsis,
   X,
-  SlidersHorizontal
+  CircleX,
+  SlidersHorizontal,
 } from "lucide-react";
 
 import { cn } from "@/lib/ui";
@@ -36,7 +37,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuLabel,
-  DropdownMenuCheckboxItem
+  DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import {
   Dialog,
@@ -96,6 +97,10 @@ type RowSelectionInitialConfig = {
   ariaLabel: string;
 };
 
+export type RowSelectionConfirmDeleteAction<TData extends TableData> = (
+  selectedData: TData[],
+) => void;
+
 type SelectionScope = "single" | "all";
 
 type DataGridRowSelectionBase = {
@@ -108,9 +113,9 @@ type DataGridRowSelectionBase = {
 };
 
 /**
- * Digunakan untuk mengatur modifier required dan optional 
+ * Digunakan untuk mengatur modifier required dan optional
  * dari property `row` dan `table`.
- * 
+ *
  * @todo pendekatan yang lebih baik?
  */
 type DataGridRowSelectionProps<
@@ -368,14 +373,13 @@ export function DataGridFacetedFilterFormatter<TData>({
 /**
  * Umumnya digunakan ketika mendefinisikan column def
  * untuk bagian header / cell. Component ini memuat fitur row selection.
- * 
+ *
  * Jika `scope` berupa `all`, maka opsi `table` bersifat `required` dan opsi `row` berupa `opsional`. Begitu pun sebaliknya, jika `scope` berupa `single` maka `row` bersifat `required` dan `table` berupa `opsional`.
  */
-export function DataGridRowSelection<SType extends SelectionScope, TData extends TableData>({
-  table,
-  row,
-  scope,
-}: DataGridRowSelectionProps<SType, TData>) {
+export function DataGridRowSelection<
+  SType extends SelectionScope,
+  TData extends TableData,
+>({ table, row, scope }: DataGridRowSelectionProps<SType, TData>) {
   let initialConfig: Partial<RowSelectionInitialConfig> = {
     checked: undefined,
     onCheckedChange: undefined,
@@ -420,6 +424,75 @@ export function DataGridRowSelection<SType extends SelectionScope, TData extends
 }
 
 /**
+ * Digunakan untuk menerapkan fitur row selection,
+ * khususnya fungsionalitas delete.
+ * Component ini umumnya digunakan didalam  `DataGridToolbarRight`.
+ *
+ * Perilaku yang diterapakan adalah ketika tidak ada row yang dipilih,
+ * secara default 'delete' mengacu pada semua rows disemua page (jika ada pagination).
+ * Namun jika terdapat row yang dipilih, 'delete' mengacu pada rows yang dipilih saja.
+ */
+export function DataGridRowSelectionDeleteAction<TData extends TableData>({
+  table,
+  onChange,
+}: {
+  table: Table<TData>;
+  onChange: RowSelectionConfirmDeleteAction<TData>;
+}) {
+  const [openModal, setOpenModal] = useState(false);
+
+  const isRowsSelected =
+    table.getIsAllPageRowsSelected() || table.getIsSomeRowsSelected();
+
+  const selectedRowsData = isRowsSelected
+    ? table.getFilteredSelectedRowModel().rows.map((row) => row.original)
+    : table.getRowModel().rows.map(row => row.original);
+
+  const deleteType = isRowsSelected ? `(${selectedRowsData?.length})` : "All";
+
+  const deleteMessage = isRowsSelected
+    ? `Are you sure you want to delete all selected data (${selectedRowsData?.length})?`
+    : "Are you sure you want to delete all data?";
+
+  return (
+    <Dialog open={openModal} onOpenChange={setOpenModal}>
+      <DialogTrigger asChild>
+        <Button
+          variant="destructive"
+          size="sm"
+          className="ml-auto hidden h-8 lg:flex"
+        >
+          <CircleX className="mr-2 h-4 w-4" />
+          Delete {deleteType}
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Selected Data</DialogTitle>
+          <DialogDescription>{deleteMessage}</DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            type="reset"
+            variant="outline"
+            onClick={() => setOpenModal(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" variant="destructive" onClick={() => {
+            onChange(selectedRowsData);
+            setOpenModal(false);
+          }}>
+            Confirm
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
  * Digunakan untuk merender content table.
  * Umumnya digunakan sebagai child dari `DataGrid` component.
  */
@@ -459,7 +532,10 @@ export function DataGridTable<TData, TValue>({
                 data-state={row.getIsSelected() && "selected"}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className={cell.column.columnDef.meta?.cell?.className}>
+                  <TableCell
+                    key={cell.id}
+                    className={cell.column.columnDef.meta?.cell?.className}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -530,6 +606,8 @@ export function DataGridCellHeader<TData, TValue>({
  * pada bagian column defs `cell` options
  */
 export function DataGridRowActions<TData>(props: CellContext<TData, unknown>) {
+  const [openModal, setOpenModal] = useState(false);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -546,29 +624,39 @@ export function DataGridRowActions<TData>(props: CellContext<TData, unknown>) {
         <DropdownMenuItem>Detail</DropdownMenuItem>
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Dialog>
-            <DialogTrigger className="flex w-full items-center gap-2">
+        <Dialog open={openModal} onOpenChange={setOpenModal}>
+          <DialogTrigger asChild>
+            <DropdownMenuItem
+              className="flex w-full items-center gap-2"
+              onSelect={(e) => {
+                e.preventDefault();
+                setOpenModal(!openModal);
+              }}
+            >
               Delete
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Delete data</DialogTitle>
-                <DialogDescription>
-                  Are you sure to delete this data?
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter className="mt-4">
-                <Button type="reset" variant="outline">
-                  Cancel
-                </Button>
-                <Button type="submit" variant="destructive">
-                  Delete
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </DropdownMenuItem>
+            </DropdownMenuItem>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Delete data</DialogTitle>
+              <DialogDescription>
+                Are you sure to delete this data?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-4">
+              <Button
+                type="reset"
+                variant="outline"
+                onClick={() => setOpenModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" variant="destructive">
+                Confirm
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -668,11 +756,11 @@ export function DataGridPagination<TData>({ table }: { table: Table<TData> }) {
  * Umumnya ini digunakan didalam component `DataGridToolbarRight`
  */
 export function DataGridVisibility<TData>({ table }: { table: Table<TData> }) {
-    return (
+  return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
+          variant="default"
           size="sm"
           className="ml-auto hidden h-8 lg:flex"
         >
@@ -687,7 +775,7 @@ export function DataGridVisibility<TData>({ table }: { table: Table<TData> }) {
           .getAllColumns()
           .filter(
             (column) =>
-              typeof column.accessorFn !== "undefined" && column.getCanHide()
+              typeof column.accessorFn !== "undefined" && column.getCanHide(),
           )
           .map((column) => {
             return (
@@ -699,9 +787,9 @@ export function DataGridVisibility<TData>({ table }: { table: Table<TData> }) {
               >
                 {column.id}
               </DropdownMenuCheckboxItem>
-            )
+            );
           })}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

@@ -30,13 +30,14 @@ import {
   DataGridProps,
   FacetedFilterOptionProps,
   DataGridVisibility,
+  DataGridRowSelectionDeleteAction,
+  RowSelectionConfirmDeleteAction
 } from "./parts";
 
 /**
  * TODO!!! :
  * @todo fleksibilitas toolbar right
- * @todo component fitur row selection (perlu pemahaman portal, untuk dialog bulk delete)
- * @todo fleksibilitas component Row Action (perlu pemahaman portal)
+ * @todo fleksibilitas component Row Action
  * @todo menyusun dokumentasi component template
  * @todo testing semua component
  *
@@ -78,6 +79,14 @@ interface Props<TData extends TableData, TValue> extends DataGridProps {
          * ini sama dengan `{ columnName: FacetedFilterOption }`
          */
         faceting: FacetingConfig<TData>;
+      };
+      
+      rowSelection: {
+        /**
+         * Callback untuk aksi yang akan dilakukan ketika
+         * proses penghapusan data dikonfirmasi.
+         */
+        onDelete: RowSelectionConfirmDeleteAction<TData>;
       };
     };
   };
@@ -139,8 +148,13 @@ export function DataGridTemplate<TData extends TableData, TValue>({
         </DataGridToolbarLeft>
 
         <DataGridToolbarRight className="flex items-center justify-end space-x-2">
+          <DataGridRowSelectionDeleteAction
+            table={table}
+            onChange={featureConfig.main.rowSelection.onDelete}
+          />
+
           <Link href="/dashboard/briefs/create">
-            <Button size="sm" className="h-8 gap-1" variant={"outline"}>
+            <Button size="sm" className="h-8 gap-1" variant={"default"}>
               <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                 Add Brief
