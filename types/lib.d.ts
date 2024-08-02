@@ -1,3 +1,4 @@
+import { TableCell } from "@/components/ui/table";
 import { User } from "./user";
 
 // Butuh penerapan yang lebih baik dengan
@@ -5,7 +6,22 @@ import { User } from "./user";
 
 // #Tanstack Table
 declare module "@tanstack/table-core" {
-  interface TableMeta<TData extends RowData> {
-    user?: User
+  interface TableData {
+    [key: string]: any;
+  }
+
+  interface BaseFeatureConfig {
+    main: { [key: string]: any };
+    incremental: { [key: string]: any };
+  }
+
+  interface TableMeta<TData extends TableData<TData>> {
+    user?: User;
+    featureConfig?: BaseFeatureConfig
+  }
+
+  interface ColumnMeta<TData extends TableData, TValue> {
+    /** Digunakan untuk menimpa property component cell table */
+    cell?: React.ComponentProps<typeof TableCell>;
   }
 }

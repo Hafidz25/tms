@@ -28,76 +28,18 @@ import {
   DataGridSearchFilter,
   DataGridTable,
   DataGridProps,
-  FacetedFilterOptionProps,
   DataGridVisibility,
   DataGridRowSelectionDeleteAction,
-  RowSelectionConfirmDeleteAction
+  DataGridShadcnTemplateFeatureConfig,
 } from "./parts";
 
 /**
  * TODO!!! :
- * @todo fleksibilitas toolbar right
- * @todo fleksibilitas component Row Action
  * @todo menyusun dokumentasi component template
  * @todo testing semua component
  *
  * @todo perbaiki " Can't perform a React state update" (lihat console). Ini merupakan kesalahan dari library. lihat {@link https://github.com/TanStack/table/issues/5026}
  */
-
-type AtLeastOne<
-  T extends Object,
-  Keys extends keyof T = keyof T,
-> = Keys extends keyof T ? Partial<T> & { [K in Keys]-?: T[K] } : never;
-
-type FacetingConfig<TData extends TableData> = AtLeastOne<
-  Record<keyof TData, FacetedFilterOptionProps[]>
-  >;
-
-export interface DataGridShadcnTemplateFeatureConfig<TData extends TableData> {
-  main: {
-    filter: {
-      /**
-       * Digunakan untuk menentukan Column
-       * yang akan diterapkan fitur filter search.
-       * Column Ini harus bertipe column {@link https://tanstack.com/table/latest/docs/guide/column-defs#column-def-types|`accessor`}. Sesuaikan dengan konfigurasi pada column def!
-       *
-       * @todo perbaiki type. gunakan teknik conditional type dari `ColumnDef`
-       */
-      searching: keyof TData;
-
-      /**
-       * Digunakan untuk menentukan Column
-       * yang akan diterapkan fitur filter faceting.
-       * Column Ini harus bertipe column {@link https://tanstack.com/table/latest/docs/guide/column-defs#column-def-types|`accessor`}. Sesuaikan dengan konfigurasi pada column def!
-       *
-       * Jika fitur digunakan,
-       * maka setidaknya harus memiliki satu property.
-       * Struktur konfigurasi
-       * ini sama dengan `{ columnName: FacetedFilterOption }`
-       */
-      faceting: FacetingConfig<TData>;
-    };
-
-    rowSelection: {
-      /**
-       * Callback untuk aksi yang akan dilakukan ketika
-       * proses penghapusan data dikonfirmasi.
-       */
-      onDelete: RowSelectionConfirmDeleteAction<TData>;
-    };
-  };
-
-  incremental: {
-    /**
-     * Digunakan untuk mengatur tampilan dan perilaku
-     * component penambahan data. Ini meliputi text dan link tombol
-     */
-    addData: {
-      text: string;
-      link: string;
-    };
-  };
-}
 
 interface Props<TData extends TableData, TValue> extends DataGridProps {
   data: TData[];
@@ -120,6 +62,9 @@ export function DataGridTemplate<TData extends TableData, TValue>({
     state: {
       sorting,
       columnFilters,
+    },
+    meta: {
+      featureConfig,
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

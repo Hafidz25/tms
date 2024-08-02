@@ -1,11 +1,12 @@
+import Link from "next/link";
 import {
   Table,
   Column,
   ColumnDef,
-  CellContext,
   TableData,
   flexRender,
   Row,
+  BaseFeatureConfig
 } from "@tanstack/react-table";
 import { useCallback, useMemo, useState } from "react";
 import {
@@ -125,10 +126,83 @@ type DataGridRowSelectionProps<
   ? DataGridRowSelectionBase & { row: Row<TData>; table?: Table<TData> }
   : DataGridRowSelectionBase & { row?: Row<TData>; table: Table<TData> };
 
+type AtLeastOne<
+  T extends Object,
+  Keys extends keyof T = keyof T,
+> = Keys extends keyof T ? Partial<T> & { [K in Keys]-?: T[K] } : never;
+
+type FacetingConfig<TData extends TableData> = AtLeastOne<
+  Record<keyof TData, FacetedFilterOptionProps[]>
+>;
+
+export interface DataGridShadcnTemplateFeatureConfig<TData extends TableData> extends BaseFeatureConfig {
+  main: {
+    filter: {
+      /**
+       * Digunakan untuk menentukan Column
+       * yang akan diterapkan fitur filter search.
+       * Column Ini harus bertipe column {@link https://tanstack.com/table/latest/docs/guide/column-defs#column-def-types|`accessor`}. Sesuaikan dengan konfigurasi pada column def!
+       *
+       * @todo perbaiki type. gunakan teknik conditional type dari `ColumnDef`
+       */
+      searching: keyof TData;
+
+      /**
+       * Digunakan untuk menentukan Column
+       * yang akan diterapkan fitur filter faceting.
+       * Column Ini harus bertipe column {@link https://tanstack.com/table/latest/docs/guide/column-defs#column-def-types|`accessor`}. Sesuaikan dengan konfigurasi pada column def!
+       *
+       * Jika fitur digunakan,
+       * maka setidaknya harus memiliki satu property.
+       * Struktur konfigurasi
+       * ini sama dengan `{ columnName: FacetedFilterOption }`
+       */
+      faceting: FacetingConfig<TData>;
+    };
+
+    rowSelection: {
+      /**
+       * Callback untuk aksi yang akan dilakukan ketika
+       * proses penghapusan data dikonfirmasi.
+       */
+      onDelete: RowSelectionConfirmDeleteAction<TData>;
+    };
+  };
+
+  incremental: {
+    /**
+     * Digunakan untuk mengatur tampilan dan perilaku
+     * component penambahan data. Ini meliputi text dan link tombol
+     */
+    addData: {
+      text: string;
+      link: string;
+    };
+
+    rowActions: {
+      /**
+       * Function yang mengembalikan string link untuk detail data.
+       * @param rowData data row untuk interpolasi string link.
+       */
+      detail: (rowData: TData) => string;
+
+      /**
+       * Function yang melakukan aksi penghapusan data row.
+       * @param rowData data row untuk operasi penghapusan data.
+       */
+      deleteData: (rowData: TData) => void;
+    };
+  };
+}
+
 export interface DataGridProps {
   title: string;
   children?: React.ReactNode;
 }
+
+type DataGridRowActionsProps<TData extends TableData> = {
+  row: Row<TData>;
+} & DataGridShadcnTemplateFeatureConfig<TData>["incremental"]["rowActions"];
 
 interface DataGridToolbarProps
   extends React.HtmlHTMLAttributes<HTMLDivElement> {}
@@ -446,7 +520,7 @@ export function DataGridRowSelectionDeleteAction<TData extends TableData>({
 
   const selectedRowsData = isRowsSelected
     ? table.getFilteredSelectedRowModel().rows.map((row) => row.original)
-    : table.getRowModel().rows.map(row => row.original);
+    : table.getRowModel().rows.map((row) => row.original);
 
   const deleteType = isRowsSelected ? `(${selectedRowsData?.length})` : "All";
 
@@ -480,10 +554,14 @@ export function DataGridRowSelectionDeleteAction<TData extends TableData>({
           >
             Cancel
           </Button>
-          <Button type="submit" variant="destructive" onClick={() => {
-            onChange(selectedRowsData);
-            setOpenModal(false);
-          }}>
+          <Button
+            type="submit"
+            variant="destructive"
+            onClick={() => {
+              onChange(selectedRowsData);
+              setOpenModal(false);
+            }}
+          >
             Confirm
           </Button>
         </DialogFooter>
@@ -605,8 +683,13 @@ export function DataGridCellHeader<TData, TValue>({
  * Umumnya ini digunakan sebagai component cell dengan tipe column display
  * pada bagian column defs `cell` options
  */
-export function DataGridRowActions<TData>(props: CellContext<TData, unknown>) {
+export function DataGridRowActions<TData extends TableData>({
+  row,
+  deleteData,
+  detail,
+}: DataGridRowActionsProps<TData>) {
   const [openModal, setOpenModal] = useState(false);
+  const linkDetail = detail(row.original);
 
   return (
     <DropdownMenu>
@@ -620,14 +703,14 @@ export function DataGridRowActions<TData>(props: CellContext<TData, unknown>) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[160px]">
-        <DropdownMenuItem>Edit</DropdownMenuItem>
-        <DropdownMenuItem>Detail</DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link href={linkDetail} className="w-full">Detail</Link>
+        </DropdownMenuItem>
 
-        <DropdownMenuSeparator />
         <Dialog open={openModal} onOpenChange={setOpenModal}>
           <DialogTrigger asChild>
             <DropdownMenuItem
-              className="flex w-full items-center gap-2"
+              className="flex w-full items-center gap-2 cursor-pointer"
               onSelect={(e) => {
                 e.preventDefault();
                 setOpenModal(!openModal);
@@ -651,7 +734,14 @@ export function DataGridRowActions<TData>(props: CellContext<TData, unknown>) {
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="destructive">
+              <Button
+                type="submit"
+                variant="destructive"
+                onClick={() => {
+                  deleteData(row.original);
+                  setOpenModal(false);
+                }}
+              >
                 Confirm
               </Button>
             </DialogFooter>
