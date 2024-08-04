@@ -6,15 +6,10 @@ import path from 'path'
 export default defineConfig({
   test: {
     environmentMatchGlobs: [
-      ["**/**.test.*", "node"],
-      ["**/components/*.test.@(js|ts|jsx|tsx)", "jsdom"],
+      ["**/components/**/*.test.@(js|ts|jsx|tsx)", "jsdom"],
+      ["**/!(components)/**/*.test.@(js|ts)", "node"],
     ],
 
-    /**
-     * WARNING!!!
-     * Jika test dilakukan dilingkungan `node`, maka setup files perlu dimatikan secara manual.
-     * Tebakan kasar, ini karena setup files dibangun hanya untuk lingkungan `jsdom` saja.
-     */
     setupFiles: ["./vitest.setup.ts"],
   },
   resolve: {
