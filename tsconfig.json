@@ -30,7 +30,9 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "./vitest.setup.ts"
-, "tailwind.config.ts", "vitest.config.mts"  ],
+    "./vitest.setup.ts",
+    "tailwind.config.ts",
+    "vitest.config.mts"
+  ],
   "exclude": ["node_modules"]
 }
