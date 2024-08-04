@@ -37,7 +37,7 @@ Contoh penerapan dalam bentuk struktur folder :
   Digunakan untuk menyusun component template (high-level).
 
 - `template.test.tsx` (required) 
-  Digunakan untuk testing component template.
+  Digunakan untuk integration testing pada component template.
 
 - `parts.tsx` (optional)
   Digunakan untuk menyusun component presentational (low-level). File ini dapat diganti menjadi file-file yang lebih kecil. Tujuan utama dari file-file ini hanyalah agar dapat digunakan didalam file `template.tsx`.
