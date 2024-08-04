@@ -20,6 +20,7 @@ Contoh penerapan dalam bentuk struktur folder :
 └── nama-component/
     ├── index.tsx
     ├── template.tsx
+    ├── template.test.tsx
     ├── parts.tsx
     ├── theme.ts
     ├── context.ts
@@ -34,6 +35,9 @@ Contoh penerapan dalam bentuk struktur folder :
 
 - `template.tsx` (required) 
   Digunakan untuk menyusun component template (high-level).
+
+- `template.test.tsx` (required) 
+  Digunakan untuk testing component template.
 
 - `parts.tsx` (optional)
   Digunakan untuk menyusun component presentational (low-level). File ini dapat diganti menjadi file-file yang lebih kecil. Tujuan utama dari file-file ini hanyalah agar dapat digunakan didalam file `template.tsx`.
