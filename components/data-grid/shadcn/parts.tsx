@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import {
   Table,
@@ -6,9 +7,9 @@ import {
   TableData,
   flexRender,
   Row,
-  BaseFeatureConfig
+  BaseFeatureConfig,
 } from "@tanstack/react-table";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -135,7 +136,8 @@ type FacetingConfig<TData extends TableData> = AtLeastOne<
   Record<keyof TData, FacetedFilterOptionProps[]>
 >;
 
-export interface DataGridShadcnTemplateFeatureConfig<TData extends TableData> extends BaseFeatureConfig {
+export interface DataGridShadcnTemplateFeatureConfig<TData extends TableData>
+  extends BaseFeatureConfig {
   main: {
     filter: {
       /**
@@ -320,10 +322,7 @@ export function DataGridFacetedFilter<TData, TValue>({
   if (!column) throw new Error("Column tidak ditemukan!");
 
   const facets = column.getFacetedUniqueValues();
-  const selectedValues = useMemo(
-    () => new Set(column?.getFilterValue() as string[]),
-    [column],
-  );
+  const selectedValues = new Set(column?.getFilterValue() as string[]);
 
   const ClearFilters = useCallback(() => {
     return (
@@ -341,43 +340,44 @@ export function DataGridFacetedFilter<TData, TValue>({
     );
   }, [column]);
 
-  const FilterOptionItem = useCallback(
-    ({ option }: { option: FacetedFilterOptionProps }) => {
-      const isSelected = selectedValues.has(option.value);
-      const handleSelectFilterOption = () => {
-        if (isSelected) {
-          selectedValues.delete(option.value);
-        } else {
-          selectedValues.add(option.value);
-        }
-        const filterValues = Array.from(selectedValues);
-        column?.setFilterValue(filterValues.length ? filterValues : undefined);
-      };
+  const FilterOptionItem = ({
+    option,
+  }: {
+    option: FacetedFilterOptionProps;
+  }) => {
+    const isSelected = selectedValues.has(option.value);
+    const handleSelectFilterOption = () => {
+      if (isSelected) {
+        selectedValues.delete(option.value);
+      } else {
+        selectedValues.add(option.value);
+      }
+      const filterValues = Array.from(selectedValues);
+      column?.setFilterValue(filterValues.length ? filterValues : undefined);
+    };
 
-      return (
-        <CommandItem key={option.value} onSelect={handleSelectFilterOption}>
-          <div
-            className={cn(
-              "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-              isSelected && "bg-primary text-primary-foreground",
-              !isSelected && "opacity-50 [&_svg]:invisible",
-            )}
-          >
-            <Check className="h-4 w-4" />
-          </div>
-
-          <span>{option.label}</span>
-
-          {facets?.get(option.value) && (
-            <span className="ml-auto flex h-4 w-4 items-center justify-center font-mono text-xs">
-              {facets.get(option.value)}
-            </span>
+    return (
+      <CommandItem key={option.value} onSelect={handleSelectFilterOption}>
+        <div
+          className={cn(
+            "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+            isSelected && "bg-primary text-primary-foreground",
+            !isSelected && "opacity-50 [&_svg]:invisible",
           )}
-        </CommandItem>
-      );
-    },
-    [selectedValues, facets, column],
-  );
+        >
+          <Check className="h-4 w-4" />
+        </div>
+
+        <span>{option.label}</span>
+
+        {facets?.get(option.value) && (
+          <span className="ml-auto flex h-4 w-4 items-center justify-center font-mono text-xs">
+            {facets.get(option.value)}
+          </span>
+        )}
+      </CommandItem>
+    );
+  };
 
   const FilterCounter = () => {
     return (
@@ -506,7 +506,7 @@ export function DataGridRowSelection<
  * secara default 'delete' mengacu pada semua rows disemua page (jika ada pagination).
  * Namun jika terdapat row yang dipilih, 'delete' mengacu pada rows yang dipilih saja.
  */
-export function DataGridRowSelectionDeleteAction<TData extends TableData>({
+export function DataGridRowSelectionBulkDelete<TData extends TableData>({
   table,
   onChange,
 }: {
@@ -704,13 +704,15 @@ export function DataGridRowActions<TData extends TableData>({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[160px]">
         <DropdownMenuItem>
-          <Link href={linkDetail} className="w-full">Detail</Link>
+          <Link href={linkDetail} className="w-full">
+            Detail
+          </Link>
         </DropdownMenuItem>
 
         <Dialog open={openModal} onOpenChange={setOpenModal}>
           <DialogTrigger asChild>
             <DropdownMenuItem
-              className="flex w-full items-center gap-2 cursor-pointer"
+              className="flex w-full cursor-pointer items-center gap-2"
               onSelect={(e) => {
                 e.preventDefault();
                 setOpenModal(!openModal);
