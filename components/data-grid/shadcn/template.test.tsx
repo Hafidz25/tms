@@ -1,5 +1,5 @@
 import React from "react";
-import { test, describe, expect, beforeEach, beforeAll } from "vitest";
+import { test, describe, expect, beforeEach, beforeAll, vi } from "vitest";
 import { screen, within } from "@testing-library/react";
 import { ColumnDef } from "@tanstack/react-table";
 import { setup, ReturnSetup } from "@/lib/test/setup";
@@ -60,7 +60,6 @@ beforeAll(() => {
       enableHiding: false,
 
       header: ({ table }) => <DataGridRowSelection scope="all" table={table} />,
-
       cell: ({ row }) => <DataGridRowSelection scope="single" row={row} />,
     }),
 
@@ -157,7 +156,7 @@ beforeAll(() => {
   FEATURE_CONFIG = {
     main: {
       rowSelection: {
-        onDelete: (selectedData) => console.log(selectedData),
+        onDelete: vi.fn(),
       },
 
       filter: {
@@ -209,7 +208,7 @@ describe("Inisialisasi DataGridTemplate", () => {
 
     const tableBody = container.querySelector("tbody");
 
-    expect(title).toBe(title);
+    expect(title.textContent).toBe(TITLE);
     expect(tableBody?.children.length).not.toBe(0);
   });
 });
@@ -256,10 +255,56 @@ describe("Row Selection DataGridTemplate", () => {
     expect(firstRowBody).not.toBeChecked();
   });
 
-  // Todo : Mocking!!!
-  // Component `DataGridRowSelectionDeleteAction`
+  // Component `DataGridRowSelectionBulkDelete`
   // All & Selected Rows
-  test.todo("Menghapus rows", () => {});
+  test("Konfirmasi dan pembatalan penghapusan rows", async () => {
+    const { user, container, debug } = SETUP_TEST as ReturnSetup;
+    const onDelete = FEATURE_CONFIG.main!.rowSelection.onDelete;
+
+    const firstRowBody = container.querySelector("tbody")
+      ?.firstElementChild as HTMLElement;
+
+    const firstRowSelection = within(firstRowBody).getByRole("checkbox", {
+      name: /select row/i,
+    });
+
+    const getRowSelectionBulkDelete = () =>
+      screen.getByRole("button", {
+        name: /(delete ((all)|\([0-9]{1,}\)))/i,
+      });
+
+    const getRowSelectionBulkDeleteConfirm = () =>
+      screen.getByRole("button", {
+        name: /confirm/i,
+      });
+
+    const getRowSelectionBulkDeleteCancel = () =>
+      screen.getByRole("button", {
+        name: /cancel/i,
+      });
+
+    // Delete All Rows
+    await user.click(getRowSelectionBulkDelete());
+    await user.click(getRowSelectionBulkDeleteConfirm());
+
+    expect(onDelete).toHaveBeenCalled();
+
+    // Delete Selected Rows
+    await user.click(firstRowSelection);
+
+    expect(getRowSelectionBulkDelete().textContent).toMatch(/delete \(1\)/i);
+
+    await user.click(getRowSelectionBulkDelete());
+    await user.click(getRowSelectionBulkDeleteConfirm());
+
+    expect(onDelete).toHaveBeenCalledTimes(2);
+
+    // Cancel Delete
+    await user.click(getRowSelectionBulkDelete());
+    await user.click(getRowSelectionBulkDeleteCancel());
+
+    expect(onDelete).not.toHaveBeenCalledTimes(3);
+  });
 });
 
 describe.todo("Filter DataGridTemplate", () => {
