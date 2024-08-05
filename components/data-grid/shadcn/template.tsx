@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { useState } from "react";
@@ -29,19 +30,23 @@ import {
   DataGridTable,
   DataGridProps,
   DataGridVisibility,
-  DataGridRowSelectionDeleteAction,
+  DataGridRowSelectionBulkDelete,
   DataGridShadcnTemplateFeatureConfig,
 } from "./parts";
 
 /**
  * TODO!!! :
+ * @todo testing component template
  * @todo menyusun dokumentasi component template
- * @todo testing semua component
- *
+ * @todo data exporting feature
+ * 
+ * @todo menambahkan filterfn custom (lihat filterFn pada column def)
+ * @todo solusi untuk `filterFns` type
  * @todo perbaiki " Can't perform a React state update" (lihat console). Ini merupakan kesalahan dari library. lihat {@link https://github.com/TanStack/table/issues/5026}
  */
 
-interface Props<TData extends TableData, TValue> extends DataGridProps {
+export interface Props<TData extends TableData, TValue>
+  extends DataGridProps {
   data: TData[];
   columns: ColumnDef<TData, TValue>[];
   featureConfig: DataGridShadcnTemplateFeatureConfig<TData>;
@@ -106,7 +111,7 @@ export function DataGridTemplate<TData extends TableData, TValue>({
         </DataGridToolbarLeft>
 
         <DataGridToolbarRight className="flex items-center justify-end space-x-2">
-          <DataGridRowSelectionDeleteAction
+          <DataGridRowSelectionBulkDelete
             table={table}
             onChange={featureConfig.main.rowSelection.onDelete}
           />

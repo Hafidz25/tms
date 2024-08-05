@@ -664,16 +664,25 @@ export function DataGridCellHeader<TData, TValue>({
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-            <ArrowUp className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Asc
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-            <ArrowDown className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Desc
-          </DropdownMenuItem>
-        </DropdownMenuContent>
+        {isCanSort && (
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+              <ArrowUp className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+              Asc
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+              <ArrowDown className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+              Desc
+            </DropdownMenuItem>
+
+            {isSorted && (
+              <DropdownMenuItem onClick={() => column.clearSorting()}>
+                <ChevronsUpDown className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+                Reset
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        )}
       </DropdownMenu>
     </div>
   );
