@@ -101,7 +101,7 @@ export function DataTableRowActions<TData>({
           </Link>
         </DropdownMenuItem>
 
-        {user?.role === "Admin" || user?.role === "Customer Service" ? (
+        {/* {user?.role === "Admin" || user?.role === "Customer Service" ? (
           <DropdownMenuItem>
             <Link
               onClick={() => setIsLoadingEdit(true)}
@@ -121,7 +121,7 @@ export function DataTableRowActions<TData>({
               )}
             </Link>
           </DropdownMenuItem>
-        ) : null}
+        ) : null} */}
 
         {user?.role === "Admin" || user?.role === "Customer Service" ? (
           <>
