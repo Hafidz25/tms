@@ -307,28 +307,42 @@ describe("Row Selection DataGridTemplate", () => {
   });
 });
 
-describe.todo("Filter DataGridTemplate", () => {
-  test.todo("Melakukan filter & reset search", () => {
-    const { user, container, debug } = setup(
-      <DataGridTemplate
-        title={TITLE}
-        data={DATA}
-        columns={COLUMNS}
-        featureConfig={FEATURE_CONFIG as FeatureConfig<"done">}
-      />,
-    );
+describe("Filter DataGridTemplate", () => {
+  test("Melakukan filter & reset search", async () => {
+    const { user, container, debug } = SETUP_TEST as ReturnSetup;
 
     const input = screen.getByPlaceholderText(/((search title)[.]*)/i);
     const tableBody = container.querySelector("tbody");
+    const getResetBtn = () =>
+      screen.queryByRole("button", {
+        name: /reset/i,
+      });
 
-    console.log(tableBody!.children.length);
-
+    // search `judul 10`
+    expect(tableBody?.children.length).not.toBe(0);
+    expect(getResetBtn()).toBeNull();
     expect(input).toBeVisible();
 
-    debug(tableBody!);
+    await user.type(input, "10");
+
+    expect(tableBody?.children.length).toBe(1);
+
+    // Reset filter search
+    expect(getResetBtn()).toBeVisible();
+
+    await user.click(getResetBtn()!);
+
+    expect(tableBody?.children.length).not.toBe(1);
+    expect(getResetBtn()).toBeNull();
   });
 
-  test.todo("Melakukan filter & reset faceting");
+  test.todo("Melakukan filter & reset faceting", async () => {
+    const { debug } = SETUP_TEST as ReturnSetup;
+    const facetsBtn = screen.queryByRole("button", {
+      name: 'Status',
+    });
+
+  });
 });
 
 describe.todo("Sorting DataGridTemplate", () => {
