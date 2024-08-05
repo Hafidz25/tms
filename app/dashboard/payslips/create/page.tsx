@@ -30,7 +30,7 @@ import useSWR from "swr";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { PDFViewer } from "@react-pdf/renderer";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import PayslipPdf from "@/components/custom/PayslipPdf";
+import PayslipPdf from "@/components/payslip-pdf";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 

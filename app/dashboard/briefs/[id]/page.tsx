@@ -52,7 +52,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import Feedback from "@/components/custom/Feedback";
+import Feedback from "@/components/feedback";
 import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns";
 import { SpokeSpinner } from "@/components/ui/spinner";
@@ -761,7 +761,8 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
                             userExist={userExist}
                             userId={users
                               ?.filter((user) => user.id === data.userId)
-                              .map((user) => user.id)}
+                              .map((user) => user.id)
+                              .join(",")}
                             userSentId={data.userSentId}
                             briefId={briefs?.id}
                             briefTitle={briefs?.title}
@@ -838,7 +839,8 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
                                               (user) =>
                                                 user.id === dataReply.userId
                                             )
-                                            .map((user) => user.id)}
+                                            .map((user) => user.id)
+                                            .join(",")}
                                           userSentId={dataReply.userSentId}
                                           briefId={briefs?.id}
                                           briefTitle={briefs?.title}

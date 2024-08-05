@@ -222,6 +222,8 @@ const Feedback = ({
     }
   };
 
+  // console.log(userId);
+
   return (
     <div className="flex flex-col gap-2  border-slate-200 py-2">
       <div className="flex gap-2 items-center">
@@ -256,8 +258,8 @@ const Feedback = ({
       </p>
       <div className="flex items-center gap-3">
         <span className="text-xs text-slate-600 me-3">{time} ago</span>
-        {(userExist.id === userId[0] && status === "Not Approved") ||
-        (userExist.id === userId[0] &&
+        {(userExist?.id === userId && status === "Not Approved") ||
+        (userExist?.id === userId &&
           status === "Default" &&
           parentStatus === "Not Approved") ? (
           <Dialog open={modalEdit} onOpenChange={setModalEdit}>
@@ -326,8 +328,8 @@ const Feedback = ({
           </Dialog>
         ) : null}
 
-        {(userExist.id !== userId[0] && status === "Not Approved") ||
-        (userExist.id !== userId[0] &&
+        {(userExist?.id !== userId && status === "Not Approved") ||
+        (userExist?.id !== userId &&
           status === "Default" &&
           parentStatus === "Not Approved") ? (
           <Dialog open={modalReply} onOpenChange={setModalReply}>
@@ -395,8 +397,8 @@ const Feedback = ({
           </Dialog>
         ) : null}
 
-        {(userExist.id === userId[0] && status === "Not Approved") ||
-        (userExist.id === userId[0] &&
+        {(userExist?.id === userId && status === "Not Approved") ||
+        (userExist?.id === userId &&
           status === "Default" &&
           parentStatus === "Not Approved") ? (
           <AlertDialog open={modalDelete} onOpenChange={setModalDelete}>
