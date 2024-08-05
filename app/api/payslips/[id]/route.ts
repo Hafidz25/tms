@@ -50,17 +50,32 @@ export async function PATCH(
 
   if (session?.user.role === "Admin") {
     const body = await req.json();
-    const { name, email, password, role } = body;
+    const {
+      userId,
+      regularFee,
+      period,
+      presence,
+      transportFee,
+      thrFee,
+      otherFee,
+      totalFee,
+      position,
+      levelId,
+    } = body;
 
-    // Hash password
-    //   const hashedPassword = await hash(password, 10);
-    const users = await db.user.update({
+    const payslip = await db.payslips.update({
       where: { id: params.id },
       data: {
-        name: name,
-        email: email,
-        //   password: hashedPassword,
-        role: role,
+        userId: userId,
+        period: period,
+        regularFee: regularFee,
+        presence: presence,
+        transportFee: transportFee,
+        thrFee: thrFee,
+        otherFee: otherFee,
+        totalFee: totalFee,
+        position: position,
+        levelId: levelId,
       },
     });
 
@@ -68,7 +83,7 @@ export async function PATCH(
       {
         success: true,
         message: "User update successfully",
-        data: users,
+        data: payslip,
       },
       {
         status: 200,
