@@ -28,11 +28,22 @@ import { Badge } from "@/components/ui/badge";
 import {
   DataGridCellHeader,
   DataGridRowActions,
-} from "@/components/data-grid/shadcn/parts";
+  DataGridRowSelection,
+  DataGridShadcnTemplateFeatureConfig,
+} from "@/components/data-grid/shadcn";
 
 const FORMAT_DATE = "LLL dd, y";
 
 export const columns = createColumns<Brief>((column) => [
+  column.display({
+    id: "select",
+    enableHiding: false,
+
+    header: ({ table }) => <DataGridRowSelection scope="all" table={table} />,
+
+    cell: ({ row }) => <DataGridRowSelection scope="single" row={row} />,
+  }),
+
   column.accessor("title", {
     header: ({ column }) => (
       <DataGridCellHeader column={column} title="Title" />
@@ -45,6 +56,8 @@ export const columns = createColumns<Brief>((column) => [
         </span>
       </div>
     ),
+
+    enableHiding: false,
   }),
 
   column.accessor("status", {
@@ -58,7 +71,9 @@ export const columns = createColumns<Brief>((column) => [
       </div>
     ),
 
-    filterFn: "arrIncludes",
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
   }),
 
   column.accessor("deadline", {
@@ -118,6 +133,7 @@ export const columns = createColumns<Brief>((column) => [
     },
   }),
 ]);
+
 ```
 
 ## B. Konfigurasi Fitur
