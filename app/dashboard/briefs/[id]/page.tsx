@@ -52,7 +52,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import Feedback from "@/components/feedback";
+import { Feedback } from "@/components/feedback";
 import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns";
 import { SpokeSpinner } from "@/components/ui/spinner";
@@ -305,13 +305,60 @@ export default function DetailBrief({ params }: { params: { id: string } }) {
             onSubmit={handleSubmit(handleSubmitBrief)}
           >
             <div className="flex items-center justify-between gap-4 mb-12">
-              <Link
-                href=""
-                onClick={() => Router.back()}
-                className="w-8 h-8 rounded-lg border border-slate-300 grid place-items-center"
-              >
-                <ChevronLeft className="h-4 w-4" />
+              <Link href="/dashboard/briefs">
+                <Button variant="outline" size="sm">
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="sr-only">Back</span>
+                </Button>
               </Link>
+              {userExist.id === briefs.authorId ||
+              userExist.role === "Admin" ? (
+                editMode ? (
+                  <Button
+                    size="sm"
+                    type="button"
+                    onClick={() => setEditMode(false)}
+                    disabled={isLoading}
+                    variant="outline"
+                  >
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                      {isLoading ? (
+                        <div className="flex items-center gap-2">
+                          <SpokeSpinner size="sm" />
+                          Loading...
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Eye className="w-4 h-4" />
+                          View Brief
+                        </div>
+                      )}
+                    </span>
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    type="button"
+                    onClick={() => setEditMode(true)}
+                    disabled={isLoading}
+                    variant="default"
+                  >
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                      {isLoading ? (
+                        <div className="flex items-center gap-2">
+                          <SpokeSpinner size="sm" />
+                          Loading...
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Pencil className="w-4 h-4" />
+                          Edit Brief
+                        </div>
+                      )}
+                    </span>
+                  </Button>
+                )
+              ) : null}
             </div>
 
             {/* <Divider className="my-10" /> */}

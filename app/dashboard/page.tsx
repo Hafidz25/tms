@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
 
-import BriefChart from "@/components/brief-chart";
-import CardDashboard from "@/components/card-dashboard";
+import { BriefChart } from "@/components/brief-chart";
+import { CardDashboard } from "@/components/card-dashboard";
 import { User } from "@/types/user";
 import { Brief } from "@/types/briefs";
 import useSWR from "swr";

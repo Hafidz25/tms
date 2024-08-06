@@ -28,7 +28,7 @@ import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
-import PayslipPdf from "@/components/payslip-pdf";
+import { PayslipPdf } from "@/components/payslip-pdf";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { toNumber } from "lodash-es";
