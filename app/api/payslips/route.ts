@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
           payslip: newPayslip,
           message: "Payslip created successfully",
         },
-        { status: 201 }
+        { status: 201 },
       );
     } catch (error) {
       console.log(error);
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
         { error: "Internal Server Error" },
         {
           status: 500,
-        }
+        },
       );
     }
   } else {
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }
@@ -95,6 +95,7 @@ export async function GET() {
           otherFee: true,
           totalFee: true,
           position: true,
+          createdAt: true,
         },
       });
 
@@ -107,14 +108,14 @@ export async function GET() {
         },
         {
           status: 200,
-        }
+        },
       );
     } catch (error) {
       return NextResponse.json(
         { error: "Internal Server Error" },
         {
           status: 500,
-        }
+        },
       );
     }
   } else {
@@ -122,7 +123,7 @@ export async function GET() {
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }

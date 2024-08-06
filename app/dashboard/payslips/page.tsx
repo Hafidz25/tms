@@ -2,14 +2,19 @@
 import React, { useEffect, useState } from "react";
 
 import { DashboardPanel } from "@/components/layouts/dashboard-panel";
-
+import {
+  DataGridTemplate,
+  DataGridShadcnTemplateFeatureConfig,
+} from "@/components/data-grid/shadcn";
 import { SpokeSpinner } from "@/components/ui/spinner";
-import useSWR from "swr";
-import { PayslipsTable } from "@/components/data-grid/payslips";
+import useSWR, { mutate } from "swr";
+import { columns } from "./data-grid-columns";
+import { toast } from "sonner";
 
 interface Payslip {
   id: string;
   userId: string;
+  name: string;
   position: string;
   period: {
     from: string;
@@ -21,6 +26,7 @@ interface Payslip {
   thrFee: number;
   otherFee: number;
   totalFee: number;
+  createdAt: string;
 }
 
 interface User {
@@ -31,6 +37,75 @@ interface User {
 }
 
 const FORMAT_DATE = "dd LLL, y";
+
+const featureConfig: DataGridShadcnTemplateFeatureConfig<Payslip> = {
+  main: {
+    filter: {
+      searching: "name",
+      // @ts-ignore
+      faceting: {},
+    },
+
+    rowSelection: {
+      onDelete: (selectedData) => {
+        const handleMultipleDelete = async () => {
+          try {
+            const response = selectedData.map((data) => {
+              fetch(`/api/payslips/${data.id}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+              }).then((response) => {
+                if (response.status === 200) {
+                  toast.success(`Payslip deleted successfully.`);
+                  mutate("/api/payslips");
+                } else if (response.status === 403) {
+                  toast.warning("You dont have access.");
+                }
+              });
+            });
+
+            return response;
+          } catch (error) {
+            toast.error("Uh oh! Something went wrong.");
+          }
+        };
+        return handleMultipleDelete();
+      },
+    },
+  },
+
+  incremental: {
+    addData: {
+      text: "Add Payslips",
+      link: "/dashboard/payslips/create",
+    },
+
+    rowActions: {
+      detail: (rowData) => `/dashboard/payslips/${rowData.id}`,
+      deleteData: (rowData) => {
+        const handleDelete = async () => {
+          try {
+            const response = await fetch(`/api/payslips/${rowData.id}`, {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+            });
+
+            if (response.status === 200) {
+              toast.success("Payslips deleted successfully.");
+              mutate("/api/payslips");
+            } else if (response.status === 403) {
+              toast.warning("You dont have access.");
+            }
+            return response;
+          } catch (error) {
+            toast.error("Uh oh! Something went wrong.");
+          }
+        };
+        return handleDelete();
+      },
+    },
+  },
+};
 
 function PayslipsPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -49,15 +124,15 @@ function PayslipsPage() {
       .then((res) => res.data);
   const { data: payslips, error } = useSWR<Payslip[], Error>(
     "/api/payslips",
-    fetcherPayslip
+    fetcherPayslip,
   );
   const { data: users, error: usersError } = useSWR<User[], Error>(
     "/api/users",
-    fetcher
+    fetcher,
   );
   const { data: userExist, error: userExistError } = useSWR<User, Error>(
     "/api/auth/session",
-    fetcherUserExists
+    fetcherUserExists,
   );
 
   if (payslips && users) {
@@ -74,6 +149,7 @@ function PayslipsPage() {
         thrFee: data.thrFee,
         otherFee: data.otherFee,
         totalFee: data.totalFee,
+        createdAt: data.createdAt,
       };
     });
 
@@ -86,16 +162,16 @@ function PayslipsPage() {
 
     return mappedPayslip && userExist ? (
       <DashboardPanel>
-        <PayslipsTable
+        <DataGridTemplate
+          title="Data Payslips"
           data={newPayslip}
-          meta={{
-            user: userExist,
-            users: users,
-          }}
+          // @ts-ignore
+          columns={columns}
+          featureConfig={featureConfig}
         />
       </DashboardPanel>
     ) : (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <div className="flex items-center gap-2">
           <SpokeSpinner size="md" />
           <span className="text-md font-medium text-slate-500">Loading...</span>
@@ -104,7 +180,7 @@ function PayslipsPage() {
     );
   } else {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <div className="flex items-center gap-2">
           <SpokeSpinner size="md" />
           <span className="text-md font-medium text-slate-500">Loading...</span>
