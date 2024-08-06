@@ -36,8 +36,6 @@ import {
 
 /**
  * TODO!!! :
- * @todo testing component template
- * @todo menyusun dokumentasi component template
  * @todo full area row selection
  * @todo data exporting feature
  * 

@@ -6,8 +6,9 @@ Digunakan untuk mengelola data umum dalam bentuk tabel. Component ini memuat fit
 - Sorting ✔
 - Filtering (Search & Faceting) ✔
 - Pagination ✔
-- Selection
-- Visibility
+- Selection ✔
+- Visibility ✔
+- Data exporting
 
 # 2. Setup
 
@@ -142,30 +143,86 @@ Data Grid Shadcn memiliki fitur-fitur yang dapat dikategorikan menjadi dua jenis
 
 ## A. Main
 
-Fitur utama yang dibangun sebagai dasar component. Fitur ini harus diterapkan dengan aturan yang ada pada high level (template) component. Fitur-fitur ini terdiri dari :
+Fitur utama yang dibangun sebagai dasar component. Fitur ini harus diterapkan dengan aturan yang ada pada high level (template) component. Contoh penerapan : 
+
+```tsx
+import { DashboardPanel } from "@/components/layouts/dashboard-panel";
+import { DataGridTemplate, DataGridShadcnTemplateFeatureConfig } from "@/components/data-grid/shadcn";
+import { createBriefs } from "@/data/briefs";
+import { columns } from "./data-grid-columns";
+import { statusOption } from "./data-grid-config";
+import { Brief } from "@/types/briefs";
+
+export default function Page() {
+  const featureConfig: DataGridShadcnTemplateFeatureConfig<Brief> = {
+    main: {
+      filter: {
+        searching: "title",
+        faceting: {
+          status: statusOption,
+        },
+      },
+
+      rowSelection: {
+        onDelete: (selectedData) => console.log(selectedData),
+      },
+    },
+
+    incremental: {
+      addData: {
+        text: "Add Brief",
+        link: "/dashboard/briefs/create",
+      },
+
+      rowActions: {
+        detail: (rowData) => `/dashboard/briefs/${rowData.id}`,
+        deleteData: (rowData) => console.log(rowData)
+      },
+    },
+  };
+
+  return (
+    <DashboardPanel>
+      <DataGridTemplate
+        title="Data Briefs"
+        data={createBriefs({ amount: 30 })}
+        columns={columns}
+        featureConfig={featureConfig}
+      />
+    </DashboardPanel>
+  );
+}
+```
+
+
+Fitur-fitur ini terdiri dari :
 
 ### a. Title
 
-Digunakan untuk menampilkan judul component. contoh penerapan :
-
-```tsx
-import { DataGridTemplate } from "@/components/data-grid/shadcn";
-import { columns } from "./data-grid-columns";
-
-<DataGridTemplate title="Data Brief" {...} />
-```
+Digunakan untuk menampilkan judul component.
 
 ### b. Filter
 
 Digunakan untuk menyaring data berdasarkan kondisi tertentu. Ini dibagi menjadi dua sub fitur utama yaitu **Search Filter** dan **Faceting Filter**. Search filter digunakan untuk melakukan filter berdasarkan kata kunci pencarian, Faceting filter digunakan untuk melakukan filter berdasarkan kelompok / column tertentu.
 
-Search filter hanya didapat diterapkan pada satu column dan Faceting filter dapat diterapkan untuk beberapa column. Setiap jenis sub filter, memiliki konfigurasi yang berbeda. contoh penerapan :
+Search filter hanya didapat diterapkan pada satu column dan Faceting filter dapat diterapkan untuk beberapa column. Setiap jenis sub filter, memiliki konfigurasi yang berbeda.
 
-```tsx
+### c. Column Visibility
 
-import { DataGridTemplate } from "@/components/data-grid/shadcn";
-import { columns } from "./data-grid-columns";
+Digunakan untuk menyembunyikan column tertentu. 
 
-<DataGridTemplate title="Data Brief" {...} />
+### d. Row Selection
 
-```
+Digunakan untuk memilih (select) row. Fitur ini juga dibangun dengan bulk delete.
+
+### e. Sorting
+
+Digunakan untuk mengurutkan cell column sesuai dengan type data pada cell tersebut.
+
+### f. Pagination
+
+Digunakan untuk membagi rows (data) menjadi beberapa halaman. 
+
+## B. Incremental 
+
+Fitur tambahan yang pada component. Fitur juga ini harus diterapkan dengan aturan yang ada pada high level (template) component.
