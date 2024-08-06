@@ -1,19 +1,22 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup, configure } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
+import { TEST_ID_ATTRIBUTE } from "@/lib/test/component";
 
-// window.PointerEvent = class PointerEvent extends Event {};
-window.HTMLElement.prototype.scrollIntoView = vi.fn();
-window.HTMLElement.prototype.hasPointerCapture = vi.fn();
-window.HTMLElement.prototype.releasePointerCapture = vi.fn();
+// untuk environment 'jsdom' saja
+if (typeof window !== "undefined") {
+  window.HTMLElement.prototype.scrollIntoView = vi.fn();
+  window.HTMLElement.prototype.hasPointerCapture = vi.fn();
+  window.HTMLElement.prototype.releasePointerCapture = vi.fn();
 
-const ResizeObserverMock = vi.fn(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-}));
+  const ResizeObserverMock = vi.fn(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  }));
 
-vi.stubGlobal("ResizeObserver", ResizeObserverMock);
+  vi.stubGlobal("ResizeObserver", ResizeObserverMock);
+}
 
 vi.mock("next/navigation", async (importOriginal) => {
   const actual = await importOriginal<typeof import("next/navigation")>();
@@ -37,7 +40,7 @@ vi.mock("next/navigation", async (importOriginal) => {
 });
 
 configure({
-  testIdAttribute: "data-test-id",
+  testIdAttribute: TEST_ID_ATTRIBUTE,
 });
 
 afterEach(() => {

@@ -3,7 +3,7 @@ import { format, parseISO } from "date-fns";
 import { DateRange, DayPickerRangeProps } from "react-day-picker";
 import { Calendar as CalendarIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/ui/";
 
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -16,35 +16,16 @@ import {
 interface DateRangePickerProps extends DayPickerRangeProps {
   onChange?: ((range?: DateRange) => void) | undefined;
   placeholder?: string;
-  setValue?: {
-    from: string | undefined;
-    to: string | undefined;
-  };
 }
 
 const DateRangePicker = forwardRef(
   (
-    {
-      onChange,
-      placeholder = "Pick a date",
-      setValue,
-      ...props
-    }: DateRangePickerProps,
-    ref
+    { onChange, placeholder = "Pick a date", ...props }: DateRangePickerProps,
+    ref,
   ) => {
-    const [date, setDate] = useState<DateRange | undefined>(() => {
-      if (setValue && setValue.from && setValue.to) {
-        return {
-          from: parseISO(setValue.from),
-          to: parseISO(setValue.to),
-        };
-      } else {
-        return {
-          from: undefined,
-          to: undefined,
-        };
-      }
-      return undefined;
+    const [date, setDate] = useState<DateRange | undefined>({
+      from: undefined,
+      to: undefined,
     });
 
     return (
@@ -55,7 +36,7 @@ const DateRangePicker = forwardRef(
             variant={"outline"}
             className={cn(
               "w-full justify-start text-left font-normal",
-              !date && "text-muted-foreground"
+              !date && "text-muted-foreground",
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
@@ -71,18 +52,6 @@ const DateRangePicker = forwardRef(
             ) : (
               <span className="text-muted-foreground">{placeholder}</span>
             )}
-            {/* {date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, "LLL dd, y")} -{" "}
-                  {format(date.to, "LLL dd, y")}
-                </>
-              ) : (
-                format(date.from, "LLL dd, y")
-              )
-            ) : (
-              <span className="text-muted-foreground">{placeholder}</span>
-            )} */}
           </Button>
         </PopoverTrigger>
 
@@ -101,7 +70,7 @@ const DateRangePicker = forwardRef(
         </PopoverContent>
       </Popover>
     );
-  }
+  },
 );
 
 DateRangePicker.displayName = "Date Range Picker";

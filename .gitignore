@@ -19,6 +19,7 @@
 # misc
 .DS_Store
 *.pem
+/**/__test-private__
 
 # debug
 npm-debug.log*

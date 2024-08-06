@@ -8,7 +8,11 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
-    environment: "jsdom",
+    environmentMatchGlobs: [
+      ["**/components/**/*.test.@(js|ts|jsx|tsx)", "jsdom"],
+      ["**/!(components)/**/*.test.@(js|ts)", "node"],
+    ],
+
     setupFiles: ["./vitest.setup.ts"],
     deps: {
       optimizer: {
