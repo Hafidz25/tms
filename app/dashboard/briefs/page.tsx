@@ -4,30 +4,84 @@ import { useRouter } from "next/navigation";
 import { DashboardPanel } from "@/components/layouts/dashboard-panel";
 import { User } from "@/types/user";
 import { SpokeSpinner } from "@/components/ui/spinner";
-import { BriefsTable } from "@/components/data-grid/briefs";
-import useSWR, { useSWRConfig } from "swr";
+import { DataGridTemplate, DataGridShadcnTemplateFeatureConfig } from "@/components/data-grid/shadcn";
+import {columns} from "./data-grid-columns"
+import { statusOption } from "./data-grid-config";
+import useSWR, { mutate, useSWRConfig } from "swr";
+import { Brief } from "@/types/briefs";
+import { toast } from "sonner";
 
-interface Brief {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  authorId: string;
-  deadline: {
-    from: string;
-    to: string;
-  };
-  assign: [
-    {
-      id: string;
-      name: string;
-      email: string;
-      role: string;
-    }
-  ];
-  feedback: [];
-  createdAt: string;
-}
+
+const featureConfig: DataGridShadcnTemplateFeatureConfig<Brief> = {
+  main: {
+    filter: {
+      searching: "title",
+      faceting: {
+        status: statusOption,
+      },
+    },
+
+    rowSelection: {
+      onDelete: (selectedData) => {
+        const handleMultipleDelete = async () => {
+          try {
+            const response = selectedData.map((data) => {
+              fetch(`/api/briefs/${data.id}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+              }).then((response) => {
+                if (response.status === 200) {
+                  toast.success(`Brief ${data.title} deleted successfully.`);
+                  mutate("/api/briefs");
+                } else if (response.status === 403) {
+                  toast.warning("You dont have access.");
+                }
+              })
+            })
+      
+            
+            return response;
+          } catch (error) {
+            toast.error("Uh oh! Something went wrong.");
+          }
+        }
+        return handleMultipleDelete()
+      }
+    },
+  },
+
+  incremental: {
+    addData: {
+      text: "Add Brief",
+      link: "/dashboard/briefs/create",
+    },
+
+    rowActions: {
+      detail: (rowData) => `/dashboard/briefs/${rowData.id}`,
+      deleteData: (rowData) => {
+        const handleDelete = async () => {
+          try {
+            const response = await fetch(`/api/briefs/${rowData.id}`, {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+            });
+      
+            if (response.status === 200) {
+              toast.success("Brief deleted successfully.");
+              mutate("/api/briefs");
+            } else if (response.status === 403) {
+              toast.warning("You dont have access.");
+            }
+            return response;
+          } catch (error) {
+            toast.error("Uh oh! Something went wrong.");
+          }
+        }
+        return handleDelete()
+      }
+    },
+  },
+};
 
 const BriefPage = () => {
   const fetcher = (url: string) =>
@@ -59,11 +113,11 @@ const BriefPage = () => {
 
   return newBriefs && userExist ? (
     <DashboardPanel>
-      <BriefsTable
+      <DataGridTemplate
+        title="Data Briefs"
         data={newBriefs}
-        meta={{
-          user: userExist,
-        }}
+        columns={columns}
+        featureConfig={featureConfig}
       />
     </DashboardPanel>
   ) : (

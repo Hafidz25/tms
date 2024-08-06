@@ -2,7 +2,7 @@ import * as React from "react";
 import { CheckIcon, CirclePlus } from "lucide-react";
 import { Column } from "@tanstack/react-table";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";

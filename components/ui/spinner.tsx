@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/ui";
 // Install MynaUI Icons from icons.mynaui.com
 import { Loader } from 'lucide-react';
 

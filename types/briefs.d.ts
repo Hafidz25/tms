@@ -1,5 +1,6 @@
 import type { DateRange } from "react-day-picker";
 import type { User } from "./user";
+import { Feedback } from "./feedback";
 
 export type BriefsStatus =
   | "Assigned"
@@ -23,8 +24,11 @@ export interface Brief {
   content: string;
 
   status: BriefsStatus;
+  authorId: string;
   assign: User[];
   createdAt: Date;
   updatedAt: Date;
   deadline?: DateRange | undefined;
+  feedback: Feedback[]
 }
+
