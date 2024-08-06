@@ -194,6 +194,8 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
+  vi.restoreAllMocks();
+
   SETUP_TEST = setup(
     <DataGridTemplate
       title={TITLE}
