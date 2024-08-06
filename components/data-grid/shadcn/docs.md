@@ -96,11 +96,26 @@ export const columns = createColumns<Brief>((column) => [
   column.display({
     id: "actions",
     enableHiding: false,
-    cell: (props) => (
-      <div className="flex w-[80px] justify-end">
-        <DataGridRowActions {...props} />
-      </div>
-    ),
+    cell: ({ row, table }) => {
+      const featureConfig = table.options.meta
+        ?.featureConfig as DataGridShadcnTemplateFeatureConfig<Brief>;
+
+      return (
+        <div className="w-max">
+          <DataGridRowActions
+            row={row}
+            detail={featureConfig?.incremental.rowActions.detail}
+            deleteData={featureConfig.incremental.rowActions.deleteData}
+          />
+        </div>
+      );
+    },
+
+    meta: {
+      cell: {
+        className: "flex justify-end max-w-full min-w-[70px] pr-6",
+      },
+    },
   }),
 ]);
 ```
