@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { SpokeSpinner } from "@/components/ui/spinner";
 import useSWR, { mutate, useSWRConfig } from "swr";
 import { columns } from "./data-grid-columns";
+import { roleOption } from "./data-grid-config";
 
 interface User {
   id: string;
@@ -22,8 +23,9 @@ const featureConfig: DataGridShadcnTemplateFeatureConfig<User> = {
   main: {
     filter: {
       searching: "name",
-      // @ts-ignore
-      faceting: {},
+      faceting: {
+        role: roleOption,
+      },
     },
 
     rowSelection: {
@@ -36,7 +38,7 @@ const featureConfig: DataGridShadcnTemplateFeatureConfig<User> = {
                 headers: { "Content-Type": "application/json" },
               }).then((response) => {
                 if (response.status === 200) {
-                  toast.success(`User deleted successfully.`);
+                  toast.success(`User ${data.name} deleted successfully.`);
                   mutate("/api/users");
                 } else if (response.status === 403) {
                   toast.warning("You dont have access.");
