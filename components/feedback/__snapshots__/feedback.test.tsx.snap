@@ -1,0 +1,300 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Feedback Component > render feedback component 1`] = `
+{
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="flex flex-col gap-2  border-slate-200 py-2"
+      >
+        <div
+          class="flex gap-2 items-center"
+        >
+          <div
+            class="text-base font-semibold"
+          />
+          <div
+            class="inline-flex items-center rounded-full border border-slate-200 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:border-slate-800 dark:focus:ring-slate-300 text-slate-950 dark:text-slate-50"
+          />
+          <div
+            class="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:border-slate-800 dark:focus:ring-slate-300 border-transparent bg-slate-900 text-slate-50 hover:bg-slate-900/80 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-50/80 cursor-pointer flex gap-1 items-center"
+          >
+            <svg
+              class="lucide lucide-circle-check w-3.5 h-3.5"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="m9 12 2 2 4-4"
+              />
+            </svg>
+          </div>
+        </div>
+        <p
+          class="text-sm"
+        >
+          <div
+            class="flex items-center gap-3"
+          >
+            <div>
+              <div
+                class="relative w-full"
+              >
+                <div
+                  class="slate-SelectionArea"
+                  style="position: relative; width: 100%;"
+                >
+                  <div
+                    class="slate-start-area slate-start-area-left"
+                    style="cursor: text; height: 100%; left: 0px; position: absolute; top: 0px; user-select: none; width: 4px; z-index: 1;"
+                  />
+                  <div
+                    class="slate-start-area slate-start-area-top"
+                    style="cursor: text; height: 0px; left: 0px; position: absolute; top: 0px; user-select: none; width: 100%; z-index: 1;"
+                  />
+                  <div
+                    class="slate-start-area slate-start-area-right"
+                    style="cursor: text; height: 100%; position: absolute; right: 0px; top: 0px; user-select: none; width: 4px; z-index: 1;"
+                  />
+                  <div
+                    class="slate-start-area slate-start-area-bottom"
+                    style="bottom: 0px; cursor: text; height: 0px; left: 0px; position: absolute; user-select: none; width: 100%; z-index: 1;"
+                  />
+                  <div
+                    autocapitalize="false"
+                    autocorrect="false"
+                    class="relative overflow-x-auto whitespace-pre-wrap break-words w-full rounded-md bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none [&_[data-slate-placeholder]]:text-muted-foreground [&_[data-slate-placeholder]]:!opacity-100 [&_[data-slate-placeholder]]:top-[auto_!important] [&_strong]:font-bold text-sm px-0 py-0 mb-0 min-h-[0px]"
+                    contenteditable="false"
+                    data-slate-editor="true"
+                    data-slate-node="value"
+                    spellcheck="false"
+                    zindex="-1"
+                  >
+                    <div
+                      class="slate-selectable"
+                    >
+                      <div
+                        class="m-0 px-0 py-1 slate-p"
+                        data-slate-node="element"
+                      >
+                        <span
+                          data-slate-node="text"
+                        >
+                          <span
+                            data-slate-leaf="true"
+                          >
+                            <span
+                              data-slate-length="0"
+                              data-slate-zero-width="n"
+                            >
+                              ﻿
+                              <br />
+                            </span>
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </p>
+        <div
+          class="flex items-center gap-3"
+        >
+          <span
+            class="text-xs text-slate-600 me-3"
+          >
+             ago
+          </span>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="flex flex-col gap-2  border-slate-200 py-2"
+    >
+      <div
+        class="flex gap-2 items-center"
+      >
+        <div
+          class="text-base font-semibold"
+        />
+        <div
+          class="inline-flex items-center rounded-full border border-slate-200 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:border-slate-800 dark:focus:ring-slate-300 text-slate-950 dark:text-slate-50"
+        />
+        <div
+          class="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:border-slate-800 dark:focus:ring-slate-300 border-transparent bg-slate-900 text-slate-50 hover:bg-slate-900/80 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-50/80 cursor-pointer flex gap-1 items-center"
+        >
+          <svg
+            class="lucide lucide-circle-check w-3.5 h-3.5"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+            />
+            <path
+              d="m9 12 2 2 4-4"
+            />
+          </svg>
+        </div>
+      </div>
+      <p
+        class="text-sm"
+      >
+        <div
+          class="flex items-center gap-3"
+        >
+          <div>
+            <div
+              class="relative w-full"
+            >
+              <div
+                class="slate-SelectionArea"
+                style="position: relative; width: 100%;"
+              >
+                <div
+                  class="slate-start-area slate-start-area-left"
+                  style="cursor: text; height: 100%; left: 0px; position: absolute; top: 0px; user-select: none; width: 4px; z-index: 1;"
+                />
+                <div
+                  class="slate-start-area slate-start-area-top"
+                  style="cursor: text; height: 0px; left: 0px; position: absolute; top: 0px; user-select: none; width: 100%; z-index: 1;"
+                />
+                <div
+                  class="slate-start-area slate-start-area-right"
+                  style="cursor: text; height: 100%; position: absolute; right: 0px; top: 0px; user-select: none; width: 4px; z-index: 1;"
+                />
+                <div
+                  class="slate-start-area slate-start-area-bottom"
+                  style="bottom: 0px; cursor: text; height: 0px; left: 0px; position: absolute; user-select: none; width: 100%; z-index: 1;"
+                />
+                <div
+                  autocapitalize="false"
+                  autocorrect="false"
+                  class="relative overflow-x-auto whitespace-pre-wrap break-words w-full rounded-md bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none [&_[data-slate-placeholder]]:text-muted-foreground [&_[data-slate-placeholder]]:!opacity-100 [&_[data-slate-placeholder]]:top-[auto_!important] [&_strong]:font-bold text-sm px-0 py-0 mb-0 min-h-[0px]"
+                  contenteditable="false"
+                  data-slate-editor="true"
+                  data-slate-node="value"
+                  spellcheck="false"
+                  zindex="-1"
+                >
+                  <div
+                    class="slate-selectable"
+                  >
+                    <div
+                      class="m-0 px-0 py-1 slate-p"
+                      data-slate-node="element"
+                    >
+                      <span
+                        data-slate-node="text"
+                      >
+                        <span
+                          data-slate-leaf="true"
+                        >
+                          <span
+                            data-slate-length="0"
+                            data-slate-zero-width="n"
+                          >
+                            ﻿
+                            <br />
+                          </span>
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </p>
+      <div
+        class="flex items-center gap-3"
+      >
+        <span
+          class="text-xs text-slate-600 me-3"
+        >
+           ago
+        </span>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

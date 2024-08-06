@@ -16,6 +16,12 @@ export default defineConfig({
           include: ["react-tweet"],
         },
       },
+      inline: ["react-tweet"],
+    },
+    server: {
+      deps: {
+        inline: ["react-tweet"],
+      },
     },
   },
   resolve: {
