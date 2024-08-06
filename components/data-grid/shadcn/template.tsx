@@ -38,6 +38,7 @@ import {
  * TODO!!! :
  * @todo testing component template
  * @todo menyusun dokumentasi component template
+ * @todo full area row selection
  * @todo data exporting feature
  * 
  * @todo menambahkan filterfn custom (lihat filterFn pada column def)
@@ -116,14 +117,14 @@ export function DataGridTemplate<TData extends TableData, TValue>({
             onChange={featureConfig.main.rowSelection.onDelete}
           />
 
-          <Link href={featureConfig.incremental.addData.link}>
-            <Button size="sm" className="h-8 gap-1" variant={"default"}>
+          <Button size="sm" className="h-8 gap-1" variant={"default"} asChild>
+            <Link href={featureConfig.incremental.addData.link}>
               <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                 {featureConfig.incremental.addData.text}
               </span>
-            </Button>
-          </Link>
+            </Link>
+          </Button>
 
           <DataGridVisibility table={table} />
         </DataGridToolbarRight>
