@@ -5,11 +5,11 @@ import { ColumnDef } from "@tanstack/react-table";
 import { setup, ReturnSetup } from "@/lib/test/setup";
 import { createColumns } from "@/lib/data-grid/columns";
 import { createBriefs } from "@/data/briefs";
-import { Brief } from "@/types/briefs";
+import { Brief } from "@/types/brief";
 import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { BriefsStatus } from "@/types/briefs";
+import { BriefsStatus } from "@/types/brief";
 
 import {
   DataGridTemplate,
@@ -144,8 +144,8 @@ beforeAll(() => {
           <div className="w-max">
             <DataGridRowActions
               row={row}
-              detail={featureConfig?.incremental.rowActions.detail}
-              deleteData={featureConfig.incremental.rowActions.deleteData}
+              detail={featureConfig?.incremental?.rowActions?.detail}
+              deleteData={featureConfig.incremental?.rowActions?.deleteData}
             />
           </div>
         );
@@ -268,7 +268,7 @@ describe("Main Features", () => {
     // All & Selected Rows
     test("Konfirmasi dan pembatalan penghapusan rows", async () => {
       const { user, container, debug } = SETUP_TEST as ReturnSetup;
-      const onDelete = FEATURE_CONFIG.main!.rowSelection.onDelete;
+      const onDelete = FEATURE_CONFIG.main?.rowSelection?.onDelete;
 
       const firstRowBody = container.querySelector("tbody")
         ?.firstElementChild as HTMLElement;
@@ -341,14 +341,14 @@ describe("Main Features", () => {
           });
 
         const getCheckItem = (
-          type: FilterStatusOptions<"assigned" | "waiting client feedback">,
+          type: FilterStatusOptions<"assigned" | "waiting for client feedback">,
         ) => within(getFirstRowBody()).getByText(type, { exact: false });
 
         // Descending
         await user.click(sortingStatusBtn);
         await user.click(getMenuItemSorting("desc"));
 
-        expect(getCheckItem("waiting client feedback")).toBeVisible();
+        expect(getCheckItem("waiting for client feedback")).toBeVisible();
 
         // Ascending
         await user.click(sortingStatusBtn);
@@ -590,7 +590,7 @@ describe("Incremental Features", () => {
     test("Confirm & Cancel Delete Data", async () => {
       const { container, user } = SETUP_TEST as ReturnSetup;
 
-      const deleteMethod = FEATURE_CONFIG.incremental?.rowActions.deleteData;
+      const deleteMethod = FEATURE_CONFIG.incremental?.rowActions?.deleteData;
       const firstRowBody = container.querySelector("tbody")
         ?.firstElementChild as HTMLTableRowElement;
       const firstRowBodyMenu = within(firstRowBody).getByRole("button", {
