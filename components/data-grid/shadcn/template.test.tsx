@@ -137,15 +137,11 @@ beforeAll(() => {
       id: "actions",
       enableHiding: false,
       cell: ({ row, table }) => {
-        const featureConfig = table.options.meta
-          ?.featureConfig as DataGridShadcnTemplateFeatureConfig<Brief>;
-
         return (
           <div className="w-max">
             <DataGridRowActions
               row={row}
-              detail={featureConfig?.incremental?.rowActions?.detail}
-              deleteData={featureConfig.incremental?.rowActions?.deleteData}
+              table={table}
             />
           </div>
         );

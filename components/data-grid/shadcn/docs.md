@@ -29,7 +29,6 @@ import {
   DataGridCellHeader,
   DataGridRowActions,
   DataGridRowSelection,
-  DataGridShadcnTemplateFeatureConfig,
 } from "@/components/data-grid/shadcn";
 
 const FORMAT_DATE = "LLL dd, y";
@@ -112,16 +111,9 @@ export const columns = createColumns<Brief>((column) => [
     id: "actions",
     enableHiding: false,
     cell: ({ row, table }) => {
-      const featureConfig = table.options.meta
-        ?.featureConfig as DataGridShadcnTemplateFeatureConfig<Brief>;
-
       return (
         <div className="w-max">
-          <DataGridRowActions
-            row={row}
-            detail={featureConfig?.incremental.rowActions.detail}
-            deleteData={featureConfig.incremental.rowActions.deleteData}
-          />
+          <DataGridRowActions row={row} table={table} />
         </div>
       );
     },
@@ -133,6 +125,7 @@ export const columns = createColumns<Brief>((column) => [
     },
   }),
 ]);
+
 ```
 
 ## B. Konfigurasi Fitur
