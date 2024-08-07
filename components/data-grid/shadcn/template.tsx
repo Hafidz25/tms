@@ -40,6 +40,7 @@ import {
  * @todo perbaiki kesalah type pada utils `createColumns` untuk use case data selain brief.
  * @todo full area row selection
  * @todo data exporting feature
+ * @todo testing componenet (hide & show features)
  * @todo lazy loading untuk optional features
  *
  * @todo menambahkan filterfn custom (lihat filterFn pada column def)

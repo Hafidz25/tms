@@ -28,7 +28,7 @@ import {
   CircleX,
   SlidersHorizontal,
   FileDown,
-  PlusCircle
+  PlusCircle,
 } from "lucide-react";
 
 import { cn } from "@/lib/ui";
@@ -159,7 +159,7 @@ export type DataGridShadcnTemplateFeatureConfig<TData extends TableData> = {
 
     /**
      * Digunakan untuk menerapkan fitur data exporter.
-     * 
+     *
      * Solusi sementara menggunakan `DataGridBriefsExporter`.
      * Untuk kedepannya, konfigurasi dan penggunaan component
      * akan berubah.
@@ -277,7 +277,9 @@ export function DataGridSearchFilter() {
 
   const placeholderInput = `Search ${featureConfig.main?.filter!.searching}...`;
 
-  const column = table.getColumn(featureConfig.main?.filter!.searching as string);
+  const column = table.getColumn(
+    featureConfig.main?.filter!.searching as string,
+  );
 
   if (!column) throw new Error("Column target tidak ditemukan!");
 
@@ -751,9 +753,18 @@ export function DataGridCellHeader<TData, TValue>({
 
 // ------------------------------------------------------------
 
+// type DataGridRowActionsProps<TData extends TableData> = {
+//   row: Row<TData>;
+// } & Partial<
+//   NonNullable<
+//     DataGridShadcnTemplateFeatureConfig<TData>["incremental"]
+//   >["rowActions"]
+// >;
+
 type DataGridRowActionsProps<TData extends TableData> = {
   row: Row<TData>;
-} & NonNullable<DataGridShadcnTemplateFeatureConfig<TData>["incremental"]>;
+  table: Table<TData>;
+};
 
 /**
  * Umumnya ini digunakan sebagai component cell dengan tipe column display
@@ -761,11 +772,17 @@ type DataGridRowActionsProps<TData extends TableData> = {
  */
 export function DataGridRowActions<TData extends TableData>({
   row,
-  deleteData,
-  detail,
+  table,
 }: DataGridRowActionsProps<TData>) {
   const [openModal, setOpenModal] = useState(false);
-  const linkDetail = detail(row.original);
+
+  const featureConfig = table.options.meta
+    ?.featureConfig as DataGridShadcnTemplateFeatureConfig<TData>;
+
+  if (!featureConfig) return;
+
+  const isShowDetail = !!featureConfig.incremental?.rowActions?.detail;
+  const isShowDelete = !!featureConfig.incremental?.rowActions?.deleteData;
 
   return (
     <DropdownMenu>
@@ -779,52 +796,63 @@ export function DataGridRowActions<TData extends TableData>({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[160px]">
-        <DropdownMenuItem>
-          <Link href={linkDetail} className="w-full">
-            Detail
-          </Link>
-        </DropdownMenuItem>
-
-        <Dialog open={openModal} onOpenChange={setOpenModal}>
-          <DialogTrigger asChild>
-            <DropdownMenuItem
-              className="flex w-full cursor-pointer items-center gap-2"
-              onSelect={(e) => {
-                e.preventDefault();
-                setOpenModal(!openModal);
-              }}
+        {isShowDetail && (
+          <DropdownMenuItem>
+            <Link
+              href={
+                featureConfig.incremental?.rowActions?.detail!(row.original)!
+              }
+              className="w-full"
             >
-              Delete
-            </DropdownMenuItem>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Delete data</DialogTitle>
-              <DialogDescription>
-                Are you sure to delete this data?
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="mt-4">
-              <Button
-                type="reset"
-                variant="outline"
-                onClick={() => setOpenModal(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="destructive"
-                onClick={() => {
-                  deleteData(row.original);
-                  setOpenModal(false);
+              Detail
+            </Link>
+          </DropdownMenuItem>
+        )}
+
+        {isShowDelete && (
+          <Dialog open={openModal} onOpenChange={setOpenModal}>
+            <DialogTrigger asChild>
+              <DropdownMenuItem
+                className="flex w-full cursor-pointer items-center gap-2"
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setOpenModal(!openModal);
                 }}
               >
-                Confirm
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+                Delete
+              </DropdownMenuItem>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Delete data</DialogTitle>
+                <DialogDescription>
+                  Are you sure to delete this data?
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="mt-4">
+                <Button
+                  type="reset"
+                  variant="outline"
+                  onClick={() => setOpenModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="destructive"
+                  onClick={() => {
+                    featureConfig.incremental?.rowActions?.deleteData!(
+                      row.original,
+                    );
+                    setOpenModal(false);
+                  }}
+                >
+                  Confirm
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -837,7 +865,7 @@ export function DataGridRowActions<TData extends TableData>({
  * Umumnya ini digunakan sebagai child dari parent component `DataGrid`
  */
 export function DataGridPagination() {
-  const {table} = useDataGridTemplateContext();
+  const { table } = useDataGridTemplateContext();
 
   const paginationRowsPerPage = table.getState().pagination.pageSize;
   const handleRowsOptionChange = (value: any) => {
@@ -1210,7 +1238,7 @@ export function DataGridBriefsExporter({
 // ------------------------------------------------------------
 
 /**
- * Digunakan untuk menerapkan fitur incremental 
+ * Digunakan untuk menerapkan fitur incremental
  * penambahan data. Umumnya diletakkan pada Toolbar right.
  */
 export function DataGridAppender() {
