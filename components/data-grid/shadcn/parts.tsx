@@ -1,15 +1,18 @@
 import React from "react";
 import Link from "next/link";
+import { utils, writeFile } from "xlsx";
+import { format, getMonth } from "date-fns";
+import { useForm, Controller } from "react-hook-form";
+import { useCallback, useState } from "react";
+import { capitalize } from "lodash-es";
 import {
   Table,
   Column,
-  ColumnDef,
-  TableData,
   flexRender,
+  TableData,
   Row,
   BaseFeatureConfig,
 } from "@tanstack/react-table";
-import { useCallback, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -24,6 +27,8 @@ import {
   X,
   CircleX,
   SlidersHorizontal,
+  FileDown,
+  PlusCircle
 } from "lucide-react";
 
 import { cn } from "@/lib/ui";
@@ -80,6 +85,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { User } from "@/types/user";
+import { Brief } from "@/types/brief";
+
+import { useDataGridTemplateContext } from "./context";
+
+/**
+ * Digunakan untuk memastikan sebuah type object
+ * memiliki satu property. Sisa dari property yang
+ * didefinisikan akan bersifat opsional.
+ */
+type AtLeastOne<
+  T extends Object,
+  Keys extends keyof T = keyof T,
+> = Keys extends keyof T ? Partial<T> & { [K in Keys]-?: T[K] } : never;
+
+type FacetingConfig<TData extends TableData> = Partial<
+  Record<keyof TData, FacetedFilterOptionProps[]>
+>;
+
+export type RowSelectionConfirmDeleteAction<TData extends TableData> = (
+  selectedData: TData[],
+) => void;
+
 export type FacetedFilterOptionProps = {
   label: string;
   value: string;
@@ -91,55 +119,9 @@ export type FacetedFilterOptionProps = {
   icon?: React.ComponentType<{ className?: string }>;
 };
 
-type CheckedState = boolean | "indeterminate";
-
-type RowSelectionInitialConfig = {
-  checked: CheckedState;
-  onCheckedChange: (value: CheckedState) => void;
-  ariaLabel: string;
-};
-
-export type RowSelectionConfirmDeleteAction<TData extends TableData> = (
-  selectedData: TData[],
-) => void;
-
-type SelectionScope = "single" | "all";
-
-type DataGridRowSelectionBase = {
-  /**
-   * Digunakan untuk menentukan jenis tipe component.
-   * `single` berarti pemilihan (selection) dilakukan pada satu row.
-   * `all` berarti pemilihan dilakukan untuk semua row pada halaman saat ini. ini menggunakan API {@link https://tanstack.com/table/latest/docs/api/features/row-selection#toggleallpagerowsselected|`table.toggleAllPageRowsSelected`}
-   */
-  scope: SelectionScope;
-};
-
-/**
- * Digunakan untuk mengatur modifier required dan optional
- * dari property `row` dan `table`.
- *
- * @todo pendekatan yang lebih baik?
- */
-type DataGridRowSelectionProps<
-  SType extends SelectionScope,
-  TData extends TableData,
-> = SType extends "single"
-  ? DataGridRowSelectionBase & { row: Row<TData>; table?: Table<TData> }
-  : DataGridRowSelectionBase & { row?: Row<TData>; table: Table<TData> };
-
-type AtLeastOne<
-  T extends Object,
-  Keys extends keyof T = keyof T,
-> = Keys extends keyof T ? Partial<T> & { [K in Keys]-?: T[K] } : never;
-
-type FacetingConfig<TData extends TableData> = AtLeastOne<
-  Record<keyof TData, FacetedFilterOptionProps[]>
->;
-
-export interface DataGridShadcnTemplateFeatureConfig<TData extends TableData>
-  extends BaseFeatureConfig {
-  main: {
-    filter: {
+export type DataGridShadcnTemplateFeatureConfig<TData extends TableData> = {
+  main?: {
+    filter?: {
       /**
        * Digunakan untuk menentukan Column
        * yang akan diterapkan fitur filter search.
@@ -147,7 +129,7 @@ export interface DataGridShadcnTemplateFeatureConfig<TData extends TableData>
        *
        * @todo perbaiki type. gunakan teknik conditional type dari `ColumnDef`
        */
-      searching: keyof TData;
+      searching?: keyof TData;
 
       /**
        * Digunakan untuk menentukan Column
@@ -159,83 +141,68 @@ export interface DataGridShadcnTemplateFeatureConfig<TData extends TableData>
        * Struktur konfigurasi
        * ini sama dengan `{ columnName: FacetedFilterOption }`
        */
-      faceting: FacetingConfig<TData>;
+      faceting?: FacetingConfig<TData>;
     };
 
-    rowSelection: {
+    rowSelection?: {
       /**
        * Callback untuk aksi yang akan dilakukan ketika
        * proses penghapusan data dikonfirmasi.
        */
-      onDelete: RowSelectionConfirmDeleteAction<TData>;
+      onDelete?: RowSelectionConfirmDeleteAction<TData>;
     };
+
+    /**
+     * Digunakan untuk menerapkan fitur column visibility.
+     */
+    columnVisibility?: boolean;
+
+    /**
+     * Digunakan untuk menerapkan fitur data exporter.
+     * 
+     * Solusi sementara menggunakan `DataGridBriefsExporter`.
+     * Untuk kedepannya, konfigurasi dan penggunaan component
+     * akan berubah.
+     */
+    dataExporter?: boolean;
+
+    /**
+     * Digunakan untuk menerapkan fitur pagination.
+     */
+    pagination?: boolean;
   };
 
-  incremental: {
+  incremental?: {
     /**
      * Digunakan untuk mengatur tampilan dan perilaku
      * component penambahan data. Ini meliputi text dan link tombol
      */
-    addData: {
-      text: string;
-      link: string;
+    addData?: {
+      text?: string;
+      link?: string;
     };
 
-    rowActions: {
+    rowActions?: {
       /**
        * Function yang mengembalikan string link untuk detail data.
        * @param rowData data row untuk interpolasi string link.
        */
-      detail: (rowData: TData) => string;
+      detail?: (rowData: TData) => string;
 
       /**
        * Function yang melakukan aksi penghapusan data row.
        * @param rowData data row untuk operasi penghapusan data.
        */
-      deleteData: (rowData: TData) => void;
+      deleteData?: (rowData: TData) => void;
     };
   };
-}
+} & BaseFeatureConfig;
+
+// ------------------------------------------------------------
 
 export interface DataGridProps {
   title: string;
   children?: React.ReactNode;
-}
-
-type DataGridRowActionsProps<TData extends TableData> = {
-  row: Row<TData>;
-} & DataGridShadcnTemplateFeatureConfig<TData>["incremental"]["rowActions"];
-
-interface DataGridToolbarProps
-  extends React.HtmlHTMLAttributes<HTMLDivElement> {}
-
-interface DataGridCellHeaderProps<TData, TValue>
-  extends React.HTMLAttributes<HTMLDivElement> {
-  title: string;
-
-  /** API column dari tanstack table */
-  column: Column<TData, TValue>;
-}
-
-interface DataGridSearchFilterProps<TData extends TableData>
-  extends React.ComponentProps<typeof Input> {
-  table: Table<TData>;
-
-  /**
-   * Column yang akan diterapkan fitur filter search.
-   * Column Ini harus bertipe column {@link https://tanstack.com/table/latest/docs/guide/column-defs#column-def-types|`accessor`}. Sesuaikan dengan konfigurasi pada column def!
-   */
-  columnTarget: keyof TData;
-}
-
-interface DataGridFacetedFilterProps<TData, TValue> {
-  title?: string;
-
-  /** API column dari tanstack table */
-  column: Column<TData, TValue>;
-
-  /** Data option filter */
-  options: FacetedFilterOptionProps[];
 }
 
 /**
@@ -253,6 +220,11 @@ export function DataGrid(props: DataGridProps) {
     </div>
   );
 }
+
+// ------------------------------------------------------------
+
+interface DataGridToolbarProps
+  extends React.HtmlHTMLAttributes<HTMLDivElement> {}
 
 /**
  * Digunakan untuk mengatur dan mengelompokkan
@@ -281,17 +253,31 @@ export function DataGridToolbarRight(props: DataGridToolbarProps) {
   return <div {...props}>{props.children}</div>;
 }
 
+// ------------------------------------------------------------
+
+interface DataGridSearchFilterProps<TData extends TableData>
+  extends React.ComponentProps<typeof Input> {
+  table: Table<TData>;
+
+  /**
+   * Column yang akan diterapkan fitur filter search.
+   * Column Ini harus bertipe column {@link https://tanstack.com/table/latest/docs/guide/column-defs#column-def-types|`accessor`}. Sesuaikan dengan konfigurasi pada column def!
+   */
+  columnTarget: keyof TData;
+}
+
 /**
  * Digunakan untuk menerapkan fitur search column (filter).
  * Component ini umumnya digunakan didalam `DataGridToolbar`.
  */
-export function DataGridSearchFilter<TData extends TableData>({
-  table,
-  columnTarget,
+export function DataGridSearchFilter() {
+  const { table, featureConfig } = useDataGridTemplateContext();
 
-  ...props
-}: DataGridSearchFilterProps<TData>) {
-  const column = table.getColumn(columnTarget as string);
+  if (!featureConfig || !featureConfig.main?.filter!.searching) return;
+
+  const placeholderInput = `Search ${featureConfig.main?.filter!.searching}...`;
+
+  const column = table.getColumn(featureConfig.main?.filter!.searching as string);
 
   if (!column) throw new Error("Column target tidak ditemukan!");
 
@@ -305,20 +291,53 @@ export function DataGridSearchFilter<TData extends TableData>({
       value={value}
       onChange={handleOnChange}
       className="h-8 w-[150px] lg:w-[250px]"
-      {...props}
+      placeholder={placeholderInput}
     />
   );
+}
+
+// ------------------------------------------------------------
+
+interface DataGridFacetedFilterItemProps<TData, TValue> {
+  title?: string;
+
+  /** API column dari tanstack table */
+  column: Column<TData, TValue>;
+
+  /** Data option filter */
+  options: FacetedFilterOptionProps[];
 }
 
 /**
  * Digunakan untuk menerapkan fitur faceted column (filter).
  * Component ini umumnya digunakan didalam `DataGridToolbar`.
  */
-export function DataGridFacetedFilter<TData, TValue>({
+export function DataGridFacetedFilter() {
+  const { table, featureConfig } = useDataGridTemplateContext();
+
+  if (!featureConfig || !featureConfig.main?.filter!.faceting) return;
+
+  const facetKeys = Object.keys(featureConfig.main?.filter!.faceting);
+
+  return (
+    <>
+      {facetKeys.map((facet, i) => (
+        <DataGridFacetedFilterItem
+          key={i}
+          title={capitalize(facet)}
+          column={table.getColumn(facet)!}
+          options={featureConfig.main?.filter!.faceting![facet]!}
+        />
+      ))}
+    </>
+  );
+}
+
+export function DataGridFacetedFilterItem<TData, TValue>({
   options,
   column,
   title,
-}: DataGridFacetedFilterProps<TData, TValue>) {
+}: DataGridFacetedFilterItemProps<TData, TValue>) {
   if (!column) throw new Error("Column tidak ditemukan!");
 
   const facets = column.getFacetedUniqueValues();
@@ -427,11 +446,13 @@ export function DataGridFacetedFilter<TData, TValue>({
  * Component ini umumnya digunakan secara bersamaan
  * dengan component `DataGridFacetedFilter`.
  */
-export function DataGridFacetedFilterFormatter<TData>({
-  table,
-}: {
-  table: Table<TData>;
-}) {
+export function DataGridFacetedFilterFormatter() {
+  const { table, featureConfig } = useDataGridTemplateContext();
+  const isFiltered = table.getState().columnFilters.length > 0;
+
+  if (!featureConfig || !featureConfig.main?.filter!.faceting || !isFiltered)
+    return;
+
   return (
     <Button
       variant="ghost"
@@ -443,6 +464,40 @@ export function DataGridFacetedFilterFormatter<TData>({
     </Button>
   );
 }
+
+// ------------------------------------------------------------
+
+type CheckedState = boolean | "indeterminate";
+
+type RowSelectionInitialConfig = {
+  checked: CheckedState;
+  onCheckedChange: (value: CheckedState) => void;
+  ariaLabel: string;
+};
+
+type SelectionScope = "single" | "all";
+
+type DataGridRowSelectionBase = {
+  /**
+   * Digunakan untuk menentukan jenis tipe component.
+   * `single` berarti pemilihan (selection) dilakukan pada satu row.
+   * `all` berarti pemilihan dilakukan untuk semua row pada halaman saat ini. ini menggunakan API {@link https://tanstack.com/table/latest/docs/api/features/row-selection#toggleallpagerowsselected|`table.toggleAllPageRowsSelected`}
+   */
+  scope: SelectionScope;
+};
+
+/**
+ * Digunakan untuk mengatur modifier required dan optional
+ * dari property `row` dan `table`.
+ *
+ * @todo pendekatan yang lebih baik?
+ */
+type DataGridRowSelectionProps<
+  SType extends SelectionScope,
+  TData extends TableData,
+> = SType extends "single"
+  ? DataGridRowSelectionBase & { row: Row<TData>; table?: Table<TData> }
+  : DataGridRowSelectionBase & { row?: Row<TData>; table: Table<TData> };
 
 /**
  * Umumnya digunakan ketika mendefinisikan column def
@@ -506,14 +561,11 @@ export function DataGridRowSelection<
  * secara default 'delete' mengacu pada semua rows disemua page (jika ada pagination).
  * Namun jika terdapat row yang dipilih, 'delete' mengacu pada rows yang dipilih saja.
  */
-export function DataGridRowSelectionBulkDelete<TData extends TableData>({
-  table,
-  onChange,
-}: {
-  table: Table<TData>;
-  onChange: RowSelectionConfirmDeleteAction<TData>;
-}) {
+export function DataGridRowSelectionBulkDelete() {
+  const { table, featureConfig } = useDataGridTemplateContext();
   const [openModal, setOpenModal] = useState(false);
+
+  if (!featureConfig || !featureConfig.main?.rowSelection) return;
 
   const isRowsSelected =
     table.getIsAllPageRowsSelected() || table.getIsSomeRowsSelected();
@@ -558,7 +610,7 @@ export function DataGridRowSelectionBulkDelete<TData extends TableData>({
             type="submit"
             variant="destructive"
             onClick={() => {
-              onChange(selectedRowsData);
+              featureConfig.main?.rowSelection?.onDelete!(selectedRowsData);
               setOpenModal(false);
             }}
           >
@@ -570,17 +622,16 @@ export function DataGridRowSelectionBulkDelete<TData extends TableData>({
   );
 }
 
+// ------------------------------------------------------------
+
 /**
  * Digunakan untuk merender content table.
  * Umumnya digunakan sebagai child dari `DataGrid` component.
  */
-export function DataGridTable<TData, TValue>({
-  table,
-  columns,
-}: {
-  table: Table<TData>;
-  columns: ColumnDef<TData, TValue>[];
-}) {
+export function DataGridTable() {
+  const { table } = useDataGridTemplateContext();
+  const columns = table.getAllColumns();
+
   return (
     <div className="rounded-md border">
       <TablePrimitive>
@@ -630,6 +681,16 @@ export function DataGridTable<TData, TValue>({
       </TablePrimitive>
     </div>
   );
+}
+
+// ------------------------------------------------------------
+
+interface DataGridCellHeaderProps<TData, TValue>
+  extends React.HTMLAttributes<HTMLDivElement> {
+  title: string;
+
+  /** API column dari tanstack table */
+  column: Column<TData, TValue>;
 }
 
 /**
@@ -687,6 +748,12 @@ export function DataGridCellHeader<TData, TValue>({
     </div>
   );
 }
+
+// ------------------------------------------------------------
+
+type DataGridRowActionsProps<TData extends TableData> = {
+  row: Row<TData>;
+} & NonNullable<DataGridShadcnTemplateFeatureConfig<TData>["incremental"]>;
 
 /**
  * Umumnya ini digunakan sebagai component cell dengan tipe column display
@@ -763,11 +830,15 @@ export function DataGridRowActions<TData extends TableData>({
   );
 }
 
+// ------------------------------------------------------------
+
 /**
  * Digunakan untuk menerapkan fitur pagination.
  * Umumnya ini digunakan sebagai child dari parent component `DataGrid`
  */
-export function DataGridPagination<TData>({ table }: { table: Table<TData> }) {
+export function DataGridPagination() {
+  const {table} = useDataGridTemplateContext();
+
   const paginationRowsPerPage = table.getState().pagination.pageSize;
   const handleRowsOptionChange = (value: any) => {
     table.setPageSize(Number(value));
@@ -852,11 +923,17 @@ export function DataGridPagination<TData>({ table }: { table: Table<TData> }) {
   );
 }
 
+// ------------------------------------------------------------
+
 /**
  * Digunakan untuk menerapkan fitur column visibility.
  * Umumnya ini digunakan didalam component `DataGridToolbarRight`
  */
-export function DataGridVisibility<TData>({ table }: { table: Table<TData> }) {
+export function DataGridVisibility() {
+  const { table, featureConfig } = useDataGridTemplateContext();
+
+  if (!featureConfig || !featureConfig.main?.columnVisibility) return;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -892,5 +969,263 @@ export function DataGridVisibility<TData>({ table }: { table: Table<TData> }) {
           })}
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+// ------------------------------------------------------------
+
+interface DataGridBriefsExporterProps {
+  users: User[];
+  briefs: Brief[];
+}
+
+const MONTH = [
+  {
+    value: "0",
+    label: "January",
+  },
+  {
+    value: "1",
+    label: "February",
+  },
+  {
+    value: "2",
+    label: "March",
+  },
+  {
+    value: "3",
+    label: "April",
+  },
+  {
+    value: "4",
+    label: "May",
+  },
+  {
+    value: "5",
+    label: "June",
+  },
+  {
+    value: "6",
+    label: "July",
+  },
+  {
+    value: "7",
+    label: "August",
+  },
+  {
+    value: "8",
+    label: "September",
+  },
+  {
+    value: "9",
+    label: "October",
+  },
+  {
+    value: "10",
+    label: "November",
+  },
+  {
+    value: "11",
+    label: "December",
+  },
+];
+
+const FORMAT_DATE = "LLL dd, y";
+
+/**
+ * Digunakan untuk mengeksport data briefs.
+ * Componenet ini merupakan solusi sementara
+ * dari fitur data eksporter.
+ */
+export function DataGridBriefsExporter({
+  briefs,
+  users,
+}: DataGridBriefsExporterProps) {
+  if (!briefs || !users) throw new Error("Tidak ada data Briefs atau Users");
+
+  const { control, register, handleSubmit } = useForm();
+  const handleExport = useCallback(
+    (data: any) => {
+      const briefUser = briefs.filter((user) =>
+        user.assign.find(({ id }) => id === data.userId),
+      );
+
+      const briefUserbyMonth = briefUser.filter(
+        (user) => getMonth(new Date(user.createdAt)).toString() === data.month,
+      );
+
+      const dataBrief = briefUserbyMonth.map((user) => {
+        return {
+          Title: user.title,
+          Status: user.status,
+
+          Author: users
+            ?.filter((e) => e.id === user.authorId)
+            .map((e) => e.name)[0],
+
+          Deadline: !!user.deadline
+            ? "-"
+            : `${format(user.deadline!.from!, FORMAT_DATE)} - ${format(
+                user.deadline!.to!,
+                FORMAT_DATE,
+              )}`,
+
+          CreatedAt: format(user.createdAt, FORMAT_DATE),
+        };
+      });
+
+      // Buat work book baru
+      const wb = utils.book_new();
+
+      // Ubah data menjadi worksheet
+      const ws = utils.json_to_sheet(dataBrief ?? []);
+
+      // Set format kolom
+      const wscols = [
+        { wch: 30 }, // Lebar kolom A
+        { wch: 10 }, // Lebar kolom B
+        { wch: 30 }, // Lebar kolom C
+        { wch: 30 },
+        { wch: 30 },
+      ];
+
+      ws["!cols"] = wscols;
+
+      // Set format baris
+      const wsrows = [
+        { hpx: 20 }, // Tinggi baris
+      ];
+      ws["!rows"] = wsrows;
+
+      // Set gaya sel
+      for (let R = 0; R < dataBrief.length + 1; ++R) {
+        for (let C = 0; C < 6; ++C) {
+          const cellAddress = utils.encode_cell({ c: C, r: R });
+          if (!ws[cellAddress]) continue;
+
+          ws[cellAddress].s = {
+            font: {
+              name: "Arial",
+              sz: 12,
+              bold: R === 0, // Buat header tebal
+              color: { rgb: R === 0 ? "FFFFFF" : "000000" }, // Warna font (putih untuk header)
+            },
+            fill: {
+              fgColor: { rgb: R === 0 ? "4F81BD" : "D3D3D3" }, // Warna latar belakang (biru untuk header, abu-abu untuk lainnya)
+            },
+            alignment: {
+              vertical: "center",
+              horizontal: "center",
+            },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          };
+        }
+      }
+
+      // Tambahkan worksheet ke workbook
+      utils.book_append_sheet(wb, ws, "Sheet1");
+
+      // Simpan workbook sebagai file
+      writeFile(
+        wb,
+        `${
+          users
+            ?.filter((user) => user.id === data.userId)
+            .map((user) => user.name)[0]
+        } - ${
+          MONTH.filter((m) => m.value === data.month).map((m) => m.label)[0]
+        }.xlsx`,
+      );
+    },
+    [briefs, users],
+  );
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button size="sm" className="h-8 gap-1" variant="outline">
+          <FileDown className="h-4 w-4" />
+          Export
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Export Data Brief</DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit(handleExport)} className="grid gap-4 py-4">
+          <Controller
+            control={control}
+            name="userId"
+            render={({ field }) => (
+              <Select onValueChange={(value) => field.onChange(value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select user" />
+                </SelectTrigger>
+                <SelectContent>
+                  {users
+                    .filter((data) => data.role === "Team Member")
+                    .map((data, i) => (
+                      <SelectItem key={i} value={data.id}>
+                        {data.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="month"
+            render={({ field }) => (
+              <Select onValueChange={(value) => field.onChange(value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MONTH.map((data, i) => (
+                    <SelectItem key={i} value={data.value}>
+                      {data.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+
+          <Button type="submit">Export</Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ------------------------------------------------------------
+
+/**
+ * Digunakan untuk menerapkan fitur incremental 
+ * penambahan data. Umumnya diletakkan pada Toolbar right.
+ */
+export function DataGridAppender() {
+  const { featureConfig } = useDataGridTemplateContext();
+
+  if (!featureConfig || !featureConfig.incremental?.addData) return;
+
+  return (
+    <Button size="sm" className="h-8 gap-1" variant={"default"} asChild>
+      <Link href={featureConfig.incremental?.addData.link!}>
+        <PlusCircle className="h-3.5 w-3.5" />
+        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+          {featureConfig.incremental.addData.text}
+        </span>
+      </Link>
+    </Button>
   );
 }

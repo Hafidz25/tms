@@ -1,8 +1,6 @@
 import React from "react";
-import Link from "next/link";
-import { PlusCircle } from "lucide-react";
 import { useState } from "react";
-import { capitalize } from "lodash-es";
+import { defaultsDeep } from "lodash-es";
 import {
   ColumnFiltersState,
   SortingState,
@@ -15,9 +13,10 @@ import {
   getSortedRowModel,
   ColumnDef,
   TableData,
+  Table,
 } from "@tanstack/react-table";
 
-import { Button } from "@/components/ui/button";
+import { DataGridTemplateContext } from "./context";
 import {
   DataGrid,
   DataGridToolbar,
@@ -31,25 +30,42 @@ import {
   DataGridProps,
   DataGridVisibility,
   DataGridRowSelectionBulkDelete,
+  DataGridAppender,
   DataGridShadcnTemplateFeatureConfig,
 } from "./parts";
 
 /**
  * TODO!!! :
+ * @todo perbaiki `filterValue.toLowerCase() is not function` pada filter faceting option.
+ * @todo perbaiki kesalah type pada utils `createColumns` untuk use case data selain brief.
  * @todo full area row selection
  * @todo data exporting feature
- * 
+ * @todo lazy loading untuk optional features
+ *
  * @todo menambahkan filterfn custom (lihat filterFn pada column def)
  * @todo solusi untuk `filterFns` type
  * @todo perbaiki " Can't perform a React state update" (lihat console). Ini merupakan kesalahan dari library. lihat {@link https://github.com/TanStack/table/issues/5026}
  */
 
-export interface Props<TData extends TableData, TValue>
-  extends DataGridProps {
+export interface Props<TData extends TableData, TValue> extends DataGridProps {
   data: TData[];
   columns: ColumnDef<TData, TValue>[];
-  featureConfig: DataGridShadcnTemplateFeatureConfig<TData>;
+  featureConfig?: DataGridShadcnTemplateFeatureConfig<TData>;
 }
+
+const DEFAULT_FEATURE_CONFIG = {
+  main: {
+    filter: undefined,
+    rowSelection: undefined,
+    pagination: true,
+    columnVisibility: true,
+    dataExporter: false,
+  },
+  incremental: {
+    addData: undefined,
+    rowActions: undefined,
+  },
+} satisfies DataGridShadcnTemplateFeatureConfig<TableData>;
 
 export function DataGridTemplate<TData extends TableData, TValue>({
   title = "Judul Tabel",
@@ -80,55 +96,35 @@ export function DataGridTemplate<TData extends TableData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
-  const isFiltered = table.getState().columnFilters.length > 0;
-  const facets = Object.keys(featureConfig.main.filter.faceting);
+  const config = !!featureConfig
+    ? defaultsDeep(featureConfig, DEFAULT_FEATURE_CONFIG)
+    : DEFAULT_FEATURE_CONFIG;
 
   return (
-    <DataGrid title={title}>
-      <DataGridToolbar>
-        <DataGridToolbarLeft>
-          {/* Fitur Search Filter */}
-          <DataGridSearchFilter
-            table={table}
-            placeholder={`Search ${featureConfig.main.filter.searching as string}...`}
-            columnTarget={featureConfig.main.filter.searching}
-          />
+    <DataGridTemplateContext.Provider
+      value={{
+        table,
+        featureConfig: config,
+      }}
+    >
+      <DataGrid title={title}>
+        <DataGridToolbar>
+          <DataGridToolbarLeft>
+            <DataGridSearchFilter />
+            <DataGridFacetedFilter />
+            <DataGridFacetedFilterFormatter />
+          </DataGridToolbarLeft>
 
-          {/* Fitur Faceting Filter */}
-          <>
-            {facets.map((item, i) => (
-              <DataGridFacetedFilter
-                key={i}
-                title={capitalize(item)}
-                column={table.getColumn(item)!}
-                options={featureConfig.main.filter.faceting[item]!}
-              />
-            ))}
+          <DataGridToolbarRight className="flex items-center justify-end space-x-2">
+            <DataGridRowSelectionBulkDelete />
+            <DataGridAppender />
+            <DataGridVisibility />
+          </DataGridToolbarRight>
+        </DataGridToolbar>
 
-            {isFiltered && <DataGridFacetedFilterFormatter table={table} />}
-          </>
-        </DataGridToolbarLeft>
-
-        <DataGridToolbarRight className="flex items-center justify-end space-x-2">
-          <DataGridRowSelectionBulkDelete
-            table={table}
-            onChange={featureConfig.main.rowSelection.onDelete}
-          />
-
-          <Button size="sm" className="h-8 gap-1" variant={"default"} asChild>
-            <Link href={featureConfig.incremental.addData.link}>
-              <PlusCircle className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                {featureConfig.incremental.addData.text}
-              </span>
-            </Link>
-          </Button>
-
-          <DataGridVisibility table={table} />
-        </DataGridToolbarRight>
-      </DataGridToolbar>
-      <DataGridTable table={table} columns={columns} />
-      <DataGridPagination table={table} />
-    </DataGrid>
+        <DataGridTable />
+        <DataGridPagination />
+      </DataGrid>
+    </DataGridTemplateContext.Provider>
   );
 }

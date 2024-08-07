@@ -1,19 +1,21 @@
 import type { DateRange } from "react-day-picker";
 import type { User } from "./user";
-import { Feedback } from "./feedback";
+import type { Feedback } from "./feedback";
 
 export type BriefsStatus =
   | "Assigned"
   | "In Review"
-  | "In Progress"
-  | "Waiting for Client"
+  | "Waiting for Client Feedback"
   | "Correction"
+  | "In Progress"
   | "Need Review"
   | "Done";
 
 export interface Brief {
   id: string;
+  authorId: string;
   title: string;
+  description: string;
 
   /**
    * Type `content` perlu refactor.
@@ -24,11 +26,9 @@ export interface Brief {
   content: string;
 
   status: BriefsStatus;
-  authorId: string;
+  feedback: Feedback[];
   assign: User[];
   createdAt: Date;
   updatedAt: Date;
   deadline?: DateRange | undefined;
-  feedback: Feedback[]
 }
-

@@ -11,8 +11,8 @@ declare module "@tanstack/table-core" {
   }
 
   interface BaseFeatureConfig {
-    main: { [key: string]: any };
-    incremental: { [key: string]: any };
+    main?: Partial<{ [key: string]: any }>;
+    incremental?: Partial<{ [key: string]: any }>;
   }
 
   interface TableMeta<TData extends TableData<TData>> {

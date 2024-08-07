@@ -22,7 +22,7 @@ Columns disarankan didefinisikan pada file terpisah, seperti `data-grid-columns.
 import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
 
-import { Brief } from "@/types/briefs";
+import { Brief } from "@/types/brief";
 import { createColumns } from "@/lib/data-grid/columns";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -133,7 +133,6 @@ export const columns = createColumns<Brief>((column) => [
     },
   }),
 ]);
-
 ```
 
 ## B. Konfigurasi Fitur
@@ -174,15 +173,18 @@ Data Grid Shadcn memiliki fitur-fitur yang dapat dikategorikan menjadi dua jenis
 
 ## A. Main
 
-Fitur utama yang dibangun sebagai dasar component. Fitur ini harus diterapkan dengan aturan yang ada pada high level (template) component. Contoh penerapan : 
+Fitur utama yang dibangun sebagai dasar component. Fitur ini harus diterapkan dengan aturan yang ada pada high level (template) component. Contoh penerapan :
 
 ```tsx
 import { DashboardPanel } from "@/components/layouts/dashboard-panel";
-import { DataGridTemplate, DataGridShadcnTemplateFeatureConfig } from "@/components/data-grid/shadcn";
+import {
+  DataGridTemplate,
+  DataGridShadcnTemplateFeatureConfig,
+} from "@/components/data-grid/shadcn";
 import { createBriefs } from "@/data/briefs";
 import { columns } from "./data-grid-columns";
 import { statusOption } from "./data-grid-config";
-import { Brief } from "@/types/briefs";
+import { Brief } from "@/types/brief";
 
 export default function Page() {
   const featureConfig: DataGridShadcnTemplateFeatureConfig<Brief> = {
@@ -207,7 +209,7 @@ export default function Page() {
 
       rowActions: {
         detail: (rowData) => `/dashboard/briefs/${rowData.id}`,
-        deleteData: (rowData) => console.log(rowData)
+        deleteData: (rowData) => console.log(rowData),
       },
     },
   };
@@ -225,7 +227,6 @@ export default function Page() {
 }
 ```
 
-
 Fitur-fitur ini terdiri dari :
 
 ### a. Title
@@ -240,7 +241,7 @@ Search filter hanya didapat diterapkan pada satu column dan Faceting filter dapa
 
 ### c. Column Visibility
 
-Digunakan untuk menyembunyikan column tertentu. 
+Digunakan untuk menyembunyikan column tertentu.
 
 ### d. Row Selection
 
@@ -252,8 +253,8 @@ Digunakan untuk mengurutkan cell column sesuai dengan type data pada cell terseb
 
 ### f. Pagination
 
-Digunakan untuk membagi rows (data) menjadi beberapa halaman. 
+Digunakan untuk membagi rows (data) menjadi beberapa halaman.
 
-## B. Incremental 
+## B. Incremental
 
 Fitur tambahan yang pada component. Fitur juga ini harus diterapkan dengan aturan yang ada pada high level (template) component.
