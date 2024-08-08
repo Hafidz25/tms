@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   if (session?.user.role === "Admin") {
     try {
       const body = await req.json();
-      const { name, email, password, role } = body;
+      const { name, email, password, role, roleMemberId, levelId } = body;
 
       // Check email
       const existingUserByEmail = await db.user.findUnique({
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       if (existingUserByEmail) {
         return NextResponse.json(
           { user: null, message: "User with this email already exists" },
-          { status: 409 }
+          { status: 409 },
         );
       }
 
@@ -40,6 +40,8 @@ export async function POST(req: NextRequest) {
           email: email,
           password: hashedPassword,
           role: role,
+          roleMemberId: roleMemberId,
+          levelId: levelId,
         },
       });
 
@@ -50,7 +52,7 @@ export async function POST(req: NextRequest) {
           user: rest,
           message: "User created successfully",
         },
-        { status: 201 }
+        { status: 201 },
       );
     } catch (error) {
       console.log(error);
@@ -58,7 +60,7 @@ export async function POST(req: NextRequest) {
         { error: "Internal Server Error" },
         {
           status: 500,
-        }
+        },
       );
     }
   } else {
@@ -66,7 +68,7 @@ export async function POST(req: NextRequest) {
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }
@@ -87,6 +89,8 @@ export async function GET() {
           name: true,
           email: true,
           role: true,
+          roleMemberId: true,
+          levelId: true,
           password: true,
           briefs: true,
           feedbacks: true,
@@ -105,14 +109,14 @@ export async function GET() {
         },
         {
           status: 200,
-        }
+        },
       );
     } catch (error) {
       return NextResponse.json(
         { error: "Internal Server Error" },
         {
           status: 500,
-        }
+        },
       );
     }
   } else {
@@ -120,7 +124,7 @@ export async function GET() {
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }

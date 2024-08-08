@@ -13,7 +13,7 @@ import { authOption } from "@/lib/auth";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const session = await getServerSession(authOption);
 
@@ -30,27 +30,27 @@ export async function DELETE(
       },
       {
         status: 200,
-      }
+      },
     );
   } else {
     return NextResponse.json(
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const session = await getServerSession(authOption);
 
   if (session?.user.role === "Admin") {
     const body = await req.json();
-    const { name, email, password, role } = body;
+    const { name, email, password, role, roleMemberId, levelId } = body;
 
     // Hash password
     //   const hashedPassword = await hash(password, 10);
@@ -61,6 +61,8 @@ export async function PATCH(
         email: email,
         //   password: hashedPassword,
         role: role,
+        roleMemberId: roleMemberId,
+        levelId: levelId,
       },
     });
 
@@ -72,21 +74,21 @@ export async function PATCH(
       },
       {
         status: 200,
-      }
+      },
     );
   } else {
     return NextResponse.json(
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const session = await getServerSession(authOption);
 
@@ -103,6 +105,8 @@ export async function GET(
           name: true,
           email: true,
           role: true,
+          roleMemberId: true,
+          levelId: true,
           briefs: true,
         },
         where: { id: params.id },
@@ -117,14 +121,14 @@ export async function GET(
         },
         {
           status: 200,
-        }
+        },
       );
     } catch (error) {
       return NextResponse.json(
         { error: "Internal Server Error", message: error },
         {
           status: 500,
-        }
+        },
       );
     }
   } else {
@@ -132,7 +136,7 @@ export async function GET(
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }
