@@ -1,7 +1,7 @@
 import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
 
-import { Brief, BriefsStatus } from "@/types/briefs";
+import { Brief, BriefsStatus } from "@/types/brief";
 import { createColumns } from "@/lib/data-grid/columns";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -141,16 +141,9 @@ export const columns = createColumns<Brief>((column) => [
     id: "actions",
     enableHiding: false,
     cell: ({ row, table }) => {
-      const featureConfig = table.options.meta
-        ?.featureConfig as DataGridShadcnTemplateFeatureConfig<Brief>;
-
       return (
         <div className="w-max">
-          <DataGridRowActions
-            row={row}
-            detail={featureConfig?.incremental.rowActions.detail}
-            deleteData={featureConfig.incremental.rowActions.deleteData}
-          />
+          <DataGridRowActions row={row} table={table} />
         </div>
       );
     },

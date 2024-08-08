@@ -9,24 +9,17 @@ import {
   DataGridShadcnTemplateFeatureConfig,
 } from "@/components/data-grid/shadcn";
 
-interface LevelFee {
+interface RoleMember {
   id: string;
-  level: string;
-  regularFee: number;
+  name: string;
+  level: [];
+  user: [];
   createdAt: string;
 }
 
-const formatCurrency = (number: any) => {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(number);
-};
-
 const FORMAT_DATE = "dd LLL, y";
 
-export const columns = createColumns<LevelFee>((column) => [
+export const columns = createColumns<RoleMember>((column) => [
   column.display({
     id: "select",
     enableHiding: false,
@@ -36,15 +29,13 @@ export const columns = createColumns<LevelFee>((column) => [
     cell: ({ row }) => <DataGridRowSelection scope="single" row={row} />,
   }),
 
-  column.accessor("level", {
-    header: ({ column }) => (
-      <DataGridCellHeader column={column} title="Level" />
-    ),
+  column.accessor("name", {
+    header: ({ column }) => <DataGridCellHeader column={column} title="Name" />,
 
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="w-[100px] truncate font-medium">
-          {row.getValue("level")}
+          {row.getValue("name")}
         </span>
       </div>
     ),
@@ -52,12 +43,14 @@ export const columns = createColumns<LevelFee>((column) => [
     enableHiding: false,
   }),
 
-  column.accessor("regularFee", {
-    header: ({ column }) => <DataGridCellHeader column={column} title="Fee" />,
+  column.accessor("level", {
+    header: ({ column }) => (
+      <DataGridCellHeader column={column} title="Level" />
+    ),
 
     cell: ({ row }) => (
       <div className="flex space-x-2">
-        <span className="">{formatCurrency(row.getValue("regularFee"))}</span>
+        <span className="">{row.original.level.length} Levels</span>
       </div>
     ),
 
@@ -80,16 +73,9 @@ export const columns = createColumns<LevelFee>((column) => [
     id: "actions",
     enableHiding: false,
     cell: ({ row, table }) => {
-      const featureConfig = table.options.meta
-        ?.featureConfig as DataGridShadcnTemplateFeatureConfig<LevelFee>;
-
       return (
         <div className="w-max">
-          <DataGridRowActions
-            row={row}
-            detail={featureConfig?.incremental.rowActions.detail}
-            deleteData={featureConfig.incremental.rowActions.deleteData}
-          />
+          <DataGridRowActions row={row} table={table} />
         </div>
       );
     },

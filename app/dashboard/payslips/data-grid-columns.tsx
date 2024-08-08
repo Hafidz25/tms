@@ -61,20 +61,6 @@ export const columns = createColumns<Payslip>((column) => [
     enableHiding: false,
   }),
 
-  column.accessor("position", {
-    header: ({ column }) => (
-      <DataGridCellHeader column={column} title="Position" />
-    ),
-
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="">{row.getValue("position")}</span>
-      </div>
-    ),
-
-    enableHiding: false,
-  }),
-
   column.accessor("period", {
     header: ({ column }) => (
       <DataGridCellHeader column={column} title="Period" />
@@ -113,16 +99,9 @@ export const columns = createColumns<Payslip>((column) => [
     id: "actions",
     enableHiding: false,
     cell: ({ row, table }) => {
-      const featureConfig = table.options.meta
-        ?.featureConfig as DataGridShadcnTemplateFeatureConfig<Payslip>;
-
       return (
         <div className="w-max">
-          <DataGridRowActions
-            row={row}
-            detail={featureConfig?.incremental.rowActions.detail}
-            deleteData={featureConfig.incremental.rowActions.deleteData}
-          />
+          <DataGridRowActions row={row} table={table} />
         </div>
       );
     },

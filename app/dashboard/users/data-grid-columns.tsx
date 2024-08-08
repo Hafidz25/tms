@@ -124,6 +124,10 @@ export const columns = createColumns<User>((column) => [
     },
 
     enableHiding: false,
+
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
   }),
 
   column.accessor("createdAt", {
@@ -142,16 +146,9 @@ export const columns = createColumns<User>((column) => [
     id: "actions",
     enableHiding: false,
     cell: ({ row, table }) => {
-      const featureConfig = table.options.meta
-        ?.featureConfig as DataGridShadcnTemplateFeatureConfig<User>;
-
       return (
         <div className="w-max">
-          <DataGridRowActions
-            row={row}
-            detail={featureConfig?.incremental.rowActions.detail}
-            deleteData={featureConfig.incremental.rowActions.deleteData}
-          />
+          <DataGridRowActions row={row} table={table} />
         </div>
       );
     },
