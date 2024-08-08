@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useForm, Controller } from "react-hook-form";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Eye, Pen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -41,9 +41,19 @@ interface RoleMember {
   createdAt: string;
 }
 
-const CreateUser = () => {
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  roleMemberId: string;
+  levelId: string;
+}
+
+const DetailUser = ({ params }: { params: { id: string } }) => {
   const { control, watch, handleSubmit, getValues, setValue } = useForm();
   const [isLoading, setIsLoading] = useState(false);
+  const [editMode, setEditMode] = useState(false);
   const Router = useRouter();
 
   const fetcher = (url: string) =>
@@ -51,12 +61,17 @@ const CreateUser = () => {
       .then((res) => res.json())
       .then((res) => res.data);
 
-  const { data: roleMember, error } = useSWR<RoleMember[], Error>(
-    "/api/role-member",
+  const { data: roleMember, error: errorRoleMember } = useSWR<
+    RoleMember[],
+    Error
+  >("/api/role-member", fetcher);
+
+  const { data: user, error: errorUser } = useSWR<User, Error>(
+    `/api/users/${params.id}`,
     fetcher,
   );
 
-  // console.log(watch("roleMember"));
+  //   console.log(user);
 
   function generatePass() {
     const password = generator.generate({
@@ -68,25 +83,24 @@ const CreateUser = () => {
 
   const handleSubmitData = async (data: any) => {
     const newData = {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      role: data.role,
-      roleMemberId: data.roleMember,
-      levelId: data.level,
+      name: data.name ? data.name : user?.name,
+      email: data.email ? data.email : user?.email,
+      role: data.role ? data.role : user?.role,
+      roleMemberId: data.roleMember ? data.roleMember : user?.roleMemberId,
+      levelId: data.level ? data.level : user?.levelId,
     };
     // console.log(newData);
     setIsLoading(true);
     try {
-      const response = await fetch("/api/users", {
-        method: "POST",
+      const response = await fetch(`/api/users/${params.id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newData),
       });
       // console.log(response);
-      if (response.status === 201) {
-        toast.success("User created successfully.");
-        Router.push("/dashboard/users");
+      if (response.status === 200) {
+        toast.success("User updated successfully.");
+        location.assign("/dashboard/users");
       } else if (response.status === 409) {
         setIsLoading(false);
         toast.warning("User with this email already exists.");
@@ -98,19 +112,47 @@ const CreateUser = () => {
     }
   };
 
-  return roleMember ? (
+  return roleMember && user ? (
     <div className="flex min-h-screen w-full flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+      <title>
+        {editMode
+          ? `Edit User - Task Management System`
+          : "Detail User - Task Management System"}
+      </title>
       <form
         onSubmit={handleSubmit(handleSubmitData)}
         className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4 lg:min-w-[59rem]"
       >
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between gap-4">
           <Link href="" onClick={() => Router.back()}>
             <Button variant="outline" size="sm">
               <ChevronLeft className="h-4 w-4" />
               <span className="sr-only">Back</span>
             </Button>
           </Link>
+          {editMode ? (
+            <Button
+              variant="outline"
+              type="button"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() => setEditMode(false)}
+            >
+              <Eye className="h-4 w-4" />
+              View
+            </Button>
+          ) : (
+            <Button
+              variant="default"
+              size="sm"
+              type="button"
+              className="flex items-center gap-2"
+              onClick={() => setEditMode(true)}
+            >
+              <Pen className="h-4 w-4" />
+              Edit
+            </Button>
+          )}
         </div>
         <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
           <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
@@ -131,6 +173,8 @@ const CreateUser = () => {
                           type="name"
                           placeholder="Input Name"
                           required
+                          disabled={editMode ? false : true}
+                          defaultValue={user.name}
                           onChange={(range) => {
                             field.onChange(range);
                           }}
@@ -149,6 +193,8 @@ const CreateUser = () => {
                           type="email"
                           placeholder="m@example.com"
                           required
+                          disabled={editMode ? false : true}
+                          defaultValue={user.email}
                           onChange={(range) => {
                             field.onChange(range);
                           }}
@@ -166,21 +212,16 @@ const CreateUser = () => {
                           <Input
                             required
                             minLength={6}
+                            type="password"
                             id="password"
+                            disabled
+                            defaultValue={"12345678"}
                             placeholder="Input Password"
                             onChange={(range) => {
                               field.onChange(range);
                             }}
                             value={getValues("password")}
                           />
-                          <Button
-                            size="sm"
-                            type="button"
-                            onClick={generatePass}
-                            variant="shine"
-                          >
-                            Generate
-                          </Button>
                         </div>
                       </div>
                     )}
@@ -203,6 +244,8 @@ const CreateUser = () => {
                       <div className="grid gap-3">
                         <Label htmlFor="role">Role</Label>
                         <Select
+                          disabled={editMode ? false : true}
+                          defaultValue={user.role}
                           onValueChange={(value) => field.onChange(value)}
                         >
                           <SelectTrigger id="role" aria-label="Select status">
@@ -228,6 +271,8 @@ const CreateUser = () => {
                       <div className="grid gap-3">
                         <Label htmlFor="roleMember">Role Member</Label>
                         <Select
+                          disabled={editMode ? false : true}
+                          defaultValue={user.roleMemberId}
                           onValueChange={(value) => field.onChange(value)}
                         >
                           <SelectTrigger
@@ -255,14 +300,19 @@ const CreateUser = () => {
                         <Label htmlFor="level">Level</Label>
                         <Select
                           onValueChange={(value) => field.onChange(value)}
-                          disabled={watch("roleMember") ? false : true}
+                          disabled={editMode ? false : true}
+                          defaultValue={user.levelId}
                         >
                           <SelectTrigger id="level" aria-label="Select level">
                             <SelectValue placeholder="Select level..." />
                           </SelectTrigger>
                           <SelectContent>
                             {roleMember
-                              .filter((data) => data.id === watch("roleMember"))
+                              .filter((data) =>
+                                watch("roleMember")
+                                  ? data.id === watch("roleMember")
+                                  : data.id === user.roleMemberId,
+                              )
                               .map((data) =>
                                 data.level.map((data) => (
                                   <SelectItem value={data.id}>
@@ -281,21 +331,23 @@ const CreateUser = () => {
           </div>
         </div>
         <div className="flex items-center justify-start gap-2">
-          <Button
-            type="submit"
-            size="sm"
-            disabled={isLoading}
-            variant="gooeyLeft"
-          >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <SpokeSpinner size="sm" />
-                Loading...
-              </div>
-            ) : (
-              "Create an user"
-            )}
-          </Button>
+          {editMode ? (
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isLoading}
+              variant="gooeyLeft"
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <SpokeSpinner size="sm" />
+                  Loading...
+                </div>
+              ) : (
+                "Save changes"
+              )}
+            </Button>
+          ) : null}
         </div>
       </form>
     </div>
@@ -309,4 +361,4 @@ const CreateUser = () => {
   );
 };
 
-export default CreateUser;
+export default DetailUser;

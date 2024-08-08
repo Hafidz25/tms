@@ -63,7 +63,7 @@ const featureConfig: DataGridShadcnTemplateFeatureConfig<User> = {
     },
 
     rowActions: {
-      detail: (rowData) => `/dashboard/users`,
+      detail: (rowData) => `/dashboard/users/${rowData.id}`,
       deleteData: (rowData) => {
         const handleDelete = async () => {
           try {
