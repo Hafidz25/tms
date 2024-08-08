@@ -35,6 +35,8 @@ interface User {
   name: string;
   email: string;
   role: string;
+  roleMemberId: string;
+  levelId: string;
 }
 
 interface RoleMember {
@@ -155,12 +157,20 @@ function PayslipsPage() {
     Error
   >("/api/role-member", fetcher);
 
-  if (payslips && users) {
+  if (payslips && users && roleMember) {
     const mappedPayslip = payslips?.map((data) => {
       return {
         id: data.id,
         userId: data.userId,
         name: users?.filter((user) => user.id === data.userId)[0].name,
+        position: roleMember
+          .filter(
+            (role) =>
+              role.id ===
+              users?.filter((user) => user.id === data.userId)[0].roleMemberId,
+          )
+          .map((data) => data.name)
+          .join(","),
         period: data.period,
         regularFee: data.regularFee,
         presence: data.presence,
@@ -171,7 +181,7 @@ function PayslipsPage() {
       };
     });
 
-    // console.log(mappedPayslip);
+    console.log(mappedPayslip);
 
     const newPayslip =
       userExist?.role === "Admin" || userExist?.role === "Customer Service"

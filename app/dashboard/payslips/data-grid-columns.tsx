@@ -8,6 +8,7 @@ import {
   DataGridRowSelection,
   DataGridShadcnTemplateFeatureConfig,
 } from "@/components/data-grid/shadcn";
+import { Badge } from "@/components/ui/badge";
 
 interface Payslip {
   id: string;
@@ -61,6 +62,18 @@ export const columns = createColumns<Payslip>((column) => [
     enableHiding: false,
   }),
 
+  column.accessor("position", {
+    header: ({ column }) => (
+      <DataGridCellHeader column={column} title="Position" />
+    ),
+
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <Badge variant="outline">{row.getValue("position")}</Badge>
+      </div>
+    ),
+  }),
+
   column.accessor("period", {
     header: ({ column }) => (
       <DataGridCellHeader column={column} title="Period" />
@@ -79,8 +92,6 @@ export const columns = createColumns<Payslip>((column) => [
         </div>
       );
     },
-
-    enableHiding: false,
   }),
 
   column.accessor("createdAt", {
