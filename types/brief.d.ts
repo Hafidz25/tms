@@ -5,7 +5,7 @@ import type { Feedback } from "./feedback";
 export type BriefsStatus =
   | "Assigned"
   | "In Review"
-  | "Waiting for Client Feedback"
+  | "Waiting for Client"
   | "Correction"
   | "In Progress"
   | "Need Review"
