@@ -36,6 +36,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -100,15 +101,21 @@ type AtLeastOne<
   Keys extends keyof T = keyof T,
 > = Keys extends keyof T ? Partial<T> & { [K in Keys]-?: T[K] } : never;
 
-type FacetingConfig<TData extends TableData> = Partial<
-  Record<keyof TData, FacetedFilterOptionProps[]>
->;
+export type FacetFilterComponentType = "combobox" | "date-range";
+
+type FacetOptionComponentType = FacetFilterCombobox[] | null;
+
+export type FacetOptionValue = [FacetFilterComponentType, FacetOptionComponentType?];
+
+type FacetOption<
+  TData extends TableData,
+> = Partial<Record<keyof TData, FacetOptionValue>>;
 
 export type RowSelectionConfirmDeleteAction<TData extends TableData> = (
   selectedData: TData[],
 ) => void;
 
-export type FacetedFilterOptionProps = {
+export type FacetFilterCombobox = {
   label: string;
   value: string;
 
@@ -136,12 +143,16 @@ export type DataGridShadcnTemplateFeatureConfig<TData extends TableData> = {
        * yang akan diterapkan fitur filter faceting.
        * Column Ini harus bertipe column {@link https://tanstack.com/table/latest/docs/guide/column-defs#column-def-types|`accessor`}. Sesuaikan dengan konfigurasi pada column def!
        *
-       * Jika fitur digunakan,
-       * maka setidaknya harus memiliki satu property.
-       * Struktur konfigurasi
-       * ini sama dengan `{ columnName: FacetedFilterOption }`
+       * Nilai konfigurasi yang diberikan pada jenis column 
+       * harus sesuai dengan jenis component yang digunakan.
+       * Untuk solusi pencegahan sementara, data grid akan melemparkan
+       * error jika nilai konfigurasi tidak sesuai dengan jenis componenet.
+       * Lihat type `FacetOptionValue` untuk detail lebih lanjut.
+       * 
+       * @todo perbaiki nilai option dengan type yang lebih baik.
+       * @todo perbaiki type jenis column yang dapat assign
        */
-      faceting?: FacetingConfig<TData>;
+      faceting?: FacetOption<TData>;
     };
 
     rowSelection?: {
@@ -255,17 +266,6 @@ export function DataGridToolbarRight(props: DataGridToolbarProps) {
 
 // ------------------------------------------------------------
 
-interface DataGridSearchFilterProps<TData extends TableData>
-  extends React.ComponentProps<typeof Input> {
-  table: Table<TData>;
-
-  /**
-   * Column yang akan diterapkan fitur filter search.
-   * Column Ini harus bertipe column {@link https://tanstack.com/table/latest/docs/guide/column-defs#column-def-types|`accessor`}. Sesuaikan dengan konfigurasi pada column def!
-   */
-  columnTarget: keyof TData;
-}
-
 /**
  * Digunakan untuk menerapkan fitur search column (filter).
  * Component ini umumnya digunakan didalam `DataGridToolbar`.
@@ -300,21 +300,25 @@ export function DataGridSearchFilter() {
 
 // ------------------------------------------------------------
 
-interface DataGridFacetedFilterItemProps<TData, TValue> {
+interface DataGridFacetFilterComboboxProps<TData, TValue> {
   title?: string;
 
   /** API column dari tanstack table */
   column: Column<TData, TValue>;
 
   /** Data option filter */
-  options: FacetedFilterOptionProps[];
+  options: FacetFilterCombobox[];
+}
+
+interface DataGridFacetFilterDateRangeProps {
+  title?: string;
 }
 
 /**
  * Digunakan untuk menerapkan fitur faceted column (filter).
  * Component ini umumnya digunakan didalam `DataGridToolbar`.
  */
-export function DataGridFacetedFilter() {
+export function DataGridFacetFilter() {
   const { table, featureConfig } = useDataGridTemplateContext();
 
   if (!featureConfig || !featureConfig.main?.filter!.faceting) return;
@@ -323,24 +327,64 @@ export function DataGridFacetedFilter() {
 
   return (
     <>
-      {facetKeys.map((facet, i) => (
-        <DataGridFacetedFilterItem
-          key={i}
-          title={capitalize(facet)}
-          column={table.getColumn(facet)!}
-          options={featureConfig.main?.filter!.faceting![facet]!}
-        />
-      ))}
+      {facetKeys.map((facet, i) => {
+        const [componenetType, options] = featureConfig.main?.filter!.faceting![facet]!;
+
+        switch (componenetType) {
+          case 'combobox': {
+            if (!options || !Array.isArray(options)) throw new Error("Options untuk jenis component combobox tidak sesuai!");
+
+            return (
+              <DataGridFacetFilterCombobox
+                key={i}
+                title={capitalize(facet)}
+                column={table.getColumn(facet)!}
+                options={options}
+              />
+            );
+          }
+          
+          case 'date-range': {
+            if (options) {
+              console.warn('Options untuk jenis component "date-range" direkomendasikan berupa `undefined` atau `null`.');
+            }
+
+            return (
+              <DataGridFacetFilterDateRange title={capitalize(facet)} />
+            )
+          }
+            
+          default: {
+            throw new Error('Jenis component tidak diketahui!');
+          }
+        }
+      })}
     </>
   );
 }
 
-export function DataGridFacetedFilterItem<TData, TValue>({
+function DataGridFacetFilterDateRange({title}: DataGridFacetFilterDateRangeProps) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="h-8 border-dashed">
+          <CirclePlus className="mr-2 h-4 w-4" />
+          {title}
+        </Button>
+      </PopoverTrigger>
+
+      <DateRangePicker mode="range"/>
+    </Popover>
+  );
+}
+
+function DataGridFacetFilterCombobox<TData, TValue>({
   options,
   column,
   title,
-}: DataGridFacetedFilterItemProps<TData, TValue>) {
+}: DataGridFacetFilterComboboxProps<TData, TValue>) {
   if (!column) throw new Error("Column tidak ditemukan!");
+  if (!options.length || !options[0].value) throw new Error("Options untuk Data Grid Facet Filter Combobox tidak sesuai!");
 
   const facets = column.getFacetedUniqueValues();
   const selectedValues = new Set(column?.getFilterValue() as string[]);
@@ -361,11 +405,7 @@ export function DataGridFacetedFilterItem<TData, TValue>({
     );
   }, [column]);
 
-  const FilterOptionItem = ({
-    option,
-  }: {
-    option: FacetedFilterOptionProps;
-  }) => {
+  const FilterOptionItem = ({ option }: { option: FacetFilterCombobox }) => {
     const isSelected = selectedValues.has(option.value);
     const handleSelectFilterOption = () => {
       if (isSelected) {

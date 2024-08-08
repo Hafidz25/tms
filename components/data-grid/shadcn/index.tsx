@@ -1,7 +1,8 @@
 export * from "./template";
 export {
   type DataGridShadcnTemplateFeatureConfig,
-  type FacetedFilterOptionProps,
+  type FacetFilterCombobox,
+  type FacetOptionValue,
   DataGridCellHeader,
   DataGridRowActions,
   DataGridRowSelection,

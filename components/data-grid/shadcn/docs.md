@@ -70,9 +70,7 @@ export const columns = createColumns<Brief>((column) => [
       </div>
     ),
 
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
+    filterFn: 'arrIncludesSome',
   }),
 
   column.accessor("deadline", {
@@ -126,6 +124,7 @@ export const columns = createColumns<Brief>((column) => [
   }),
 ]);
 
+
 ```
 
 ## B. Konfigurasi Fitur
@@ -133,13 +132,16 @@ export const columns = createColumns<Brief>((column) => [
 Bagian ini juga disarankan untuk didefinisikan pada file terpisah, seperti `data-grid-config.ts` :
 
 ```ts
-export const statusOption = [
+import { FacetFilterCombobox } from "@/components/data-grid/shadcn";
+import { BriefsStatus } from "@/types/brief";
+
+export const statusOption: FacetFilterCombobox[] = ([
   "Assigned",
   "Correction",
   "Done",
   "In Review",
-  "Waiting Client Feedback",
-].map((s) => ({
+  "Waiting for Client Feedback",
+] satisfies BriefsStatus[]).map((s) => ({
   value: s,
   label: s,
 }));
@@ -179,13 +181,13 @@ import { columns } from "./data-grid-columns";
 import { statusOption } from "./data-grid-config";
 import { Brief } from "@/types/brief";
 
-export default function Page() {
+export default function DebugPage() {
   const featureConfig: DataGridShadcnTemplateFeatureConfig<Brief> = {
     main: {
       filter: {
         searching: "title",
         faceting: {
-          status: statusOption,
+          status: ["combobox", statusOption],
         },
       },
 

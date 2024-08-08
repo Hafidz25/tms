@@ -22,7 +22,7 @@ import {
   DataGridToolbar,
   DataGridToolbarLeft,
   DataGridToolbarRight,
-  DataGridFacetedFilter,
+  DataGridFacetFilter,
   DataGridFacetedFilterFormatter,
   DataGridPagination,
   DataGridSearchFilter,
@@ -36,15 +36,17 @@ import {
 
 /**
  * TODO!!! :
- * @todo perbaiki `filterValue.toLowerCase() is not function` pada filter faceting option.
- * @todo perbaiki kesalah type pada utils `createColumns` untuk use case data selain brief.
+ * @todo filter date
+ * @todo testing
+ * @todo perbaiki kesalah type pada utils `createColumns` untuk use case data selain brief (konfirmasi lagi).
  * @todo full area row selection
  * @todo data exporting feature
  * @todo testing componenet (hide & show features)
  * @todo lazy loading untuk optional features
  *
  * @todo menambahkan filterfn custom (lihat filterFn pada column def)
- * @todo solusi untuk `filterFns` type
+ *       solusi sementara yang dapat digunakan adalah menggunakan lib terpisah dan mengirimkannya
+ *       secara langsung pada option.
  * @todo perbaiki " Can't perform a React state update" (lihat console). Ini merupakan kesalahan dari library. lihat {@link https://github.com/TanStack/table/issues/5026}
  */
 
@@ -112,7 +114,7 @@ export function DataGridTemplate<TData extends TableData, TValue>({
         <DataGridToolbar>
           <DataGridToolbarLeft>
             <DataGridSearchFilter />
-            <DataGridFacetedFilter />
+            <DataGridFacetFilter />
             <DataGridFacetedFilterFormatter />
           </DataGridToolbarLeft>
 
