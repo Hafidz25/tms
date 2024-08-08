@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { SpokeSpinner } from "@/components/ui/spinner";
 import { MoneyInput } from "@/components/ui/money-input";
-import { toNumber } from "lodash-es";
+import { sum, toNumber } from "lodash-es";
 import useSWR from "swr";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { PDFViewer } from "@react-pdf/renderer";
@@ -39,12 +39,27 @@ interface User {
   name: string;
   email: string;
   role: string;
+  roleMemberId: string;
+  levelId: string;
 }
 
-interface LevelFee {
+interface RoleMember {
   id: string;
-  level: number;
-  regularFee: number;
+  name: string;
+  level: [
+    {
+      id: string;
+      name: string;
+      fee: number;
+    },
+  ];
+  user: [];
+  createdAt: string;
+}
+
+interface AdditionalFee {
+  name: string;
+  fee: number;
 }
 
 const FORMAT_DATE = "dd LLLL y";
@@ -59,10 +74,9 @@ const CreatePayslip = () => {
   const [periodTo, setPeriodTo] = useState("");
   const [fee, setFee] = useState("");
   const [presence, setPresence] = useState("");
-  const [thr, setThr] = useState("");
-  const [other, setOther] = useState("");
   const [position, setPosition] = useState("");
   const [level, setLevel] = useState("");
+  const [additionalFee, setAdditionalFee] = useState<AdditionalFee[]>([]);
   const Router = useRouter();
 
   const fetcher = (url: string) =>
@@ -72,51 +86,58 @@ const CreatePayslip = () => {
 
   const { data: users, error: usersError } = useSWR<User[], Error>(
     "/api/users",
-    fetcher
+    fetcher,
   );
 
-  const { data: levelFee, error } = useSWR<LevelFee[], Error>(
-    "/api/level-fee",
-    fetcher
+  const { data: roleMember, error } = useSWR<RoleMember[], Error>(
+    "/api/role-member",
+    fetcher,
   );
 
   const countTotal = () => {
     setTotalFee(
       (getValues("fee") ? toNumber(getValues("fee")) : 0) +
         (getValues("transportFee") ? getValues("transportFee") : 0) +
-        (getValues("thrFee") ? toNumber(getValues("thrFee")) : 0) +
-        (getValues("otherFee") ? toNumber(getValues("otherFee")) : 0)
+        additionalFee.reduce(function (s, a) {
+          return s + toNumber(a.fee);
+        }, 0),
     );
   };
 
   const formatMonth =
     periodTo === "" ? null : format(periodTo, "LLLL", { locale: id });
 
+  // const sumValues = (obj: Record<string, number>) =>
+  //   Object.values(obj).reduce((a, b) => a + b, 0);
+
+  // console.log(sumValues( 5, 6, 7 ));
+
   const handleSubmitData = async (data: any) => {
     const newData = {
       userId: data.userId,
-      levelId: data.levelId,
-      position: data.position,
       period: data.period,
       fee: toNumber(data.fee),
       presence: data.presence ? toNumber(data.presence) : 0,
       transportFee: data.presence ? toNumber(data.presence) * 25000 : 0,
-      thrFee: data.thrFee ? toNumber(data.thrFee) : 0,
-      otherFee: data.otherFee ? toNumber(data.otherFee) : 0,
+      additionalFee: additionalFee.map((data) => {
+        return {
+          name: data.name,
+          fee: toNumber(data.fee),
+        };
+      }),
+      additionalFeeTotal: additionalFee.reduce(function (s, a) {
+        return s + toNumber(a.fee);
+      }, 0),
     };
 
     const totalData = {
       userId: newData.userId,
-      levelId: newData.levelId,
-      position: newData.position,
       period: newData.period,
       regularFee: newData.fee,
       presence: newData.presence,
       transportFee: newData.transportFee,
-      thrFee: newData.thrFee,
-      otherFee: newData.otherFee,
-      totalFee:
-        newData.fee + newData.transportFee + newData.thrFee + newData.otherFee,
+      additionalFee: newData.additionalFee,
+      totalFee: newData.fee + newData.transportFee + newData.additionalFeeTotal,
     };
     // console.log(totalData);
     setIsLoading(true);
@@ -142,9 +163,35 @@ const CreatePayslip = () => {
     }
   };
 
-  return users && levelFee ? (
-    <div className="min-h-screen w-full flex flex-col  justify-center gap-4 p-4 md:gap-4 md:p-8">
-      <div className="w-full lg:w-[73rem] justify-between self-center flex items-center gap-4">
+  const handleFormChange = (index: number, event: any, name: string) => {
+    let data = [...additionalFee];
+    //@ts-ignore
+    data[index][name] = event;
+    setAdditionalFee(data);
+  };
+
+  const addFields = () => {
+    let newfield: AdditionalFee = { name: "", fee: 0 };
+    setAdditionalFee([
+      ...additionalFee,
+      {
+        name: newfield.name,
+        fee: toNumber(newfield.fee),
+      },
+    ]);
+  };
+
+  const removeFields = (index: number) => {
+    let data = [...additionalFee];
+    data.splice(index, 1);
+    setAdditionalFee(data);
+  };
+
+  // console.log(additionalFee);
+
+  return users && roleMember ? (
+    <div className="flex min-h-screen w-full flex-col justify-center gap-4 p-4 md:gap-4 md:p-8">
+      <div className="flex w-full items-center justify-between gap-4 self-center lg:w-[73rem]">
         <Link href="/dashboard/payslips">
           <Button variant="outline" size="sm">
             <ChevronLeft className="h-4 w-4" />
@@ -152,10 +199,10 @@ const CreatePayslip = () => {
           </Button>
         </Link>
       </div>
-      <div className=" w-full flex flex-col lg:flex-row justify-center gap-4 md:gap-4">
+      <div className="flex w-full flex-col justify-center gap-4 md:gap-4 lg:flex-row">
         <form
           onSubmit={handleSubmit(handleSubmitData)}
-          className="grid w-full lg:max-w-[36rem] flex-1 auto-rows-max gap-4"
+          className="grid w-full flex-1 auto-rows-max gap-4 lg:max-w-[36rem]"
         >
           <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
             <Card x-chunk="dashboard-07-chunk-0">
@@ -164,12 +211,12 @@ const CreatePayslip = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid gap-6">
-                  <div className="flex flex-col md:flex-row gap-3 w-full">
+                  <div className="flex w-full flex-col gap-3 md:flex-row">
                     <Controller
                       control={control}
                       name="userId"
                       render={({ field }) => (
-                        <div className="grid gap-3 w-full">
+                        <div className="grid w-full gap-3">
                           <Label htmlFor="userId">Team Member</Label>
                           <Select
                             onValueChange={(range) => {
@@ -177,11 +224,64 @@ const CreatePayslip = () => {
                               setName(
                                 users
                                   .filter(
-                                    (user) => user.id === getValues("userId")
+                                    (user) => user.id === getValues("userId"),
                                   )
                                   .map((user) => user.name)
-                                  .join(", ")
+                                  .join(", "),
                               );
+                              const roleMemberId = users
+                                .filter(
+                                  (user) => user.id === getValues("userId"),
+                                )
+                                .map((user) => user.roleMemberId)
+                                .join(", ");
+                              const levelId = users
+                                .filter(
+                                  (user) => user.id === getValues("userId"),
+                                )
+                                .map((user) => user.levelId)
+                                .join(", ");
+                              setPosition(
+                                roleMember
+                                  .filter((data) => data.id === roleMemberId)
+                                  .map((data) => data.name)
+                                  .join(","),
+                              );
+                              setLevel(
+                                roleMember
+                                  .filter((data) => data.id === roleMemberId)
+                                  .map((data) =>
+                                    data.level
+                                      .filter((data) => data.id === levelId)
+                                      .map((data) => data.name)
+                                      .join(","),
+                                  )
+                                  .join(","),
+                              );
+                              setFee(
+                                roleMember
+                                  .filter((data) => data.id === roleMemberId)
+                                  .map((data) =>
+                                    data.level
+                                      .filter((data) => data.id === levelId)
+                                      .map((data) => data.fee)
+                                      .join(","),
+                                  )
+                                  .join(","),
+                              );
+                              setValue(
+                                "fee",
+                                roleMember
+                                  .filter((data) => data.id === roleMemberId)
+                                  .map((data) =>
+                                    data.level
+                                      .filter((data) => data.id === levelId)
+                                      .map((data) => data.fee)
+                                      .join(","),
+                                  )
+                                  .join(","),
+                              );
+                              countTotal();
                             }}
                           >
                             <SelectTrigger className="">
@@ -204,16 +304,17 @@ const CreatePayslip = () => {
                       control={control}
                       name="position"
                       render={({ field }) => (
-                        <div className="grid gap-3 w-full">
+                        <div className="grid w-full gap-3">
                           <Label htmlFor="period">Position</Label>
                           <Input
                             id="position"
                             type="text"
+                            disabled
+                            value={position}
                             placeholder="e.g Illustrator Designer"
                             required
                             onChange={(range) => {
                               field.onChange(range);
-                              setPosition(getValues("position"));
                             }}
                           />
                         </div>
@@ -224,7 +325,7 @@ const CreatePayslip = () => {
                     control={control}
                     name="period"
                     render={({ field }) => (
-                      <div className="grid gap-3 w-full">
+                      <div className="grid w-full gap-3">
                         <Label htmlFor="period">Period</Label>
                         <DateRangePicker
                           mode="range"
@@ -232,67 +333,36 @@ const CreatePayslip = () => {
                             field.onChange(range);
                             // setPeriod(getValues("period"));
                             setPeriodFrom(
-                              format(getValues("period").from, FORMAT_DATE)
+                              format(getValues("period").from, FORMAT_DATE),
                             );
                             setPeriodTo(
                               getValues("period").to
                                 ? format(getValues("period").to, FORMAT_DATE)
-                                : ""
+                                : "",
                             );
                           }}
                         />
                       </div>
                     )}
                   />
-                  <div className="flex flex-col md:flex-row gap-3 w-full">
+                  <div className="flex w-full flex-col gap-3 md:flex-row">
                     <Controller
                       control={control}
                       name="levelId"
                       render={({ field }) => (
-                        <div className="grid gap-3 w-full">
+                        <div className="grid w-full gap-3">
                           <Label htmlFor="levelId">Level</Label>
-                          <Select
-                            onValueChange={(range) => {
+                          <Input
+                            id="levelId"
+                            type="text"
+                            placeholder="e.g Junior 1"
+                            required
+                            disabled
+                            value={level}
+                            onChange={(range) => {
                               field.onChange(range);
-                              setFee(
-                                levelFee
-                                  ?.filter(
-                                    (data) => data.id === getValues("levelId")
-                                  )
-                                  .map((data) => data.regularFee)
-                                  .join("")
-                              );
-                              setLevel(
-                                levelFee
-                                  ?.filter(
-                                    (data) => data.id === getValues("levelId")
-                                  )
-                                  .map((data) => data.level)
-                                  .join("")
-                              );
-                              setValue(
-                                "fee",
-                                levelFee
-                                  ?.filter(
-                                    (data) => data.id === getValues("levelId")
-                                  )
-                                  .map((data) => data.regularFee)
-                                  .join("")
-                              );
-                              countTotal();
                             }}
-                          >
-                            <SelectTrigger className="">
-                              <SelectValue placeholder="Select Level" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {levelFee?.map((data, i) => (
-                                <SelectItem key={i} value={data.id}>
-                                  {data.level}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          />
                         </div>
                       )}
                     />
@@ -300,7 +370,7 @@ const CreatePayslip = () => {
                       control={control}
                       name="fee"
                       render={({ field }) => (
-                        <div className="grid gap-3 w-full">
+                        <div className="grid w-full gap-3">
                           <Label htmlFor="fee">Fee</Label>
                           <MoneyInput
                             id="fee"
@@ -309,19 +379,22 @@ const CreatePayslip = () => {
                             value={fee}
                             disabled
                             // @ts-ignore
-                            onValueChange={(value) => field.onChange(value)}
-                            onInput={(value) => field.onChange(value)}
+                            onValueChange={(value) => field.onChange(fee)}
+                            onInput={(value) => {
+                              field.onChange(fee);
+                              countTotal();
+                            }}
                           />
                         </div>
                       )}
                     />
                   </div>
-                  <div className="flex flex-col md:flex-row gap-3 w-full">
+                  <div className="flex w-full flex-col gap-3 md:flex-row">
                     <Controller
                       control={control}
                       name="presence"
                       render={({ field }) => (
-                        <div className="grid gap-3 w-full">
+                        <div className="grid w-full gap-3">
                           <Label htmlFor="presence">Presence</Label>
                           <Input
                             id="presence"
@@ -332,7 +405,7 @@ const CreatePayslip = () => {
                               field.onChange(range);
                               setValue(
                                 "transportFee",
-                                getValues("presence") * 25000
+                                getValues("presence") * 25000,
                               );
                               setTransportFee(getValues("presence") * 25000);
                               countTotal();
@@ -346,7 +419,7 @@ const CreatePayslip = () => {
                       control={control}
                       name="transportFee"
                       render={({ field }) => (
-                        <div className="grid gap-3 w-full">
+                        <div className="grid w-full gap-3">
                           <div className="flex items-end gap-2">
                             <Label htmlFor="transportFee">Transport Fee</Label>
                             <span className="text-xs text-slate-500">
@@ -367,60 +440,73 @@ const CreatePayslip = () => {
                       )}
                     />
                   </div>
-                  <div className="flex flex-col md:flex-row gap-3 w-full">
-                    <Controller
-                      control={control}
-                      name="thrFee"
-                      render={({ field }) => (
-                        <div className="grid gap-3 w-full">
+
+                  {additionalFee.map((input, index) => {
+                    return (
+                      <div
+                        key={index}
+                        className="flex w-full flex-col items-end gap-3 md:flex-row"
+                      >
+                        <div className="grid w-full gap-3">
                           <div className="flex items-end gap-2">
-                            <Label htmlFor="thrFee">THR</Label>
-                            <span className="text-xs text-slate-500">
-                              * optional
-                            </span>
+                            <Label htmlFor="name">Name</Label>
                           </div>
-                          <MoneyInput
-                            id="thrFee"
-                            currency={"Rp."}
-                            placeholder="Input Nominal"
-                            defaultValue={0}
+                          <Input
+                            id="name"
+                            name="name"
+                            placeholder="Input Name"
+                            defaultValue={input.name}
+                            autoComplete="off"
                             // @ts-ignore
-                            onValueChange={(value) => {
-                              field.onChange(value);
+                            onChange={(e) => {
                               countTotal();
-                              setThr(getValues("thrFee"));
+                              const name = "name";
+                              const event = e.target.value;
+                              handleFormChange(index, event, name);
                             }}
+                            //@ts-ignore
+                            // onChange={(event) => handleFormChange(index, event)}
                           />
                         </div>
-                      )}
-                    />
-                    <Controller
-                      control={control}
-                      name="otherFee"
-                      render={({ field }) => (
-                        <div className="grid gap-3 w-full">
+                        <div className="grid w-full gap-3">
                           <div className="flex items-end gap-2">
-                            <Label htmlFor="otherFee">Other Fee</Label>
-                            <span className="text-xs text-slate-500">
-                              * optional
-                            </span>
+                            <Label htmlFor="fee">Amount</Label>
                           </div>
                           <MoneyInput
-                            id="otherFee"
+                            id="fee"
+                            name="fee"
                             currency={"Rp."}
-                            placeholder="Input Nominal"
-                            defaultValue={0}
+                            defaultValue={input.fee}
                             // @ts-ignore
-                            onValueChange={(value) => {
-                              field.onChange(value);
+                            onValueChange={(event) => {
                               countTotal();
-                              setOther(getValues("otherFee"));
+                              const name = "fee";
+                              handleFormChange(index, event, name);
                             }}
+                            //@ts-ignore
+                            onChange={(event) => countTotal()}
                           />
                         </div>
-                      )}
-                    />
-                  </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => removeFields(index)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    );
+                  })}
+
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="default"
+                    onClick={addFields}
+                  >
+                    Add more
+                  </Button>
+
                   <Controller
                     control={control}
                     name="totalFee"
@@ -443,7 +529,7 @@ const CreatePayslip = () => {
               </CardContent>
             </Card>
           </div>
-          <div className="flex items-center justify-start gap-2 w-full">
+          <div className="flex w-full items-center justify-start gap-2">
             <Button
               type="submit"
               size="sm"
@@ -470,8 +556,7 @@ const CreatePayslip = () => {
                   fee={fee}
                   presence={presence}
                   transportFee={transportFee}
-                  thr={thr}
-                  other={other}
+                  additionalFee={additionalFee}
                   totalFee={totalFee}
                 />
               }
@@ -485,7 +570,7 @@ const CreatePayslip = () => {
         </form>
         <PDFViewer
           showToolbar={false}
-          className="w-full lg:w-[30rem] xl:w-[36rem] h-[20rem] md:h-[36rem] xl:h-[54rem] rounded-lg"
+          className="h-[20rem] w-full rounded-lg md:h-[36rem] lg:w-[30rem] xl:h-[54rem] xl:w-[36rem]"
         >
           <PayslipPdf
             name={name}
@@ -496,15 +581,14 @@ const CreatePayslip = () => {
             fee={fee}
             presence={presence}
             transportFee={transportFee}
-            thr={thr}
-            other={other}
+            additionalFee={additionalFee}
             totalFee={totalFee}
           />
         </PDFViewer>
       </div>
     </div>
   ) : (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex h-screen items-center justify-center">
       <div className="flex items-center gap-2">
         <SpokeSpinner size="md" />
         <span className="text-md font-medium text-slate-500">Loading...</span>

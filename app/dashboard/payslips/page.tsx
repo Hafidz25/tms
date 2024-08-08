@@ -15,7 +15,6 @@ interface Payslip {
   id: string;
   userId: string;
   name: string;
-  position: string;
   period: {
     from: string;
     to: string;
@@ -23,8 +22,10 @@ interface Payslip {
   regularFee: number;
   presence: number;
   transportFee: number;
-  thrFee: number;
-  otherFee: number;
+  additionalFee: {
+    name: string;
+    fee: number;
+  };
   totalFee: number;
   createdAt: string;
 }
@@ -34,6 +35,20 @@ interface User {
   name: string;
   email: string;
   role: string;
+}
+
+interface RoleMember {
+  id: string;
+  name: string;
+  level: [
+    {
+      id: string;
+      name: string;
+      fee: number;
+    },
+  ];
+  user: [];
+  createdAt: string;
 }
 
 const FORMAT_DATE = "dd LLL, y";
@@ -135,25 +150,28 @@ function PayslipsPage() {
     fetcherUserExists,
   );
 
+  const { data: roleMember, error: ErrorRoleMember } = useSWR<
+    RoleMember[],
+    Error
+  >("/api/role-member", fetcher);
+
   if (payslips && users) {
     const mappedPayslip = payslips?.map((data) => {
       return {
         id: data.id,
         userId: data.userId,
         name: users?.filter((user) => user.id === data.userId)[0].name,
-        position: data.position,
         period: data.period,
         regularFee: data.regularFee,
         presence: data.presence,
         transportFee: data.transportFee,
-        thrFee: data.thrFee,
-        otherFee: data.otherFee,
+        additionalFee: data.additionalFee,
         totalFee: data.totalFee,
         createdAt: data.createdAt,
       };
     });
 
-    // console.log(mappedPayslip);
+    console.log(mappedPayslip);
 
     const newPayslip =
       userExist?.role === "Admin" || userExist?.role === "Customer Service"

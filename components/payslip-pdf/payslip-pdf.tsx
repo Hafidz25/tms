@@ -10,6 +10,7 @@ import {
 } from "@react-pdf/renderer";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { toNumber } from "lodash-es";
 
 const FORMAT_DATE = "dd LLLL y";
 
@@ -98,8 +99,7 @@ const PayslipPdf = ({
   fee,
   presence,
   transportFee,
-  thr,
-  other,
+  additionalFee,
   totalFee,
 }: any) => {
   const formatCurrency = (number: any) => {
@@ -335,113 +335,61 @@ const PayslipPdf = ({
             </View>
           </View>
           {/* Table row 4 */}
-          <View
-            style={{
-              width: "100%",
-              backgroundColor: "#ffffff",
-              height: 36,
-              borderLeft: 2,
-              borderRight: 2,
-              borderBottom: 2,
-              display: "flex",
-              flexDirection: "row",
-              marginBottom: -1,
-            }}
-          >
+          {additionalFee.map((data: any) => (
             <View
               style={{
-                width: "12%",
+                width: "100%",
+                backgroundColor: "#ffffff",
+                height: 36,
+                borderLeft: 2,
+                borderRight: 2,
+                borderBottom: 2,
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                height: 34,
-                borderRight: 1,
+                flexDirection: "row",
+                marginBottom: -1,
               }}
             >
-              <Text style={styles.tableText}>3.</Text>
+              <View
+                style={{
+                  width: "12%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: 34,
+                  borderRight: 1,
+                }}
+              >
+                <Text style={styles.tableText}>3.</Text>
+              </View>
+              <View
+                style={{
+                  width: "53%",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  paddingHorizontal: 12,
+                  justifyContent: "center",
+                  height: 34,
+                  borderRight: 1,
+                }}
+              >
+                <Text style={styles.tableText}>{data.name}</Text>
+              </View>
+              <View
+                style={{
+                  width: "35%",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  justifyContent: "center",
+                  paddingHorizontal: 12,
+                  backgroundColor: "#ffe598",
+                  height: 34,
+                  borderBottom: 0.5,
+                }}
+              >
+                <Text style={styles.tableText}>{formatCurrency(data.fee)}</Text>
+              </View>
             </View>
-            <View
-              style={{
-                width: "53%",
-                display: "flex",
-                alignItems: "flex-start",
-                paddingHorizontal: 12,
-                justifyContent: "center",
-                height: 34,
-                borderRight: 1,
-              }}
-            >
-              <Text style={styles.tableText}>THR</Text>
-            </View>
-            <View
-              style={{
-                width: "35%",
-                display: "flex",
-                alignItems: "flex-start",
-                justifyContent: "center",
-                paddingHorizontal: 12,
-                backgroundColor: "#ffe598",
-                height: 34,
-                borderBottom: 0.5,
-              }}
-            >
-              <Text style={styles.tableText}>{formatCurrency(thr)}</Text>
-            </View>
-          </View>
-          {/* Table row 5 */}
-          <View
-            style={{
-              width: "100%",
-              backgroundColor: "#ffffff",
-              height: 36,
-              borderLeft: 2,
-              borderRight: 2,
-              borderBottom: 2,
-              display: "flex",
-              flexDirection: "row",
-              marginBottom: -1,
-            }}
-          >
-            <View
-              style={{
-                width: "12%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                height: 34,
-                borderRight: 1,
-              }}
-            >
-              <Text style={styles.tableText}>4.</Text>
-            </View>
-            <View
-              style={{
-                width: "53%",
-                display: "flex",
-                alignItems: "flex-start",
-                paddingHorizontal: 12,
-                justifyContent: "center",
-                height: 34,
-                borderRight: 1,
-              }}
-            >
-              <Text style={styles.tableText}>Lain - Lain</Text>
-            </View>
-            <View
-              style={{
-                width: "35%",
-                display: "flex",
-                alignItems: "flex-start",
-                justifyContent: "center",
-                paddingHorizontal: 12,
-                backgroundColor: "#ffe598",
-                height: 34,
-                borderBottom: 0.5,
-              }}
-            >
-              <Text style={styles.tableText}>{formatCurrency(other)}</Text>
-            </View>
-          </View>
+          ))}
           {/* Table row 6 */}
           <View
             style={{
