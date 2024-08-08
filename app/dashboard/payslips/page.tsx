@@ -181,7 +181,7 @@ function PayslipsPage() {
       };
     });
 
-    console.log(mappedPayslip);
+    // console.log(mappedPayslip);
 
     const newPayslip =
       userExist?.role === "Admin" || userExist?.role === "Customer Service"
