@@ -91,7 +91,6 @@ export async function GET() {
           role: true,
           roleMemberId: true,
           levelId: true,
-          password: true,
           briefs: true,
           feedbacks: true,
           briefNotification: true,
