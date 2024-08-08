@@ -94,7 +94,7 @@ const NAVS = [
   nav({ href: "/dashboard/users", location: "Users" }),
   nav({ href: "/dashboard/briefs", location: "Briefs" }),
   nav({ href: "/dashboard/payslips", location: "Payslips" }),
-  nav({ href: "/dashboard/level-fee", location: "Level" }),
+  nav({ href: "/dashboard/role-member", location: "Role Member" }),
 ];
 
 // perlu refactor
@@ -102,7 +102,7 @@ function NavbarBrand() {
   return (
     <Link
       href="/dashboard"
-      className="min-w-max flex items-center gap-2 text-lg font-semibold md:text-base"
+      className="flex min-w-max items-center gap-2 text-lg font-semibold md:text-base"
     >
       <Package2 className="h-6 w-6" />
       Task Management
@@ -149,7 +149,7 @@ function NavbarMenu({ data }: any) {
               >
                 {nav.location}
               </Link>
-            )
+            ),
           )}
         </>
       ) : (
@@ -157,7 +157,7 @@ function NavbarMenu({ data }: any) {
           {NAVS.filter(
             (data) =>
               !data.location?.includes("Users") &&
-              !data.location?.includes("Level")
+              !data.location?.includes("Level"),
           ).map((nav) =>
             pathname === "/dashboard" ? (
               <Link
@@ -189,7 +189,7 @@ function NavbarMenu({ data }: any) {
               >
                 {nav.location}
               </Link>
-            )
+            ),
           )}
         </>
       )}
@@ -207,7 +207,7 @@ interface BriefNotification {
       name: string;
       email: string;
       role: string;
-    }
+    },
   ];
   read: boolean;
   createdAt: string;
@@ -255,11 +255,11 @@ function Navbar({ user }: any) {
   };
 
   return (
-    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-8 z-50">
-      <nav className="hidden flex-col gap-6 text-lg font-medium md:w-full md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+    <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-white px-8">
+      <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:w-full md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <NavbarBrand />
 
-        <div className="flex w-full gap-5 justify-end">
+        <div className="flex w-full justify-end gap-5">
           <NavbarMenu data={user.user} />
         </div>
       </nav>
@@ -280,7 +280,7 @@ function Navbar({ user }: any) {
         </SheetContent>
       </Sheet>
 
-      <div className="md:ml-auto flex gap-2 md:w-auto w-full justify-end">
+      <div className="flex w-full justify-end gap-2 md:ml-auto md:w-auto">
         {briefNotif ? (
           user?.user.role === "Admin" ||
           user?.user.role === "Customer Service" ? (
@@ -290,16 +290,16 @@ function Navbar({ user }: any) {
                   aria-label="Notif"
                   variant="ghost"
                   size="icon"
-                  className="rounded-full focus-visible:ring-0 focus-visible:ring-offset-0 relative"
+                  className="relative rounded-full focus-visible:ring-0 focus-visible:ring-offset-0"
                 >
                   <Bell className="h-5 w-5" />
                   {briefNotif.filter((data) => data.read === false).length >
                   0 ? (
-                    <div className="w-2 h-2 rounded-full bg-red-600 absolute right-3 top-2"></div>
+                    <div className="absolute right-3 top-2 h-2 w-2 rounded-full bg-red-600"></div>
                   ) : null}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-80 ms-4 md:w-96" align="end">
+              <DropdownMenuContent className="ms-4 w-80 md:w-96" align="end">
                 <DropdownMenuLabel>Notifications</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>
@@ -327,8 +327,8 @@ function Navbar({ user }: any) {
                               <Card
                                 className={
                                   data.read === false
-                                    ? "bg-slate-50 cursor-pointer hover:bg-slate-100 transition duration-200"
-                                    : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
+                                    ? "cursor-pointer bg-slate-50 transition duration-200 hover:bg-slate-100"
+                                    : "cursor-pointer bg-white transition duration-200 hover:bg-slate-100"
                                 }
                                 key={data.id}
                                 onClick={() =>
@@ -337,13 +337,13 @@ function Navbar({ user }: any) {
                               >
                                 <CardHeader className="p-4">
                                   <CardDescription>
-                                    <div className="flex gap-4 items-start w-full">
-                                      <div className="bg-slate-100 p-4 rounded-md">
+                                    <div className="flex w-full items-start gap-4">
+                                      <div className="rounded-md bg-slate-100 p-4">
                                         <Package2 className="h-6 w-6" />
                                       </div>
                                       <div className="w-full">
                                         <div
-                                          className="text-black text-md"
+                                          className="text-md text-black"
                                           dangerouslySetInnerHTML={{
                                             __html: data.message,
                                           }}
@@ -369,7 +369,7 @@ function Navbar({ user }: any) {
                             ))}
                           </div>
                         ) : (
-                          <div className="flex flex-col justify-center h-96 items-center font-medium text-slate-400 gap-2">
+                          <div className="flex h-96 flex-col items-center justify-center gap-2 font-medium text-slate-400">
                             <SearchX className="h-12 w-12" />
                             No result
                           </div>
@@ -387,8 +387,8 @@ function Navbar({ user }: any) {
                                 <Card
                                   className={
                                     data.read === false
-                                      ? "bg-slate-50 cursor-pointer hover:bg-slate-100 transition duration-200  "
-                                      : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
+                                      ? "cursor-pointer bg-slate-50 transition duration-200 hover:bg-slate-100"
+                                      : "cursor-pointer bg-white transition duration-200 hover:bg-slate-100"
                                   }
                                   key={data.id}
                                   onClick={() =>
@@ -397,13 +397,13 @@ function Navbar({ user }: any) {
                                 >
                                   <CardHeader className="p-4">
                                     <CardDescription>
-                                      <div className="flex gap-4 items-start w-full">
-                                        <div className="bg-slate-100 p-4 rounded-md">
+                                      <div className="flex w-full items-start gap-4">
+                                        <div className="rounded-md bg-slate-100 p-4">
                                           <Package2 className="h-6 w-6" />
                                         </div>
                                         <div className="w-full">
                                           <div
-                                            className="text-black text-md"
+                                            className="text-md text-black"
                                             dangerouslySetInnerHTML={{
                                               __html: data.message,
                                             }}
@@ -415,7 +415,7 @@ function Navbar({ user }: any) {
                                           </div>
                                           <span className="text-xs font-normal">
                                             {formatDistanceToNow(
-                                              data.createdAt
+                                              data.createdAt,
                                             )}
                                           </span>
                                         </div>
@@ -431,7 +431,7 @@ function Navbar({ user }: any) {
                               ))}
                           </div>
                         ) : (
-                          <div className="flex flex-col justify-center h-96 items-center font-medium text-slate-400 gap-2">
+                          <div className="flex h-96 flex-col items-center justify-center gap-2 font-medium text-slate-400">
                             <SearchX className="h-12 w-12" />
                             No result
                           </div>
@@ -449,19 +449,19 @@ function Navbar({ user }: any) {
                   variant="ghost"
                   aria-label="Notif"
                   size="icon"
-                  className="rounded-full focus-visible:ring-0 focus-visible:ring-offset-0 relative"
+                  className="relative rounded-full focus-visible:ring-0 focus-visible:ring-offset-0"
                 >
                   <Bell className="h-5 w-5" />
                   {briefNotif.filter(
                     (data) =>
                       data.read === false &&
-                      data.assign.find(({ id }) => id === user?.user.id)
+                      data.assign.find(({ id }) => id === user?.user.id),
                   ).length > 0 ? (
-                    <div className="w-2 h-2 rounded-full bg-red-600 absolute right-3 top-2"></div>
+                    <div className="absolute right-3 top-2 h-2 w-2 rounded-full bg-red-600"></div>
                   ) : null}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-80 ms-4 md:w-96" align="end">
+              <DropdownMenuContent className="ms-4 w-80 md:w-96" align="end">
                 <DropdownMenuLabel>Notifications</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>
@@ -473,7 +473,7 @@ function Navbar({ user }: any) {
                         {briefNotif.filter(
                           (data) =>
                             data.read === false &&
-                            data.assign.find(({ id }) => id === user?.user.id)
+                            data.assign.find(({ id }) => id === user?.user.id),
                         ).length > 0 ? (
                           <Badge className="ms-2">
                             {
@@ -481,8 +481,8 @@ function Navbar({ user }: any) {
                                 (data) =>
                                   data.read === false &&
                                   data.assign.find(
-                                    ({ id }) => id === user?.user.id
-                                  )
+                                    ({ id }) => id === user?.user.id,
+                                  ),
                               ).length
                             }
                           </Badge>
@@ -492,21 +492,21 @@ function Navbar({ user }: any) {
                     <TabsContent value="all">
                       <ScrollArea className="h-96 rounded-md">
                         {briefNotif.filter((data) =>
-                          data.assign.find(({ id }) => id === user?.user.id)
+                          data.assign.find(({ id }) => id === user?.user.id),
                         ).length ? (
                           <div className="flex flex-col gap-2">
                             {briefNotif
                               .filter((data) =>
                                 data.assign.find(
-                                  ({ id }) => id === user?.user.id
-                                )
+                                  ({ id }) => id === user?.user.id,
+                                ),
                               )
                               .map((data) => (
                                 <Card
                                   className={
                                     data.read === false
-                                      ? "bg-slate-50 cursor-pointer"
-                                      : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
+                                      ? "cursor-pointer bg-slate-50"
+                                      : "cursor-pointer bg-white transition duration-200 hover:bg-slate-100"
                                   }
                                   key={data.id}
                                   onClick={() =>
@@ -515,13 +515,13 @@ function Navbar({ user }: any) {
                                 >
                                   <CardHeader className="p-4">
                                     <CardDescription>
-                                      <div className="flex gap-4 items-start w-full">
-                                        <div className="bg-slate-100 p-4 rounded-md">
+                                      <div className="flex w-full items-start gap-4">
+                                        <div className="rounded-md bg-slate-100 p-4">
                                           <Package2 className="h-6 w-6" />
                                         </div>
                                         <div className="w-full">
                                           <div
-                                            className="text-black text-md"
+                                            className="text-md text-black"
                                             dangerouslySetInnerHTML={{
                                               __html: data.message,
                                             }}
@@ -533,7 +533,7 @@ function Navbar({ user }: any) {
                                           </div>
                                           <span className="text-xs font-normal">
                                             {formatDistanceToNow(
-                                              data.createdAt
+                                              data.createdAt,
                                             )}
                                           </span>
                                         </div>
@@ -549,7 +549,7 @@ function Navbar({ user }: any) {
                               ))}
                           </div>
                         ) : (
-                          <div className="flex flex-col justify-center h-96 items-center font-medium text-slate-400 gap-2">
+                          <div className="flex h-96 flex-col items-center justify-center gap-2 font-medium text-slate-400">
                             <SearchX className="h-12 w-12" />
                             No result
                           </div>
@@ -561,7 +561,7 @@ function Navbar({ user }: any) {
                         {briefNotif.filter(
                           (data) =>
                             data.read === false &&
-                            data.assign.find(({ id }) => id === user?.user.id)
+                            data.assign.find(({ id }) => id === user?.user.id),
                         ).length ? (
                           <div className="flex flex-col gap-2">
                             {briefNotif
@@ -569,15 +569,15 @@ function Navbar({ user }: any) {
                                 (data) =>
                                   data.read === false &&
                                   data.assign.find(
-                                    ({ id }) => id === user?.user.id
-                                  )
+                                    ({ id }) => id === user?.user.id,
+                                  ),
                               )
                               .map((data) => (
                                 <Card
                                   className={
                                     data.read === false
-                                      ? "bg-slate-50 cursor-pointer"
-                                      : "bg-white cursor-pointer hover:bg-slate-100 transition duration-200"
+                                      ? "cursor-pointer bg-slate-50"
+                                      : "cursor-pointer bg-white transition duration-200 hover:bg-slate-100"
                                   }
                                   key={data.id}
                                   onClick={() =>
@@ -586,13 +586,13 @@ function Navbar({ user }: any) {
                                 >
                                   <CardHeader className="p-4">
                                     <CardDescription>
-                                      <div className="flex gap-4 items-start w-full">
-                                        <div className="bg-slate-100 p-4 rounded-md">
+                                      <div className="flex w-full items-start gap-4">
+                                        <div className="rounded-md bg-slate-100 p-4">
                                           <Package2 className="h-6 w-6" />
                                         </div>
                                         <div className="w-full">
                                           <div
-                                            className="text-black text-md"
+                                            className="text-md text-black"
                                             dangerouslySetInnerHTML={{
                                               __html: data.message,
                                             }}
@@ -604,7 +604,7 @@ function Navbar({ user }: any) {
                                           </div>
                                           <span className="text-xs font-normal">
                                             {formatDistanceToNow(
-                                              data.createdAt
+                                              data.createdAt,
                                             )}
                                           </span>
                                         </div>
@@ -620,7 +620,7 @@ function Navbar({ user }: any) {
                               ))}
                           </div>
                         ) : (
-                          <div className="flex flex-col justify-center h-96 items-center font-medium text-slate-400 gap-2">
+                          <div className="flex h-96 flex-col items-center justify-center gap-2 font-medium text-slate-400">
                             <SearchX className="h-12 w-12" />
                             No result
                           </div>
