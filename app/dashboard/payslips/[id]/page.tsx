@@ -98,7 +98,7 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
   const [periodFrom, setPeriodFrom] = useState("");
   const [periodTo, setPeriodTo] = useState("");
   const [fee, setFee] = useState("0");
-  const [presence, setPresence] = useState("");
+  const [presence, setPresence] = useState(0);
   const [thr, setThr] = useState("");
   const [other, setOther] = useState("");
   const [position, setPosition] = useState("");
@@ -114,9 +114,15 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
     fetch(url)
       .then((res) => res.json())
       .then((res) => res.data);
+  const payslipFetcher = (url: string) =>
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => {
+        return res.data;
+      });
   const { data: payslips, error } = useSWR<Payslip, Error>(
     `/api/payslips/${params.id}`,
-    fetcher,
+    payslipFetcher,
   );
   const { data: users, error: usersError } = useSWR<User[], Error>(
     "/api/users",
@@ -127,14 +133,10 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
     fetcher,
   );
 
-  // console.log(
-  //   ,
-  // );
-
   const countTotal = () => {
     setTotalFee(
       (getValues("fee") ? toNumber(getValues("fee")) : 0) +
-        (getValues("transportFee") ? getValues("transportFee") : 0) +
+        (getValues("transportFee") ? toNumber(getValues("transportFee")) : 0) +
         additionalFee.reduce(function (s, a) {
           return s + toNumber(a.fee);
         }, 0),
@@ -152,12 +154,21 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
       userId: data.userId ? data.userId : payslips?.userId,
       period: data.period ? data.period : payslips?.period,
       fee: data.fee ? toNumber(data.fee) : toNumber(payslips?.regularFee),
+      additionalFee: additionalFee.map((data) => {
+        return {
+          name: data.name,
+          fee: toNumber(data.fee),
+        };
+      }),
       presence: data.presence
         ? toNumber(data.presence)
         : toNumber(payslips?.presence),
       transportFee: data.presence
         ? toNumber(data.presence) * 25000
         : toNumber(payslips?.transportFee),
+      additionalFeeTotal: additionalFee.reduce(function (s, a) {
+        return s + toNumber(a.fee);
+      }, 0),
     };
 
     const totalData = {
@@ -166,9 +177,8 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
       regularFee: newData.fee,
       presence: newData.presence,
       transportFee: newData.transportFee,
-      totalFee:
-        // @ts-ignore
-        newData.fee + newData.transportFee + newData.thrFee + newData.otherFee,
+      additionalFee: newData.additionalFee,
+      totalFee: newData.fee + newData.transportFee + newData.additionalFeeTotal,
     };
     // console.log(totalData);
     setIsLoading(true);
@@ -213,9 +223,10 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
     ]);
   };
 
-  const removeFields = (index: number) => {
+  const removeFields = (index: number, fee: any) => {
     let data = [...additionalFee];
     data.splice(index, 1);
+    setTotalFee(totalFee - toNumber(fee));
     setAdditionalFee(data);
   };
 
@@ -234,7 +245,7 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
               <span className="sr-only">Back</span>
             </Button>
           </Link>
-          {/* {editMode ? (
+          {editMode ? (
             <Button
               variant="outline"
               size="sm"
@@ -249,12 +260,74 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
               variant="default"
               size="sm"
               className="flex items-center gap-2"
-              onClick={() => setEditMode(true)}
+              onClick={() => {
+                setEditMode(true);
+                setName(
+                  users
+                    .filter((user) => user.id === payslips.userId)
+                    .map((user) => user.name)
+                    .join(", "),
+                );
+                const roleMemberId = users
+                  .filter((user) => user.id === payslips.userId)
+                  .map((user) => user.roleMemberId)
+                  .join(", ");
+                const levelId = users
+                  .filter((user) => user.id === payslips.userId)
+                  .map((user) => user.levelId)
+                  .join(", ");
+                setPosition(
+                  roleMember
+                    .filter((data) => data.id === roleMemberId)
+                    .map((data) => data.name)
+                    .join(","),
+                );
+                setLevel(
+                  roleMember
+                    .filter((data) => data.id === roleMemberId)
+                    .map((data) =>
+                      data.level
+                        .filter((data) => data.id === levelId)
+                        .map((data) => data.name)
+                        .join(","),
+                    )
+                    .join(","),
+                );
+                setFee(
+                  roleMember
+                    .filter((data) => data.id === roleMemberId)
+                    .map((data) =>
+                      data.level
+                        .filter((data) => data.id === levelId)
+                        .map((data) => data.fee)
+                        .join(","),
+                    )
+                    .join(","),
+                );
+                setValue(
+                  "fee",
+                  roleMember
+                    .filter((data) => data.id === roleMemberId)
+                    .map((data) =>
+                      data.level
+                        .filter((data) => data.id === levelId)
+                        .map((data) => data.fee)
+                        .join(","),
+                    )
+                    .join(","),
+                );
+                setPresence(payslips?.presence);
+                setTransportFee(payslips?.transportFee);
+                setTotalFee(payslips?.totalFee);
+                setAdditionalFee(payslips?.additionalFee);
+                setPeriodFrom(payslips?.period.from);
+                setPeriodTo(payslips?.period.to);
+              }}
             >
               <Pen className="h-4 w-4" />
               Edit
             </Button>
-          )} */}
+          )}
         </div>
         <div className="flex w-full flex-col justify-center gap-4 md:gap-4 lg:flex-row">
           <form
@@ -286,22 +359,59 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
                                     .map((user) => user.name)
                                     .join(", "),
                                 );
+                                const roleMemberId = users
+                                  .filter(
+                                    (user) => user.id === getValues("userId"),
+                                  )
+                                  .map((user) => user.roleMemberId)
+                                  .join(", ");
+                                const levelId = users
+                                  .filter(
+                                    (user) => user.id === getValues("userId"),
+                                  )
+                                  .map((user) => user.levelId)
+                                  .join(", ");
                                 setPosition(
                                   roleMember
-                                    ?.filter(
-                                      (data) =>
-                                        data.id ===
-                                        users
-                                          ?.filter(
-                                            (user) =>
-                                              user.id === getValues("userId"),
-                                          )
-                                          .map((user) => user.roleMemberId)
-                                          .join(", "),
-                                    )
+                                    .filter((data) => data.id === roleMemberId)
                                     .map((data) => data.name)
                                     .join(","),
                                 );
+                                setLevel(
+                                  roleMember
+                                    .filter((data) => data.id === roleMemberId)
+                                    .map((data) =>
+                                      data.level
+                                        .filter((data) => data.id === levelId)
+                                        .map((data) => data.name)
+                                        .join(","),
+                                    )
+                                    .join(","),
+                                );
+                                setFee(
+                                  roleMember
+                                    .filter((data) => data.id === roleMemberId)
+                                    .map((data) =>
+                                      data.level
+                                        .filter((data) => data.id === levelId)
+                                        .map((data) => data.fee)
+                                        .join(","),
+                                    )
+                                    .join(","),
+                                );
+                                setValue(
+                                  "fee",
+                                  roleMember
+                                    .filter((data) => data.id === roleMemberId)
+                                    .map((data) =>
+                                      data.level
+                                        .filter((data) => data.id === levelId)
+                                        .map((data) => data.fee)
+                                        .join(","),
+                                    )
+                                    .join(","),
+                                );
+                                countTotal();
                               }}
                               disabled={editMode ? false : true}
                               // value={payslips.userId}
@@ -335,19 +445,24 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
                               id="position"
                               type="text"
                               disabled
-                              value={roleMember
-                                ?.filter(
-                                  (data) =>
-                                    data.id ===
-                                    users
+                              value={
+                                editMode
+                                  ? position
+                                  : roleMember
                                       ?.filter(
-                                        (user) => user.id === payslips?.userId,
+                                        (data) =>
+                                          data.id ===
+                                          users
+                                            ?.filter(
+                                              (user) =>
+                                                user.id === payslips?.userId,
+                                            )
+                                            .map((user) => user.roleMemberId)
+                                            .join(", "),
                                       )
-                                      .map((user) => user.roleMemberId)
-                                      .join(", "),
-                                )
-                                .map((data) => data.name)
-                                .join(",")}
+                                      .map((data) => data.name)
+                                      .join(",")
+                              }
                               placeholder="e.g Illustrator Designer"
                               required
                               onChange={(range) => {
@@ -366,14 +481,14 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
                           <Label htmlFor="period">Period</Label>
                           <DateRangePicker
                             mode="range"
-                            // setValue={{
-                            //   //@ts-ignore
-                            //   from: editMode
-                            //     ? periodFrom
-                            //     : payslips.period.from,
-                            //   //@ts-ignore
-                            //   to: editMode ? periodTo : payslips.period.to,
-                            // }}
+                            setValue={{
+                              //@ts-ignore
+                              from: editMode
+                                ? periodFrom
+                                : payslips.period.from,
+                              //@ts-ignore
+                              to: editMode ? periodTo : payslips.period.to,
+                            }}
                             disabled={editMode ? false : true}
                             onChange={(range) => {
                               field.onChange(range);
@@ -409,33 +524,39 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
                               placeholder="e.g Junior 1"
                               required
                               disabled
-                              value={roleMember
-                                ?.filter(
-                                  (data) =>
-                                    data.id ===
-                                    users
+                              value={
+                                editMode
+                                  ? level
+                                  : roleMember
                                       ?.filter(
-                                        (user) => user.id === payslips?.userId,
+                                        (data) =>
+                                          data.id ===
+                                          users
+                                            ?.filter(
+                                              (user) =>
+                                                user.id === payslips?.userId,
+                                            )
+                                            .map((user) => user.roleMemberId)
+                                            .join(", "),
                                       )
-                                      .map((user) => user.roleMemberId)
-                                      .join(", "),
-                                )
-                                .map((data) =>
-                                  data.level
-                                    .filter(
-                                      (data) =>
-                                        data.id ===
-                                        users
-                                          ?.filter(
-                                            (user) =>
-                                              user.id === payslips?.userId,
+                                      .map((data) =>
+                                        data.level
+                                          .filter(
+                                            (data) =>
+                                              data.id ===
+                                              users
+                                                ?.filter(
+                                                  (user) =>
+                                                    user.id ===
+                                                    payslips?.userId,
+                                                )
+                                                .map((user) => user.levelId)
+                                                .join(", "),
                                           )
-                                          .map((user) => user.levelId)
-                                          .join(", "),
-                                    )
-                                    .map((data) => data.name)
-                                    .join(","),
-                                )}
+                                          .map((data) => data.name)
+                                          .join(","),
+                                      )
+                              }
                               onChange={(range) => {
                                 field.onChange(range);
                               }}
@@ -453,33 +574,39 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
                               id="fee"
                               currency={"Rp."}
                               placeholder="Input Nominal"
-                              value={roleMember
-                                ?.filter(
-                                  (data) =>
-                                    data.id ===
-                                    users
+                              value={
+                                editMode
+                                  ? fee
+                                  : roleMember
                                       ?.filter(
-                                        (user) => user.id === payslips?.userId,
+                                        (data) =>
+                                          data.id ===
+                                          users
+                                            ?.filter(
+                                              (user) =>
+                                                user.id === payslips?.userId,
+                                            )
+                                            .map((user) => user.roleMemberId)
+                                            .join(", "),
                                       )
-                                      .map((user) => user.roleMemberId)
-                                      .join(", "),
-                                )
-                                .map((data) =>
-                                  data.level
-                                    .filter(
-                                      (data) =>
-                                        data.id ===
-                                        users
-                                          ?.filter(
-                                            (user) =>
-                                              user.id === payslips?.userId,
+                                      .map((data) =>
+                                        data.level
+                                          .filter(
+                                            (data) =>
+                                              data.id ===
+                                              users
+                                                ?.filter(
+                                                  (user) =>
+                                                    user.id ===
+                                                    payslips?.userId,
+                                                )
+                                                .map((user) => user.levelId)
+                                                .join(", "),
                                           )
-                                          .map((user) => user.levelId)
-                                          .join(", "),
-                                    )
-                                    .map((data) => data.fee)
-                                    .join(","),
-                                )}
+                                          .map((data) => data.fee)
+                                          .join(","),
+                                      )
+                              }
                               disabled
                               // @ts-ignore
                               onValueChange={(value) => field.onChange(fee)}
@@ -505,7 +632,9 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
                               placeholder="Input Presence Day"
                               maxLength={2}
                               disabled={editMode ? false : true}
-                              defaultValue={payslips.presence}
+                              defaultValue={
+                                editMode ? presence : payslips.presence
+                              }
                               onChange={(range) => {
                                 field.onChange(range);
                                 setValue(
@@ -549,72 +678,141 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
                         )}
                       />
                     </div>
-                    {payslips.additionalFee.map((input, index) => {
-                      return (
-                        <div
-                          key={index}
-                          className="flex w-full flex-col items-end gap-3 md:flex-row"
-                        >
-                          <div className="grid w-full gap-3">
-                            <div className="flex items-end gap-2">
-                              <Label htmlFor="name">Name</Label>
+                    {editMode
+                      ? additionalFee.map((input, index) => {
+                          return (
+                            <div
+                              key={index}
+                              className="flex w-full flex-col items-end gap-3 md:flex-row"
+                            >
+                              <div className="grid w-full gap-3">
+                                <div className="flex items-end gap-2">
+                                  <Label htmlFor="name">Name</Label>
+                                </div>
+                                <Input
+                                  id="name"
+                                  name="name"
+                                  placeholder="Input Name"
+                                  defaultValue={input.name}
+                                  autoComplete="off"
+                                  disabled={editMode ? false : true}
+                                  // @ts-ignore
+                                  onChange={(e) => {
+                                    countTotal();
+                                    const name = "name";
+                                    const event = e.target.value;
+                                    handleFormChange(index, event, name);
+                                  }}
+                                  //@ts-ignore
+                                  // onChange={(event) => handleFormChange(index, event)}
+                                />
+                              </div>
+                              <div className="grid w-full gap-3">
+                                <div className="flex items-end gap-2">
+                                  <Label htmlFor="fee">Amount</Label>
+                                </div>
+                                <MoneyInput
+                                  id="fee"
+                                  name="fee"
+                                  currency={"Rp."}
+                                  defaultValue={input.fee}
+                                  disabled={editMode ? false : true}
+                                  // @ts-ignore
+                                  onValueChange={(event) => {
+                                    countTotal();
+                                    const name = "fee";
+                                    handleFormChange(index, event, name);
+                                  }}
+                                  //@ts-ignore
+                                  onChange={(event) => countTotal()}
+                                />
+                              </div>
+                              {editMode ? (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() => {
+                                    removeFields(index, input.fee);
+                                  }}
+                                >
+                                  Remove
+                                </Button>
+                              ) : null}
                             </div>
-                            <Input
-                              id="name"
-                              name="name"
-                              placeholder="Input Name"
-                              defaultValue={input.name}
-                              autoComplete="off"
-                              disabled
-                              // @ts-ignore
-                              onChange={(e) => {
-                                countTotal();
-                                const name = "name";
-                                const event = e.target.value;
-                                handleFormChange(index, event, name);
-                              }}
-                              //@ts-ignore
-                              // onChange={(event) => handleFormChange(index, event)}
-                            />
-                          </div>
-                          <div className="grid w-full gap-3">
-                            <div className="flex items-end gap-2">
-                              <Label htmlFor="fee">Amount</Label>
+                          );
+                        })
+                      : payslips.additionalFee.map((input, index) => {
+                          return (
+                            <div
+                              key={index}
+                              className="flex w-full flex-col items-end gap-3 md:flex-row"
+                            >
+                              <div className="grid w-full gap-3">
+                                <div className="flex items-end gap-2">
+                                  <Label htmlFor="name">Name</Label>
+                                </div>
+                                <Input
+                                  id="name"
+                                  name="name"
+                                  placeholder="Input Name"
+                                  defaultValue={input.name}
+                                  autoComplete="off"
+                                  disabled={editMode ? false : true}
+                                  // @ts-ignore
+                                  onChange={(e) => {
+                                    countTotal();
+                                    const name = "name";
+                                    const event = e.target.value;
+                                    handleFormChange(index, event, name);
+                                  }}
+                                  //@ts-ignore
+                                  // onChange={(event) => handleFormChange(index, event)}
+                                />
+                              </div>
+                              <div className="grid w-full gap-3">
+                                <div className="flex items-end gap-2">
+                                  <Label htmlFor="fee">Amount</Label>
+                                </div>
+                                <MoneyInput
+                                  id="fee"
+                                  name="fee"
+                                  currency={"Rp."}
+                                  defaultValue={input.fee}
+                                  disabled={editMode ? false : true}
+                                  // @ts-ignore
+                                  onValueChange={(event) => {
+                                    countTotal();
+                                    const name = "fee";
+                                    handleFormChange(index, event, name);
+                                  }}
+                                  //@ts-ignore
+                                  onChange={(event) => countTotal()}
+                                />
+                              </div>
+                              {editMode ? (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() => {
+                                    removeFields(index, input.fee);
+                                  }}
+                                >
+                                  Remove
+                                </Button>
+                              ) : null}
                             </div>
-                            <MoneyInput
-                              id="fee"
-                              name="fee"
-                              currency={"Rp."}
-                              defaultValue={input.fee}
-                              disabled
-                              // @ts-ignore
-                              onValueChange={(event) => {
-                                countTotal();
-                                const name = "fee";
-                                handleFormChange(index, event, name);
-                              }}
-                              //@ts-ignore
-                              onChange={(event) => countTotal()}
-                            />
-                          </div>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => removeFields(index)}
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                      );
-                    })}
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="default"
-                      onClick={addFields}
-                    >
-                      Add more
-                    </Button>
+                          );
+                        })}
+                    {editMode ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="default"
+                        onClick={addFields}
+                      >
+                        Add more
+                      </Button>
+                    ) : null}
                     <Controller
                       control={control}
                       name="totalFee"
@@ -731,7 +929,7 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
                 fee={fee}
                 presence={presence}
                 transportFee={transportFee}
-                additionalFee={payslips.additionalFee}
+                additionalFee={additionalFee}
                 totalFee={totalFee}
               />
             ) : (

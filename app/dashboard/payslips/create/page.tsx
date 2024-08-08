@@ -79,6 +79,8 @@ const CreatePayslip = () => {
   const [additionalFee, setAdditionalFee] = useState<AdditionalFee[]>([]);
   const Router = useRouter();
 
+  // console.log(additionalFee);
+
   const fetcher = (url: string) =>
     fetch(url)
       .then((res) => res.json())
@@ -98,19 +100,16 @@ const CreatePayslip = () => {
     setTotalFee(
       (getValues("fee") ? toNumber(getValues("fee")) : 0) +
         (getValues("transportFee") ? getValues("transportFee") : 0) +
-        additionalFee.reduce(function (s, a) {
-          return s + toNumber(a.fee);
-        }, 0),
+        (additionalFee.length
+          ? additionalFee.reduce(function (s, a) {
+              return s + toNumber(a.fee);
+            }, 0)
+          : 0),
     );
   };
 
   const formatMonth =
     periodTo === "" ? null : format(periodTo, "LLLL", { locale: id });
-
-  // const sumValues = (obj: Record<string, number>) =>
-  //   Object.values(obj).reduce((a, b) => a + b, 0);
-
-  // console.log(sumValues( 5, 6, 7 ));
 
   const handleSubmitData = async (data: any) => {
     const newData = {
@@ -181,9 +180,10 @@ const CreatePayslip = () => {
     ]);
   };
 
-  const removeFields = (index: number) => {
+  const removeFields = (index: number, fee: any) => {
     let data = [...additionalFee];
     data.splice(index, 1);
+    setTotalFee(totalFee - toNumber(fee));
     setAdditionalFee(data);
   };
 
@@ -490,7 +490,9 @@ const CreatePayslip = () => {
                         <Button
                           type="button"
                           variant="outline"
-                          onClick={() => removeFields(index)}
+                          onClick={() => {
+                            removeFields(index, input.fee);
+                          }}
                         >
                           Remove
                         </Button>
