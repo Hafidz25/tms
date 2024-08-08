@@ -17,8 +17,6 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { SpokeSpinner } from "@/components/ui/spinner";
-import { MoneyInput } from "@/components/ui/money-input";
-import { toInteger, toNumber } from "lodash-es";
 
 interface User {
   id: string;
@@ -27,29 +25,28 @@ interface User {
   role: string;
 }
 
-const CreateLevel = () => {
+const CreateRole = () => {
   const { control, register, handleSubmit, getValues, setValue } = useForm();
   const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
 
   const handleSubmitData = async (data: any) => {
     const newData = {
-      level: data.level,
-      regularFee: toNumber(data.regularFee),
+      name: data.name,
     };
     // console.log(newData);
     setIsLoading(true);
     try {
-      const response = await fetch("/api/level-fee", {
+      const response = await fetch("/api/role-member", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newData),
       });
       // console.log(response);
       if (response.status === 201) {
-        toast.success("Level created successfully.");
+        toast.success("Role member created successfully.");
         setIsLoading(false);
-        Router.push("/dashboard/level-fee");
+        Router.push("/dashboard/role-member");
       } else {
         setIsLoading(false);
         toast.error("Uh oh! Something went wrong.");
@@ -62,13 +59,13 @@ const CreateLevel = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center gap-4 p-4 md:gap-4 md:p-8">
+    <div className="flex min-h-screen w-full flex-col items-center justify-center gap-4 p-4 md:gap-4 md:p-8">
       <form
         onSubmit={handleSubmit(handleSubmitData)}
         className="grid w-[48rem] flex-1 auto-rows-max gap-4"
       >
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/level-fee">
+          <Link href="/dashboard/role-member">
             <Button variant="outline" size="icon" className="h-7 w-7">
               <ChevronLeft className="h-4 w-4" />
               <span className="sr-only">Back</span>
@@ -78,41 +75,23 @@ const CreateLevel = () => {
         <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
           <Card x-chunk="dashboard-07-chunk-0">
             <CardHeader>
-              <CardTitle>Create Level</CardTitle>
+              <CardTitle>Create Role Member</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid gap-6">
                 <Controller
                   control={control}
-                  name="level"
+                  name="name"
                   render={({ field }) => (
-                    <div className="grid gap-3 w-full">
-                      <Label htmlFor="period">Level Name</Label>
+                    <div className="grid w-full gap-3">
+                      <Label htmlFor="period">Role Name</Label>
                       <Input
-                        id="level"
+                        id="name"
                         type="text"
-                        placeholder="e.g Junior 1"
+                        placeholder="e.g Illustrator"
                         required
                         onChange={(range) => {
                           field.onChange(range);
-                        }}
-                      />
-                    </div>
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="regularFee"
-                  render={({ field }) => (
-                    <div className="grid gap-3 w-full">
-                      <Label htmlFor="fee">Fee</Label>
-                      <MoneyInput
-                        id="fee"
-                        currency={"Rp."}
-                        placeholder="Input Nominal"
-                        // @ts-ignore
-                        onValueChange={(value) => {
-                          field.onChange(value);
                         }}
                       />
                     </div>
@@ -135,7 +114,7 @@ const CreateLevel = () => {
                 Loading...
               </div>
             ) : (
-              "Create level"
+              "Create role"
             )}
           </Button>
         </div>
@@ -144,4 +123,4 @@ const CreateLevel = () => {
   );
 };
 
-export default CreateLevel;
+export default CreateRole;

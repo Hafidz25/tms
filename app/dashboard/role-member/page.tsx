@@ -8,14 +8,15 @@ import {
 } from "@/components/data-grid/shadcn";
 import { SpokeSpinner } from "@/components/ui/spinner";
 import useSWR, { mutate } from "swr";
-import { LevelsTable } from "@/components/data-grid/levels";
 import { toast } from "sonner";
 import { columns } from "./data-grid-columns";
 
-interface LevelFee {
+interface RoleMember {
   id: string;
-  level: string;
-  regularFee: number;
+  name: string;
+  level: [];
+  user: [];
+  createdAt: string;
 }
 
 interface User {
@@ -25,10 +26,10 @@ interface User {
   role: string;
 }
 
-const featureConfig: DataGridShadcnTemplateFeatureConfig<LevelFee> = {
+const featureConfig: DataGridShadcnTemplateFeatureConfig<RoleMember> = {
   main: {
     filter: {
-      searching: "level",
+      searching: "name",
       // @ts-ignore
       faceting: {},
     },
@@ -38,13 +39,13 @@ const featureConfig: DataGridShadcnTemplateFeatureConfig<LevelFee> = {
         const handleMultipleDelete = async () => {
           try {
             const response = selectedData.map((data) => {
-              fetch(`/api/level-fee/${data.id}`, {
+              fetch(`/api/role-member/${data.id}`, {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
               }).then((response) => {
                 if (response.status === 200) {
-                  toast.success(`Level ${data.level} deleted successfully.`);
-                  mutate("/api/level-fee");
+                  toast.success(`Role ${data.name} deleted successfully.`);
+                  mutate("/api/role-member");
                 } else if (response.status === 403) {
                   toast.warning("You dont have access.");
                 }
@@ -63,23 +64,23 @@ const featureConfig: DataGridShadcnTemplateFeatureConfig<LevelFee> = {
 
   incremental: {
     addData: {
-      text: "Add Level",
-      link: "/dashboard/level-fee/create",
+      text: "Add Role Member",
+      link: "/dashboard/role-member/create",
     },
 
     rowActions: {
-      detail: (rowData) => `/dashboard/level-fee/${rowData.id}`,
+      detail: (rowData) => `/dashboard/role-member/${rowData.id}`,
       deleteData: (rowData) => {
         const handleDelete = async () => {
           try {
-            const response = await fetch(`/api/level-fee/${rowData.id}`, {
+            const response = await fetch(`/api/role-member/${rowData.id}`, {
               method: "DELETE",
               headers: { "Content-Type": "application/json" },
             });
 
             if (response.status === 200) {
-              toast.success("Level deleted successfully.");
-              mutate("/api/level-fee");
+              toast.success("Role member deleted successfully.");
+              mutate("/api/role-member");
             } else if (response.status === 403) {
               toast.warning("You dont have access.");
             }
@@ -94,7 +95,7 @@ const featureConfig: DataGridShadcnTemplateFeatureConfig<LevelFee> = {
   },
 };
 
-function LevelPage() {
+function RolePage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetcherUserExists = (url: string) =>
@@ -105,8 +106,8 @@ function LevelPage() {
     fetch(url)
       .then((res) => res.json())
       .then((res) => res.data);
-  const { data: levelFee, error } = useSWR<LevelFee[], Error>(
-    "/api/level-fee",
+  const { data: roleMember, error } = useSWR<RoleMember[], Error>(
+    "/api/role-member",
     fetcher,
   );
   const { data: userExist, error: userExistError } = useSWR<User, Error>(
@@ -116,11 +117,11 @@ function LevelPage() {
 
   // console.log(levelFee);
 
-  return levelFee && userExist ? (
+  return roleMember && userExist ? (
     <DashboardPanel>
       <DataGridTemplate
-        title="Data Levels"
-        data={levelFee}
+        title="Data Role Member"
+        data={roleMember}
         // @ts-ignore
         columns={columns}
         featureConfig={featureConfig}
@@ -136,4 +137,4 @@ function LevelPage() {
   );
 }
 
-export default LevelPage;
+export default RolePage;
