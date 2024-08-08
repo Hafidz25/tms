@@ -15,19 +15,43 @@ datasource db {
 
 
 model User {
-  id                   String    @id @default(cuid())
-  name                 String    @db.VarChar(255)
-  email                String    @unique @db.VarChar(255)
-  role                 String    @default("Team Member")
-  password             String    @db.VarChar(255)
-  briefs               Brief[]   @relation("assign") // user have many brief
-  briefsCreated        Brief[]   @relation("author") // user have many brief
+  id                   String      @id @default(cuid())
+  name                 String      @db.VarChar(255)
+  email                String      @unique @db.VarChar(255)
+  role                 String      @default("Team Member")
+  roleMember           RoleMember? @relation("roleMember", fields: [roleMemberId], references: [id])
+  roleMemberId         String?
+  level                Level?      @relation("level", fields: [levelId], references: [id])
+  levelId              String?
+  password             String      @db.VarChar(255)
+  briefs               Brief[]     @relation("assign") // user have many brief
+  briefsCreated        Brief[]     @relation("author") // user have many brief
   feedbacks            Feedback[]  @relation("user") // user have many feedback
   feedbackPrivate      Feedback[]  @relation("userSent") // user have many feedback
   payslips             Payslips[]  @relation("payslip") // user have many payslips
   briefNotification    BriefNotification[]
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+}
+
+model RoleMember {
+  id                   String    @id @default(cuid())
+  name                 String
+  level                Level[]   @relation("roleLevel")
+  user                 User[]    @relation("roleMember")
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
+}
+
+model Level {
+  id              String       @id @default(cuid())
+  name            String
+  fee             Decimal   
+  role            RoleMember?  @relation("roleLevel", fields: [roleId], references: [id], onDelete: Cascade)
+  roleId          String?
+  user            User[]       @relation("level")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 }
 
 model Payslips {
@@ -36,25 +60,12 @@ model Payslips {
   regularFee      Decimal  
   presence        Decimal
   transportFee    Decimal  
-  thrFee          Decimal  
-  otherFee        Decimal   
+  additionalFee   Json   
   totalFee        Decimal  
   user            User?     @relation("payslip", fields: [userId], references: [id], onDelete: Cascade)
   userId          String?
-  position        String
-  level           LevelFee? @relation("payslipLevel", fields: [levelId], references: [id], onDelete: Cascade)          
-  levelId         String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
-}
-
-model LevelFee {
-  id              String     @id @default(cuid())
-  level           String
-  regularFee      Decimal   
-  payslips        Payslips[] @relation("payslipLevel")
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
 }
 
 model Brief {
@@ -91,7 +102,7 @@ model Feedback {
 model BriefNotification {
   id              String    @id @default(cuid())
   message         String
-  read            Boolean @default(false)
+  read            Boolean   @default(false)
   assign          User[]
   brief           Brief?    @relation(fields: [briefId], references: [id], onDelete: Cascade)
   briefId         String?
