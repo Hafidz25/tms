@@ -17,22 +17,24 @@ export async function POST(req: NextRequest) {
   if (session?.user.role === "Admin") {
     try {
       const body = await req.json();
-      const { level, regularFee } = body;
+      const { name, fee, roleId, user } = body;
 
       // Create data
-      const newPayslip = await db.levelFee.create({
+      const newLevel = await db.level.create({
         data: {
-          level: level,
-          regularFee: regularFee,
+          name: name,
+          fee: fee,
+          roleId: roleId,
+          user: { connect: user },
         },
       });
 
       return NextResponse.json(
         {
-          payslip: newPayslip,
+          level: newLevel,
           message: "Level fee created successfully",
         },
-        { status: 201 }
+        { status: 201 },
       );
     } catch (error) {
       console.log(error);
@@ -40,7 +42,7 @@ export async function POST(req: NextRequest) {
         { error: "Internal Server Error" },
         {
           status: 500,
-        }
+        },
       );
     }
   } else {
@@ -48,7 +50,7 @@ export async function POST(req: NextRequest) {
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }
@@ -63,11 +65,20 @@ export async function GET() {
   ) {
     try {
       //get all posts
-      const payslips = await db.levelFee.findMany({
+      const level = await db.level.findMany({
         select: {
           id: true,
-          level: true,
-          regularFee: true,
+          name: true,
+          fee: true,
+          roleId: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            },
+          },
           createdAt: true,
         },
       });
@@ -77,18 +88,18 @@ export async function GET() {
         {
           success: true,
           message: "List Data Level Fee",
-          data: payslips,
+          data: level,
         },
         {
           status: 200,
-        }
+        },
       );
     } catch (error) {
       return NextResponse.json(
         { error: "Internal Server Error" },
         {
           status: 500,
-        }
+        },
       );
     }
   } else {
@@ -96,7 +107,7 @@ export async function GET() {
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }

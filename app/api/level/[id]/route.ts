@@ -13,12 +13,12 @@ import { authOption } from "@/lib/auth";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const session = await getServerSession(authOption);
 
   if (session?.user.role === "Admin") {
-    const payslips = await db.levelFee.delete({
+    const level = await db.level.delete({
       where: { id: params.id },
     });
 
@@ -26,39 +26,41 @@ export async function DELETE(
       {
         success: true,
         message: "Delete level fee successfully",
-        data: payslips,
+        data: level,
       },
       {
         status: 200,
-      }
+      },
     );
   } else {
     return NextResponse.json(
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const session = await getServerSession(authOption);
 
   if (session?.user.role === "Admin") {
     const body = await req.json();
-    const { level, regularFee } = body;
+    const { name, fee, roleId, user } = body;
 
     // Hash password
     //   const hashedPassword = await hash(password, 10);
-    const levelUpdate = await db.levelFee.update({
+    const levelUpdate = await db.level.update({
       where: { id: params.id },
       data: {
-        level: level,
-        regularFee: regularFee,
+        name: name,
+        fee: fee,
+        roleId: roleId,
+        user: { set: user },
       },
     });
 
@@ -70,21 +72,21 @@ export async function PATCH(
       },
       {
         status: 200,
-      }
+      },
     );
   } else {
     return NextResponse.json(
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const session = await getServerSession(authOption);
 
@@ -95,11 +97,21 @@ export async function GET(
   ) {
     try {
       //get all posts
-      const payslips = await db.levelFee.findUnique({
+      const level = await db.level.findUnique({
         select: {
           id: true,
-          level: true,
-          regularFee: true,
+          name: true,
+          fee: true,
+          roleId: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            },
+          },
+          createdAt: true,
         },
         where: { id: params.id },
       });
@@ -109,18 +121,18 @@ export async function GET(
         {
           success: true,
           message: "Data Level Fee",
-          data: payslips,
+          data: level,
         },
         {
           status: 200,
-        }
+        },
       );
     } catch (error) {
       return NextResponse.json(
         { error: "Internal Server Error", message: error },
         {
           status: 500,
-        }
+        },
       );
     }
   } else {
@@ -128,7 +140,7 @@ export async function GET(
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }

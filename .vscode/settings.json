@@ -1,5 +1,7 @@
 {
   "tailwindCSS.experimental.classRegex": [
     ["tv\\(([^)]*)\\)", "{?\\s?[\\w].*:\\s*?[\"'`]([^\"'`]*).*?,?\\s?}?"]
-  ]
+  ],
+  "terminal.integrated.gpuAcceleration": "off",
+  "vscode_vibrancy.imports": ["/path/to/file"]
 }
