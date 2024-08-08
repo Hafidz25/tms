@@ -23,26 +23,20 @@ export async function POST(req: NextRequest) {
         period,
         presence,
         transportFee,
-        thrFee,
-        otherFee,
         totalFee,
-        position,
-        levelId,
+        additionalFee,
       } = body;
 
       // Create data
       const newPayslip = await db.payslips.create({
         data: {
           userId: userId,
-          period: period,
           regularFee: regularFee,
+          additionalFee: additionalFee,
+          period: period,
           presence: presence,
           transportFee: transportFee,
-          thrFee: thrFee,
-          otherFee: otherFee,
           totalFee: totalFee,
-          position: position,
-          levelId: levelId,
         },
       });
 
@@ -86,15 +80,12 @@ export async function GET() {
         select: {
           id: true,
           userId: true,
-          levelId: true,
           period: true,
           regularFee: true,
+          additionalFee: true,
           presence: true,
           transportFee: true,
-          thrFee: true,
-          otherFee: true,
           totalFee: true,
-          position: true,
           createdAt: true,
         },
       });

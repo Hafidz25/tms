@@ -13,7 +13,7 @@ import { authOption } from "@/lib/auth";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const session = await getServerSession(authOption);
 
@@ -30,21 +30,21 @@ export async function DELETE(
       },
       {
         status: 200,
-      }
+      },
     );
   } else {
     return NextResponse.json(
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const session = await getServerSession(authOption);
 
@@ -56,26 +56,20 @@ export async function PATCH(
       period,
       presence,
       transportFee,
-      thrFee,
-      otherFee,
       totalFee,
-      position,
-      levelId,
+      additionalFee,
     } = body;
 
     const payslip = await db.payslips.update({
       where: { id: params.id },
       data: {
         userId: userId,
-        period: period,
         regularFee: regularFee,
+        additionalFee: additionalFee,
+        period: period,
         presence: presence,
         transportFee: transportFee,
-        thrFee: thrFee,
-        otherFee: otherFee,
         totalFee: totalFee,
-        position: position,
-        levelId: levelId,
       },
     });
 
@@ -87,21 +81,21 @@ export async function PATCH(
       },
       {
         status: 200,
-      }
+      },
     );
   } else {
     return NextResponse.json(
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const session = await getServerSession(authOption);
 
@@ -118,13 +112,11 @@ export async function GET(
           userId: true,
           period: true,
           regularFee: true,
+          additionalFee: true,
           presence: true,
           transportFee: true,
-          thrFee: true,
-          otherFee: true,
           totalFee: true,
-          position: true,
-          levelId: true,
+          createdAt: true,
         },
         where: { id: params.id },
       });
@@ -138,14 +130,14 @@ export async function GET(
         },
         {
           status: 200,
-        }
+        },
       );
     } catch (error) {
       return NextResponse.json(
         { error: "Internal Server Error", message: error },
         {
           status: 500,
-        }
+        },
       );
     }
   } else {
@@ -153,7 +145,7 @@ export async function GET(
       { error: "You dont have access" },
       {
         status: 403,
-      }
+      },
     );
   }
 }
