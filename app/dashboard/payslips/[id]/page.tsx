@@ -675,141 +675,287 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
                         )}
                       />
                     </div>
-                    {editMode
-                      ? additionalFee.map((input, index) => {
-                          return (
-                            <div
-                              key={index}
-                              className="flex w-full flex-col items-end gap-3 md:flex-row"
-                            >
-                              <div className="grid w-full gap-3">
-                                <div className="flex items-end gap-2">
-                                  <Label htmlFor="name">Name</Label>
-                                </div>
-                                <Input
-                                  id="name"
-                                  name="name"
-                                  placeholder="Input Name"
-                                  defaultValue={input.name}
-                                  autoComplete="off"
-                                  disabled={editMode ? false : true}
-                                  // @ts-ignore
-                                  onChange={(e) => {
-                                    countTotal();
-                                    const name = "name";
-                                    const event = e.target.value;
-                                    handleFormChange(index, event, name);
-                                  }}
-                                  //@ts-ignore
-                                  // onChange={(event) => handleFormChange(index, event)}
-                                />
-                              </div>
-                              <div className="grid w-full gap-3">
-                                <div className="flex items-end gap-2">
-                                  <Label htmlFor="fee">Amount</Label>
-                                </div>
-                                <MoneyInput
-                                  id="fee"
-                                  name="fee"
-                                  currency={"Rp."}
-                                  defaultValue={input.fee}
-                                  disabled={editMode ? false : true}
-                                  // @ts-ignore
-                                  onValueChange={(event) => {
-                                    countTotal();
-                                    const name = "fee";
-                                    handleFormChange(index, event, name);
-                                  }}
-                                  //@ts-ignore
-                                  onChange={(event) => countTotal()}
-                                />
-                              </div>
-                              {editMode ? (
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  onClick={() => {
-                                    removeFields(index, input.fee);
-                                  }}
+
+                    <div className="grid gap-3">
+                      <Label>Additional Fee</Label>
+                      {editMode ? (
+                        additionalFee.length ? (
+                          <div className="grid gap-3 rounded-lg bg-slate-100 p-4 lg:p-6">
+                            {additionalFee.map((input, index) => {
+                              return (
+                                <div
+                                  key={index}
+                                  className="flex w-full flex-col items-end gap-3 md:flex-row"
                                 >
-                                  Remove
-                                </Button>
-                              ) : null}
-                            </div>
-                          );
-                        })
-                      : payslips.additionalFee.map((input, index) => {
-                          return (
-                            <div
-                              key={index}
-                              className="flex w-full flex-col items-end gap-3 md:flex-row"
-                            >
-                              <div className="grid w-full gap-3">
-                                <div className="flex items-end gap-2">
-                                  <Label htmlFor="name">Name</Label>
+                                  <div className="grid w-full gap-3">
+                                    <div className="flex items-end gap-2">
+                                      <Label htmlFor="name">Name</Label>
+                                    </div>
+                                    <Input
+                                      id="name"
+                                      name="name"
+                                      placeholder="Input Name"
+                                      defaultValue={input.name}
+                                      autoComplete="off"
+                                      disabled={editMode ? false : true}
+                                      // @ts-ignore
+                                      onChange={(e) => {
+                                        countTotal();
+                                        const name = "name";
+                                        const event = e.target.value;
+                                        handleFormChange(index, event, name);
+                                      }}
+                                      //@ts-ignore
+                                      // onChange={(event) => handleFormChange(index, event)}
+                                    />
+                                  </div>
+                                  <div className="grid w-full gap-3">
+                                    <div className="flex items-end gap-2">
+                                      <Label htmlFor="fee">Amount</Label>
+                                    </div>
+                                    <MoneyInput
+                                      id="fee"
+                                      name="fee"
+                                      currency={"Rp."}
+                                      defaultValue={input.fee}
+                                      disabled={editMode ? false : true}
+                                      // @ts-ignore
+                                      onValueChange={(event) => {
+                                        countTotal();
+                                        const name = "fee";
+                                        handleFormChange(index, event, name);
+                                      }}
+                                      //@ts-ignore
+                                      onChange={(event) => countTotal()}
+                                    />
+                                  </div>
+                                  {editMode ? (
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      onClick={() => {
+                                        removeFields(index, input.fee);
+                                      }}
+                                    >
+                                      Remove
+                                    </Button>
+                                  ) : null}
                                 </div>
-                                <Input
-                                  id="name"
-                                  name="name"
-                                  placeholder="Input Name"
-                                  defaultValue={input.name}
-                                  autoComplete="off"
-                                  disabled={editMode ? false : true}
-                                  // @ts-ignore
-                                  onChange={(e) => {
-                                    countTotal();
-                                    const name = "name";
-                                    const event = e.target.value;
-                                    handleFormChange(index, event, name);
-                                  }}
-                                  //@ts-ignore
-                                  // onChange={(event) => handleFormChange(index, event)}
-                                />
-                              </div>
-                              <div className="grid w-full gap-3">
-                                <div className="flex items-end gap-2">
-                                  <Label htmlFor="fee">Amount</Label>
+                              );
+                            })}
+                          </div>
+                        ) : null
+                      ) : payslips.additionalFee.length ? (
+                        <div className="grid gap-3 rounded-lg bg-slate-100 p-4 lg:p-6">
+                          {payslips.additionalFee.map((input, index) => {
+                            return (
+                              <div
+                                key={index}
+                                className="flex w-full flex-col items-end gap-3 md:flex-row"
+                              >
+                                <div className="grid w-full gap-3">
+                                  <div className="flex items-end gap-2">
+                                    <Label htmlFor="name">Name</Label>
+                                  </div>
+                                  <Input
+                                    id="name"
+                                    name="name"
+                                    placeholder="Input Name"
+                                    defaultValue={input.name}
+                                    autoComplete="off"
+                                    disabled={editMode ? false : true}
+                                    // @ts-ignore
+                                    onChange={(e) => {
+                                      countTotal();
+                                      const name = "name";
+                                      const event = e.target.value;
+                                      handleFormChange(index, event, name);
+                                    }}
+                                    //@ts-ignore
+                                    // onChange={(event) => handleFormChange(index, event)}
+                                  />
                                 </div>
-                                <MoneyInput
-                                  id="fee"
-                                  name="fee"
-                                  currency={"Rp."}
-                                  defaultValue={input.fee}
-                                  disabled={editMode ? false : true}
-                                  // @ts-ignore
-                                  onValueChange={(event) => {
-                                    countTotal();
-                                    const name = "fee";
-                                    handleFormChange(index, event, name);
-                                  }}
-                                  //@ts-ignore
-                                  onChange={(event) => countTotal()}
-                                />
+                                <div className="grid w-full gap-3">
+                                  <div className="flex items-end gap-2">
+                                    <Label htmlFor="fee">Amount</Label>
+                                  </div>
+                                  <MoneyInput
+                                    id="fee"
+                                    name="fee"
+                                    currency={"Rp."}
+                                    defaultValue={input.fee}
+                                    disabled={editMode ? false : true}
+                                    // @ts-ignore
+                                    onValueChange={(event) => {
+                                      countTotal();
+                                      const name = "fee";
+                                      handleFormChange(index, event, name);
+                                    }}
+                                    //@ts-ignore
+                                    onChange={(event) => countTotal()}
+                                  />
+                                </div>
+                                {editMode ? (
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => {
+                                      removeFields(index, input.fee);
+                                    }}
+                                  >
+                                    Remove
+                                  </Button>
+                                ) : null}
                               </div>
-                              {editMode ? (
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  onClick={() => {
-                                    removeFields(index, input.fee);
-                                  }}
-                                >
-                                  Remove
-                                </Button>
-                              ) : null}
-                            </div>
-                          );
-                        })}
-                    {editMode ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="default"
-                        onClick={addFields}
-                      >
-                        Add more
-                      </Button>
-                    ) : null}
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="flex justify-center gap-3 rounded-lg bg-slate-100 p-4 text-sm text-slate-500 lg:p-6">
+                          No result
+                        </div>
+                      )}
+                      {/* {additionalFee.length || payslips.additionalFee ? (
+                        <div className="grid gap-3 rounded-lg bg-slate-100 p-4 lg:p-6">
+                          {editMode
+                            ? additionalFee.map((input, index) => {
+                                return (
+                                  <div
+                                    key={index}
+                                    className="flex w-full flex-col items-end gap-3 md:flex-row"
+                                  >
+                                    <div className="grid w-full gap-3">
+                                      <div className="flex items-end gap-2">
+                                        <Label htmlFor="name">Name</Label>
+                                      </div>
+                                      <Input
+                                        id="name"
+                                        name="name"
+                                        placeholder="Input Name"
+                                        defaultValue={input.name}
+                                        autoComplete="off"
+                                        disabled={editMode ? false : true}
+                                        // @ts-ignore
+                                        onChange={(e) => {
+                                          countTotal();
+                                          const name = "name";
+                                          const event = e.target.value;
+                                          handleFormChange(index, event, name);
+                                        }}
+                                        //@ts-ignore
+                                        // onChange={(event) => handleFormChange(index, event)}
+                                      />
+                                    </div>
+                                    <div className="grid w-full gap-3">
+                                      <div className="flex items-end gap-2">
+                                        <Label htmlFor="fee">Amount</Label>
+                                      </div>
+                                      <MoneyInput
+                                        id="fee"
+                                        name="fee"
+                                        currency={"Rp."}
+                                        defaultValue={input.fee}
+                                        disabled={editMode ? false : true}
+                                        // @ts-ignore
+                                        onValueChange={(event) => {
+                                          countTotal();
+                                          const name = "fee";
+                                          handleFormChange(index, event, name);
+                                        }}
+                                        //@ts-ignore
+                                        onChange={(event) => countTotal()}
+                                      />
+                                    </div>
+                                    {editMode ? (
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => {
+                                          removeFields(index, input.fee);
+                                        }}
+                                      >
+                                        Remove
+                                      </Button>
+                                    ) : null}
+                                  </div>
+                                );
+                              })
+                            : payslips.additionalFee.map((input, index) => {
+                                return (
+                                  <div
+                                    key={index}
+                                    className="flex w-full flex-col items-end gap-3 md:flex-row"
+                                  >
+                                    <div className="grid w-full gap-3">
+                                      <div className="flex items-end gap-2">
+                                        <Label htmlFor="name">Name</Label>
+                                      </div>
+                                      <Input
+                                        id="name"
+                                        name="name"
+                                        placeholder="Input Name"
+                                        defaultValue={input.name}
+                                        autoComplete="off"
+                                        disabled={editMode ? false : true}
+                                        // @ts-ignore
+                                        onChange={(e) => {
+                                          countTotal();
+                                          const name = "name";
+                                          const event = e.target.value;
+                                          handleFormChange(index, event, name);
+                                        }}
+                                        //@ts-ignore
+                                        // onChange={(event) => handleFormChange(index, event)}
+                                      />
+                                    </div>
+                                    <div className="grid w-full gap-3">
+                                      <div className="flex items-end gap-2">
+                                        <Label htmlFor="fee">Amount</Label>
+                                      </div>
+                                      <MoneyInput
+                                        id="fee"
+                                        name="fee"
+                                        currency={"Rp."}
+                                        defaultValue={input.fee}
+                                        disabled={editMode ? false : true}
+                                        // @ts-ignore
+                                        onValueChange={(event) => {
+                                          countTotal();
+                                          const name = "fee";
+                                          handleFormChange(index, event, name);
+                                        }}
+                                        //@ts-ignore
+                                        onChange={(event) => countTotal()}
+                                      />
+                                    </div>
+                                    {editMode ? (
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => {
+                                          removeFields(index, input.fee);
+                                        }}
+                                      >
+                                        Remove
+                                      </Button>
+                                    ) : null}
+                                  </div>
+                                );
+                              })}
+                        </div>
+                      ) : null} */}
+                      {editMode ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="default"
+                          onClick={addFields}
+                        >
+                          Add more
+                        </Button>
+                      ) : null}
+                    </div>
+
                     <Controller
                       control={control}
                       name="totalFee"

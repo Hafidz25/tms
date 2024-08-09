@@ -441,73 +441,80 @@ const CreatePayslip = () => {
                     />
                   </div>
 
-                  {additionalFee.map((input, index) => {
-                    return (
-                      <div
-                        key={index}
-                        className="flex w-full flex-col items-end gap-3 md:flex-row"
-                      >
-                        <div className="grid w-full gap-3">
-                          <div className="flex items-end gap-2">
-                            <Label htmlFor="name">Name</Label>
-                          </div>
-                          <Input
-                            id="name"
-                            name="name"
-                            placeholder="Input Name"
-                            defaultValue={input.name}
-                            autoComplete="off"
-                            // @ts-ignore
-                            onChange={(e) => {
-                              countTotal();
-                              const name = "name";
-                              const event = e.target.value;
-                              handleFormChange(index, event, name);
-                            }}
-                            //@ts-ignore
-                            // onChange={(event) => handleFormChange(index, event)}
-                          />
-                        </div>
-                        <div className="grid w-full gap-3">
-                          <div className="flex items-end gap-2">
-                            <Label htmlFor="fee">Amount</Label>
-                          </div>
-                          <MoneyInput
-                            id="fee"
-                            name="fee"
-                            currency={"Rp."}
-                            defaultValue={input.fee}
-                            // @ts-ignore
-                            onValueChange={(event) => {
-                              countTotal();
-                              const name = "fee";
-                              handleFormChange(index, event, name);
-                            }}
-                            //@ts-ignore
-                            onChange={(event) => countTotal()}
-                          />
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => {
-                            removeFields(index, input.fee);
-                          }}
-                        >
-                          Remove
-                        </Button>
+                  <div className="grid gap-3">
+                    <Label>Additional Fee</Label>
+                    {additionalFee.length ? (
+                      <div className="grid gap-3 rounded-lg bg-slate-100 p-4 lg:p-6">
+                        {additionalFee.map((input, index) => {
+                          return (
+                            <div
+                              key={index}
+                              className="flex w-full flex-col items-end gap-3 md:flex-row"
+                            >
+                              <div className="grid w-full gap-3">
+                                <div className="flex items-end gap-2">
+                                  <Label htmlFor="name">Name</Label>
+                                </div>
+                                <Input
+                                  id="name"
+                                  name="name"
+                                  placeholder="Input Name"
+                                  defaultValue={input.name}
+                                  autoComplete="off"
+                                  // @ts-ignore
+                                  onChange={(e) => {
+                                    countTotal();
+                                    const name = "name";
+                                    const event = e.target.value;
+                                    handleFormChange(index, event, name);
+                                  }}
+                                  //@ts-ignore
+                                  // onChange={(event) => handleFormChange(index, event)}
+                                />
+                              </div>
+                              <div className="grid w-full gap-3">
+                                <div className="flex items-end gap-2">
+                                  <Label htmlFor="fee">Amount</Label>
+                                </div>
+                                <MoneyInput
+                                  id="fee"
+                                  name="fee"
+                                  currency={"Rp."}
+                                  defaultValue={input.fee}
+                                  // @ts-ignore
+                                  onValueChange={(event) => {
+                                    countTotal();
+                                    const name = "fee";
+                                    handleFormChange(index, event, name);
+                                  }}
+                                  //@ts-ignore
+                                  onChange={(event) => countTotal()}
+                                />
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                  removeFields(index, input.fee);
+                                }}
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
+                    ) : null}
 
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="default"
-                    onClick={addFields}
-                  >
-                    Add more
-                  </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="default"
+                      onClick={addFields}
+                    >
+                      Add more
+                    </Button>
+                  </div>
 
                   <Controller
                     control={control}
