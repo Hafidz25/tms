@@ -92,6 +92,11 @@ export const columns = createColumns<Payslip>((column) => [
         </div>
       );
     },
+
+    filterFn: (row, id, value) => {
+      const date = row.getValue("period") satisfies DateRange | undefined;
+      return value.includes(date?.from ? format(date.from, "LLLL") : "");
+    },
   }),
 
   column.accessor("createdAt", {

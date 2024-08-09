@@ -10,6 +10,7 @@ import { SpokeSpinner } from "@/components/ui/spinner";
 import useSWR, { mutate } from "swr";
 import { columns } from "./data-grid-columns";
 import { toast } from "sonner";
+import { monthOption } from "./data-grid-config";
 
 interface Payslip {
   id: string;
@@ -60,7 +61,9 @@ const featureConfig: DataGridShadcnTemplateFeatureConfig<Payslip> = {
     filter: {
       searching: "name",
       // @ts-ignore
-      faceting: {},
+      faceting: {
+        period: monthOption,
+      },
     },
 
     rowSelection: {

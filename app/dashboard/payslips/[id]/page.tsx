@@ -99,13 +99,10 @@ export default function DetailPayslip({ params }: { params: { id: string } }) {
   const [periodTo, setPeriodTo] = useState("");
   const [fee, setFee] = useState("0");
   const [presence, setPresence] = useState(0);
-  const [thr, setThr] = useState("");
-  const [other, setOther] = useState("");
   const [position, setPosition] = useState("");
   const [level, setLevel] = useState("");
   const [additionalFee, setAdditionalFee] = useState<AdditionalFee[]>([]);
 
-  const [title, setTitle] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const FORMAT_DATE = "dd LLLL y";
   const Router = useRouter();
