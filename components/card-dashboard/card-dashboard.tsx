@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { PackageCheck, BriefcaseBusiness, Headset, Users } from "lucide-react";
 import { User } from "@/types/user";
-import { Brief } from "@/types/briefs";
+import { Brief } from "@/types/brief";
 
 interface CardProps {
   users: User[];
@@ -65,7 +65,7 @@ const CardDashboard = ({ users, briefs, userExist }: CardProps) => {
               : briefs.filter(
                   (data) =>
                     data.status !== "Done" &&
-                    data.assign.find(({ id }) => id === userExist?.id)
+                    data.assign.find(({ id }) => id === userExist?.id),
                 ).length}
           </div>
           {/* <p className="text-xs text-muted-foreground">+19% from last month</p> */}
@@ -84,7 +84,7 @@ const CardDashboard = ({ users, briefs, userExist }: CardProps) => {
               : briefs.filter(
                   (data) =>
                     data.status === "Done" &&
-                    data.assign.find(({ id }) => id === userExist?.id)
+                    data.assign.find(({ id }) => id === userExist?.id),
                 ).length}
           </div>
           {/* <p className="text-xs text-muted-foreground">+201 since last hour</p> */}

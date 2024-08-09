@@ -4,13 +4,15 @@ import { useRouter } from "next/navigation";
 import { DashboardPanel } from "@/components/layouts/dashboard-panel";
 import { User } from "@/types/user";
 import { SpokeSpinner } from "@/components/ui/spinner";
-import { DataGridTemplate, DataGridShadcnTemplateFeatureConfig } from "@/components/data-grid/shadcn";
-import {columns} from "./data-grid-columns"
+import {
+  DataGridTemplate,
+  DataGridShadcnTemplateFeatureConfig,
+} from "@/components/data-grid/shadcn";
+import { columns } from "./data-grid-columns";
 import { statusOption } from "./data-grid-config";
 import useSWR, { mutate, useSWRConfig } from "swr";
-import { Brief } from "@/types/briefs";
+import { Brief } from "@/types/brief";
 import { toast } from "sonner";
-
 
 const featureConfig: DataGridShadcnTemplateFeatureConfig<Brief> = {
   main: {
@@ -36,17 +38,16 @@ const featureConfig: DataGridShadcnTemplateFeatureConfig<Brief> = {
                 } else if (response.status === 403) {
                   toast.warning("You dont have access.");
                 }
-              })
-            })
-      
-            
+              });
+            });
+
             return response;
           } catch (error) {
             toast.error("Uh oh! Something went wrong.");
           }
-        }
-        return handleMultipleDelete()
-      }
+        };
+        return handleMultipleDelete();
+      },
     },
   },
 
@@ -65,7 +66,7 @@ const featureConfig: DataGridShadcnTemplateFeatureConfig<Brief> = {
               method: "DELETE",
               headers: { "Content-Type": "application/json" },
             });
-      
+
             if (response.status === 200) {
               toast.success("Brief deleted successfully.");
               mutate("/api/briefs");
@@ -76,9 +77,9 @@ const featureConfig: DataGridShadcnTemplateFeatureConfig<Brief> = {
           } catch (error) {
             toast.error("Uh oh! Something went wrong.");
           }
-        }
-        return handleDelete()
-      }
+        };
+        return handleDelete();
+      },
     },
   },
 };
@@ -95,21 +96,21 @@ const BriefPage = () => {
 
   const { data: briefs, error: briefsError } = useSWR<Brief[], Error>(
     "/api/briefs",
-    fetcher
+    fetcher,
   );
   const { data: userExist, error: userExistError } = useSWR<User, Error>(
     "/api/auth/session",
-    fetcherUserExists
+    fetcherUserExists,
   );
 
   const newBriefs =
     userExist?.role === "Admin"
       ? briefs
       : userExist?.role === "Customer Service"
-      ? briefs?.filter((data) => data.authorId === userExist.id)
-      : briefs?.filter((data) =>
-          data.assign.find(({ id }) => id === userExist?.id)
-        );
+        ? briefs?.filter((data) => data.authorId === userExist.id)
+        : briefs?.filter((data) =>
+            data.assign.find(({ id }) => id === userExist?.id),
+          );
 
   return newBriefs && userExist ? (
     <DashboardPanel>
@@ -121,7 +122,7 @@ const BriefPage = () => {
       />
     </DashboardPanel>
   ) : (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex h-screen items-center justify-center">
       <div className="flex items-center gap-2">
         <SpokeSpinner size="md" />
         <span className="text-md font-medium text-slate-500">Loading...</span>

@@ -4,7 +4,7 @@ import React from "react";
 import { BriefChart } from "@/components/brief-chart";
 import { CardDashboard } from "@/components/card-dashboard";
 import { User } from "@/types/user";
-import { Brief } from "@/types/briefs";
+import { Brief } from "@/types/brief";
 import useSWR from "swr";
 import { SpokeSpinner } from "@/components/ui/spinner";
 
@@ -20,15 +20,15 @@ export default function Page() {
 
   const { data: users, error: usersError } = useSWR<User[], Error>(
     "/api/users",
-    fetcher
+    fetcher,
   );
   const { data: briefs, error: briefsError } = useSWR<Brief[], Error>(
     "/api/briefs",
-    fetcher
+    fetcher,
   );
   const { data: userExist, error: userExistError } = useSWR<User, Error>(
     "/api/auth/session",
-    fetcherUserExists
+    fetcherUserExists,
   );
 
   return (
@@ -47,7 +47,7 @@ export default function Page() {
           />
         </>
       ) : (
-        <div className="flex justify-center items-center h-screen">
+        <div className="flex h-screen items-center justify-center">
           <div className="flex items-center gap-2">
             <SpokeSpinner size="md" />
             <span className="text-md font-medium text-slate-500">

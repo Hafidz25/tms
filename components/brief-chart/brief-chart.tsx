@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/chart";
 import { Badge } from "@/components/ui/badge";
 import { User } from "@/types/user";
-import { Brief } from "@/types/briefs";
+import { Brief } from "@/types/brief";
 import { getMonth, getDate } from "date-fns";
 
 interface BriefMonth {
@@ -106,7 +106,7 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
     const filterBriefUser = (userId: string) => {
       // console.log(userId);
       const briefUserData = briefs.filter((data) =>
-        data.assign.find(({ id }) => id === userId)
+        data.assign.find(({ id }) => id === userId),
       );
       setBriefUser(briefUserData);
       setSelect(userId);
@@ -114,7 +114,7 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
       const filterMonth = briefUserData.filter(
         (brief) =>
           getMonth(new Date(brief.createdAt)).toString() ===
-            getMonth(Date()).toString() && brief.status === "Done"
+            getMonth(Date()).toString() && brief.status === "Done",
       );
 
       setBriefMonthDone(filterMonth);
@@ -122,8 +122,8 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
         briefUserData.filter(
           (brief) =>
             getMonth(new Date(brief.createdAt)).toString() ===
-            getMonth(Date()).toString()
-        )
+            getMonth(Date()).toString(),
+        ),
       );
 
       const getDateBrief = filterMonth.map((data) => {
@@ -133,13 +133,13 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
       });
 
       const week1 = getDateBrief.filter(
-        (data) => data.date > 0 && data.date <= 7
+        (data) => data.date > 0 && data.date <= 7,
       ).length;
       const week2 = getDateBrief.filter(
-        (data) => data.date > 7 && data.date <= 14
+        (data) => data.date > 7 && data.date <= 14,
       ).length;
       const week3 = getDateBrief.filter(
-        (data) => data.date > 14 && data.date <= 21
+        (data) => data.date > 14 && data.date <= 21,
       ).length;
       const week4 = getDateBrief.filter((data) => data.date > 21).length;
 
@@ -159,7 +159,7 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
   const filterBriefUser = (userId: string) => {
     // console.log(userId);
     const briefUserData = briefs.filter((data) =>
-      data.assign.find(({ id }) => id === userId)
+      data.assign.find(({ id }) => id === userId),
     );
     setBriefUser(briefUserData);
     setSelect(userId);
@@ -167,7 +167,7 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
     const filterMonth = briefUserData.filter(
       (brief) =>
         getMonth(new Date(brief.createdAt)).toString() ===
-          getMonth(Date()).toString() && brief.status === "Done"
+          getMonth(Date()).toString() && brief.status === "Done",
     );
 
     setBriefMonthDone(filterMonth);
@@ -175,8 +175,8 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
       briefUserData.filter(
         (brief) =>
           getMonth(new Date(brief.createdAt)).toString() ===
-          getMonth(Date()).toString()
-      )
+          getMonth(Date()).toString(),
+      ),
     );
 
     const getDateBrief = filterMonth.map((data) => {
@@ -186,13 +186,13 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
     });
 
     const week1 = getDateBrief.filter(
-      (data) => data.date > 0 && data.date <= 7
+      (data) => data.date > 0 && data.date <= 7,
     ).length;
     const week2 = getDateBrief.filter(
-      (data) => data.date > 7 && data.date <= 14
+      (data) => data.date > 7 && data.date <= 14,
     ).length;
     const week3 = getDateBrief.filter(
-      (data) => data.date > 14 && data.date <= 21
+      (data) => data.date > 14 && data.date <= 21,
     ).length;
     const week4 = getDateBrief.filter((data) => data.date > 21).length;
 
@@ -208,14 +208,14 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
     const filterMonth = briefUser.filter(
       (brief) =>
         getMonth(new Date(brief.createdAt)).toString() === month &&
-        brief.status === "Done"
+        brief.status === "Done",
     );
 
     setBriefMonthDone(filterMonth);
     setBriefMonthTotal(
       briefUser.filter(
-        (brief) => getMonth(new Date(brief.createdAt)).toString() === month
-      )
+        (brief) => getMonth(new Date(brief.createdAt)).toString() === month,
+      ),
     );
 
     const getDateBrief = filterMonth.map((data) => {
@@ -225,13 +225,13 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
     });
 
     const week1 = getDateBrief.filter(
-      (data) => data.date > 0 && data.date <= 7
+      (data) => data.date > 0 && data.date <= 7,
     ).length;
     const week2 = getDateBrief.filter(
-      (data) => data.date > 7 && data.date <= 14
+      (data) => data.date > 7 && data.date <= 14,
     ).length;
     const week3 = getDateBrief.filter(
-      (data) => data.date > 14 && data.date <= 21
+      (data) => data.date > 14 && data.date <= 21,
     ).length;
     const week4 = getDateBrief.filter((data) => data.date > 21).length;
 
@@ -306,7 +306,7 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
                   <TooltipTrigger>
                     <RefreshCcw
                       onClick={() => resetFilter()}
-                      className="w-4 h-4 text-slate-500 cursor-pointer hover:text-slate-900 transition duration-300"
+                      className="h-4 w-4 cursor-pointer text-slate-500 transition duration-300 hover:text-slate-900"
                     />
                   </TooltipTrigger>
                   <TooltipContent side="right">
@@ -320,19 +320,19 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
         {briefMonthDone.length ||
         briefMonthTotal.length ||
         briefMonth.length ? (
-          <div className="flex gap-4 items-center">
+          <div className="flex items-center gap-4">
             <Badge
               variant="outline"
-              className="flex gap-2 text-sm items-center"
+              className="flex items-center gap-2 text-sm"
             >
-              <CircleCheck className="w-4 h-4" />
+              <CircleCheck className="h-4 w-4" />
               Brief done : {briefMonthDone.length}
             </Badge>
             <Badge
               variant="outline"
-              className="flex gap-2 text-sm items-center"
+              className="flex items-center gap-2 text-sm"
             >
-              <Package className="w-4 h-4" />
+              <Package className="h-4 w-4" />
               Brief total : {briefMonthTotal.length}
             </Badge>
           </div>
@@ -379,7 +379,7 @@ const BriefChart = ({ users, briefs, userExist }: ChartProps) => {
             </ChartContainer>
           </div>
         ) : (
-          <div className="flex justify-center items-center h-28 text-sm text-slate-500">
+          <div className="flex h-28 items-center justify-center text-sm text-slate-500">
             Please select data...
           </div>
         )}
